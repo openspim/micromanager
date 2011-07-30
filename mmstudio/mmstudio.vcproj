@@ -24,7 +24,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="\projects\3rdpartypublic\apache-ant-1.6.5\bin\ant -f \projects\micromanager\mmstudio\build32.xml"
+				BuildCommandLine="..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml -DMMPluginDir=..\bin_Win32"
 				ReBuildCommandLine=""
 				CleanCommandLine=""
 				Output=""

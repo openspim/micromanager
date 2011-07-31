@@ -92,7 +92,7 @@ public class ZWheelListener implements MouseWheelListener, LiveModeListener {
 	  synchronized(this) {
 		  // Get needed info from core
 		  String zStage = core_.getFocusDevice();
-		  if (zStage == null)
+		  if (zStage == null || zStage.length() == 0)
 			  return;
  
 		  double moveIncrement = moveIncrement_;

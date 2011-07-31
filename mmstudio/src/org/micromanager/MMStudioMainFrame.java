@@ -3457,29 +3457,35 @@ public class MMStudioMainFrame extends JFrame implements
       if (profileWin_ != null) {
          removeMMBackgroundListener(profileWin_);
          profileWin_.dispose();
+         profileWin_ = null;
       }
 
       if (scriptPanel_ != null) {
          removeMMBackgroundListener(scriptPanel_);
          scriptPanel_.closePanel();
+         scriptPanel_ = null;
       }
 
       if (propertyBrowser_ != null) {
          removeMMBackgroundListener(propertyBrowser_);
          propertyBrowser_.dispose();
+         propertyBrowser_ = null;
       }
 
       if (acqControlWin_ != null) {
          removeMMBackgroundListener(acqControlWin_);
          acqControlWin_.close();
+         acqControlWin_ = null;
       }
 
       if (engine_ != null) {
          engine_.shutdown();
+         engine_ = null;
       }
 
       if (afMgr_ != null) {
          afMgr_.closeOptionsDialog();
+         afMgr_ = null;
       }
 
       // dispose plugins
@@ -3489,6 +3495,7 @@ public class MMStudioMainFrame extends JFrame implements
             plugin.dispose();
          }
       }
+      plugins_.clear();
 
       synchronized (shutdownLock_) {
          try {

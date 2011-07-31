@@ -95,7 +95,7 @@ public class GUIUtils {
 		   if (JavaUtils.isWindows()) { // Check that we are in windows.
 			   //Dynamically load sun.awt.Win32GraphicsEnvironment, because it seems to be missing from
 			   //the Mac OS X JVM.
-			   ClassLoader cl = ClassLoader.getSystemClassLoader ();
+			   ClassLoader cl = GUIUtils.class.getClassLoader();
 			   Class<?> envClass = cl.loadClass("sun.awt.Win32GraphicsEnvironment");
 			   //Get the current local graphics environment.
 			   GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

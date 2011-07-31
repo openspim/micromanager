@@ -647,7 +647,7 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface {
          @Override
          public void run() {
             try {
-               acquisitionEngine2010Class  = Class.forName("org.micromanager.AcquisitionEngine2010");
+               acquisitionEngine2010Class  = getClass().getClassLoader().loadClass("org.micromanager.AcquisitionEngine2010");
             } catch (Exception ex) {
                ReportingUtils.logError(ex);
                acquisitionEngine2010Class = null;
@@ -3576,29 +3576,35 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface {
       if (profileWin_ != null) {
          removeMMBackgroundListener(profileWin_);
          profileWin_.dispose();
+         profileWin_ = null;
       }
 
       if (scriptPanel_ != null) {
          removeMMBackgroundListener(scriptPanel_);
          scriptPanel_.closePanel();
+         scriptPanel_ = null;
       }
 
       if (propertyBrowser_ != null) {
          removeMMBackgroundListener(propertyBrowser_);
          propertyBrowser_.dispose();
+         propertyBrowser_ = null;
       }
 
       if (acqControlWin_ != null) {
          removeMMBackgroundListener(acqControlWin_);
          acqControlWin_.close();
+         acqControlWin_ = null;
       }
 
       if (engine_ != null) {
          engine_.shutdown();
+         engine_ = null;
       }
 
       if (afMgr_ != null) {
          afMgr_.closeOptionsDialog();
+         afMgr_ = null;
       }
 
       // dispose plugins
@@ -3608,6 +3614,7 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface {
             plugin.dispose();
          }
       }
+      plugins_.clear();
 
       synchronized (shutdownLock_) {
          try {
@@ -3782,8 +3789,8 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface {
             interp.eval(TextUtils.readTextFile(startupScriptFile_));
          } catch (IOException exc) {
             ReportingUtils.logError(exc, "Unable to read the startup script (" + startupScriptFile_ + ").");
-         } catch (EvalError exc) {
-            ReportingUtils.logError(exc);
+         } catch (Throwable exc) {
+            ReportingUtils.showError(exc);
          } finally {
             waitDlg.closeDialog();
          }
@@ -4889,12 +4896,12 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface {
 
       try {
          long t1 = System.currentTimeMillis();
-         classes = JavaUtils.findClasses(new File("mmplugins"), 2);
+         classes = JavaUtils.findClasses(new File(IJ.getDirectory("imagej"), "mmplugins"), 2);
          //System.out.println("findClasses: " + (System.currentTimeMillis() - t1));
-         //System.out.println(classes.size());
+         ReportingUtils.logMessage("#uManager plugins: " + classes.size());
          for (Class<?> clazz : classes) {
             for (Class<?> iface : clazz.getInterfaces()) {
-               //core_.logMessage("interface found: " + iface.getName());
+               ReportingUtils.logMessage("interface found: " + iface.getName());
                if (iface == MMPlugin.class) {
                   pluginClasses.add(clazz);
                }

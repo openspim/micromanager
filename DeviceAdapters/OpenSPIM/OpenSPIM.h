@@ -61,6 +61,9 @@ public:
 	int AddToStageSequence(double position);
 	int SendStageSequence() const; 
 	bool IsContinuousFocusDrive() const;
+private:
+	int serial_;
+	void *handle_;
 };
 
 //////////////////////////////////////////////////////////////////////////////

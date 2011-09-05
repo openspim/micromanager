@@ -62,7 +62,10 @@ public:
 	int SendStageSequence() const; 
 	bool IsContinuousFocusDrive() const;
 private:
+	int OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct);
+
 	int serial_;
+	int velocity_;
 	void *handle_;
 };
 

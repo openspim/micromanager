@@ -27,9 +27,10 @@ using namespace std;
 
 // External names used used by the rest of the system
 // to load particular device from the "OpenSPIM.dll" library
-const char* g_TwisterDeviceName = "SPIMTwister";
-const char* g_StageDeviceName = "SPIMZStage";
-const char* g_XYStageDeviceName = "DXYStage";
+const char* g_TwisterDeviceName = "Picard Twister";
+const char* g_StageDeviceName = "Picard Z Stage";
+const char* g_XYStageDeviceName = "Picard XY Stage";
+const char* g_Keyword_SerialNumber = "Serial Number";
 
 // windows DLL entry code
 #ifdef WIN32
@@ -114,14 +115,35 @@ MODULE_API void DeleteDevice(MM::Device* pDevice)
 
 CSIABTwister::CSIABTwister()
 {
+	CPropertyAction* pAct = new CPropertyAction (this, &CSIABTwister::OnSerialNumber);
+	CreateProperty(g_Keyword_SerialNumber, "101", MM::String, false, pAct, true);
 }
 
 CSIABTwister::~CSIABTwister()
 {
 }
 
+int CSIABTwister::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
+{
+   if (eAct == MM::BeforeGet)
+   {
+      // instead of relying on stored state we could actually query the device
+      pProp->Set((long)serial_);
+   }
+   else if (eAct == MM::AfterSet)
+   {
+      long serial;
+      pProp->Get(serial);
+      serial_ = (int)serial;
+   }
+   return DEVICE_OK;
+}
+
 bool CSIABTwister::Busy()
 {
+	BOOL moving;
+	if (handle_ && !piGetTwisterMovingStatus(&moving, handle_))
+		return moving != 0;
 	return false;
 }
 
@@ -142,97 +164,113 @@ bool CSIABTwister::UsesDelay()
 int CSIABTwister::Initialize()
 {
 	int error = -1;
-	handle_ = piConnectMotor(&error, serial_);
-	return 0;
+	handle_ = piConnectTwister(&error, serial_);
+	if (handle_)
+		piGetTwisterVelocity(&velocity_, handle_);
+	return !handle_;
 }
 
 int CSIABTwister::Shutdown()
 {
+	if (handle_) {
+		piDisconnectTwister(handle_);
+		handle_ = NULL;
+	}
 	return 0;
 }
 
 void CSIABTwister::GetName(char* name) const
 {
+	CDeviceUtils::CopyLimitedString(name, g_TwisterDeviceName);
 }
 
 int CSIABTwister::SetPositionUm(double pos)
 {
-	return 0;
+	return piRunTwisterToPosition((int)pos, velocity_, handle_);
 }
 
 int CSIABTwister::SetRelativePositionUm(double d)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::Move(double velocity)
 {
-	return 0;
+	velocity_ = (int)velocity;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::SetAdapterOriginUm(double d)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::GetPositionUm(double& pos)
 {
-	return 0;
+	int position;
+	if (piGetTwisterPosition(&position, handle_))
+		return DEVICE_ERR;
+	pos = position;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::SetPositionSteps(long steps)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::GetPositionSteps(long& steps)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::SetOrigin()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::GetLimits(double& lower, double& upper)
 {
+	lower = 0;
+	upper = 360;
 	return 0;
 }
 
 int CSIABTwister::IsStageSequenceable(bool& isSequenceable) const
 {
+	isSequenceable = false;
 	return 0;
 }
 
 int CSIABTwister::GetStageSequenceMaxLength(long& nrEvents) const
 {
-	return 0;
+	nrEvents = 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::StartStageSequence() const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::StopStageSequence() const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::ClearStageSequence()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::AddToStageSequence(double position)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABTwister::SendStageSequence() const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 bool CSIABTwister::IsContinuousFocusDrive() const

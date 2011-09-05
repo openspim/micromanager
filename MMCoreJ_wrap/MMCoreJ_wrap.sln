@@ -340,6 +340,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Toptica_iChrome_MLE_TCP", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AxioCam", "..\SecretDeviceAdapters\AxioCam\AxioCam.vcproj", "{91CCB72B-852D-47D8-82FA-0E19A300A125}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenSPIM", "..\DeviceAdapters\OpenSPIM\OpenSPIM.vcproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -1368,6 +1370,18 @@ Global
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.ActiveCfg = Release|Win32
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.Build.0 = Release|Win32
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|x64.ActiveCfg = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|Win32.Build.0 = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|x64.ActiveCfg = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|Win32.ActiveCfg = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|Win32.Build.0 = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|x64.ActiveCfg = Release|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Debug|Win32.Build.0 = Debug|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Debug|x64.ActiveCfg = Debug|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|Win32.ActiveCfg = Release|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|Win32.Build.0 = Release|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

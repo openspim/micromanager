@@ -150,4 +150,3 @@ public:
 };
 
 #endif //_OPENSPIM_H_
-

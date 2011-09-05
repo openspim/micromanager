@@ -282,13 +282,35 @@ bool CSIABTwister::IsContinuousFocusDrive() const
 
 CSIABStage::CSIABStage()
 {
+	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
+	CreateProperty(g_Keyword_SerialNumber, "102", MM::String, false, pAct, true);
 }
+
 CSIABStage::~CSIABStage()
 {
 }
 
+int CSIABStage::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
+{
+   if (eAct == MM::BeforeGet)
+   {
+      // instead of relying on stored state we could actually query the device
+      pProp->Set((long)serial_);
+   }
+   else if (eAct == MM::AfterSet)
+   {
+      long serial;
+      pProp->Get(serial);
+      serial_ = (int)serial;
+   }
+   return DEVICE_OK;
+}
+
 bool CSIABStage::Busy()
 {
+	BOOL moving;
+	if (handle_ && !piGetMotorMovingStatus(&moving, handle_))
+		return moving != 0;
 	return false;
 }
 
@@ -308,21 +330,30 @@ bool CSIABStage::UsesDelay()
 
 int CSIABStage::Initialize()
 {
-	return 0;
+	int error = -1;
+	handle_ = piConnectMotor(&error, serial_);
+	if (handle_)
+		piGetMotorVelocity(&velocity_, handle_);
+	return !handle_;
 }
 
 int CSIABStage::Shutdown()
 {
+	if (handle_) {
+		piDisconnectMotor(handle_);
+		handle_ = NULL;
+	}
 	return 0;
 }
 
 void CSIABStage::GetName(char* name) const
 {
+	CDeviceUtils::CopyLimitedString(name, g_StageDeviceName);
 }
 
 int CSIABStage::SetPositionUm(double pos)
 {
-	return 0;
+	return piRunMotorToPosition((int)pos, velocity_, handle_);
 }
 
 int CSIABStage::SetRelativePositionUm(double d)
@@ -332,72 +363,79 @@ int CSIABStage::SetRelativePositionUm(double d)
 
 int CSIABStage::Move(double velocity)
 {
-	return 0;
+	velocity_ = (int)velocity;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::SetAdapterOriginUm(double d)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::GetPositionUm(double& pos)
 {
-	return 0;
+	int position;
+	if (piGetMotorPosition(&position, handle_))
+		return DEVICE_ERR;
+	pos = position;
+	return DEVICE_OK;
 }
 
 int CSIABStage::SetPositionSteps(long steps)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::GetPositionSteps(long& steps)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::SetOrigin()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::GetLimits(double& lower, double& upper)
 {
+	lower = 1;
+	upper = 2000;
 	return 0;
 }
 
 int CSIABStage::IsStageSequenceable(bool& isSequenceable) const
 {
-	return 0;
+	return false;
 }
 
 int CSIABStage::GetStageSequenceMaxLength(long& nrEvents) const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::StartStageSequence() const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::StopStageSequence() const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::ClearStageSequence()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::AddToStageSequence(double position)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABStage::SendStageSequence() const
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 bool CSIABStage::IsContinuousFocusDrive() const

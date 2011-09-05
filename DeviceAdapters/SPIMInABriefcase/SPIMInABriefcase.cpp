@@ -21,6 +21,7 @@
 
 #include "SPIMInABriefcase.h"
 #include "../../MMDevice/ModuleInterface.h"
+#include "../../../3rdpartypublic/picard/PiUsb.h"
 
 using namespace std;
 
@@ -114,6 +115,7 @@ MODULE_API void DeleteDevice(MM::Device* pDevice)
 CSIABTwister::CSIABTwister()
 {
 }
+
 CSIABTwister::~CSIABTwister()
 {
 }
@@ -139,6 +141,8 @@ bool CSIABTwister::UsesDelay()
 
 int CSIABTwister::Initialize()
 {
+	int error = -1;
+	handle_ = piConnectMotor(&error, serial_);
 	return 0;
 }
 

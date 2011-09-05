@@ -150,4 +150,3 @@ public:
 };
 
 #endif //_SPIMINABRIEFCASE_H_
-

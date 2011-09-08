@@ -18,7 +18,7 @@
 	<property name="MMPluginDir" value="${ImageJPath}/plugins/Micro-Manager"/>
 	<property name="IJ" value="../../3rdpartypublic/classext/ij.jar"/>
 	<property name="IJLauncher" value="../../3rdpartypublic/JavaLauncher/ImageJ.exe"/>
-	<property name="MMCoreJ" value="../bin_x64/MMCoreJ.jar"/>
+	<property name="MMCoreJ" value="../bin_x64/plugins/MMCoreJ.jar"/>
 	<property name="MMPluginDir-inst" value="${InstallRoot}/plugins/Micro-Manager"/>
 	<property name="BinRoot" value="../bin_x64"/>
 

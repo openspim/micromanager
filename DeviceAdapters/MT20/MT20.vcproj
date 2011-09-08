@@ -88,7 +88,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -162,7 +162,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -238,7 +238,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -315,7 +315,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -348,19 +348,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tinystr.cpp"
+				RelativePath=".	inystr.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\tinyxml.cpp"
+				RelativePath=".	inyxml.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\tinyxmlerror.cpp"
+				RelativePath=".	inyxmlerror.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\tinyxmlparser.cpp"
+				RelativePath=".	inyxmlparser.cpp"
 				>
 			</File>
 		</Filter>
@@ -398,11 +398,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tinystr.h"
+				RelativePath=".	inystr.h"
 				>
 			</File>
 			<File
-				RelativePath=".\tinyxml.h"
+				RelativePath=".	inyxml.h"
 				>
 			</File>
 		</Filter>

@@ -101,7 +101,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\Install_$(PlatformName)\micro-manager&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\bin_$(PlatformName)&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\Install_$(PlatformName)\micro-manager&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -183,7 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\Install_$(PlatformName)\micro-manager&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\bin_$(PlatformName)&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\Install_$(PlatformName)\micro-manager&#x0D;&#x0A;copy NKRemoteLib.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration

@@ -264,7 +264,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -350,7 +350,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -371,15 +371,18 @@
 				>
 			</File>
 			<File
-				RelativePath=".\nPC400.cpp"
+				RelativePath=".
+PC400.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\nPC400Channel.cpp"
+				RelativePath=".
+PC400Channel.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\nPC400Ctrl.cpp"
+				RelativePath=".
+PC400Ctrl.cpp"
 				>
 			</File>
 			<File
@@ -409,15 +412,18 @@
 				>
 			</File>
 			<File
-				RelativePath=".\nPC400.h"
+				RelativePath=".
+PC400.h"
 				>
 			</File>
 			<File
-				RelativePath=".\nPC400Channel.h"
+				RelativePath=".
+PC400Channel.h"
 				>
 			</File>
 			<File
-				RelativePath=".\nPC400Ctrl.h"
+				RelativePath=".
+PC400Ctrl.h"
 				>
 			</File>
 			<File
@@ -425,7 +431,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\targetver.h"
+				RelativePath=".	argetver.h"
 				>
 			</File>
 		</Filter>

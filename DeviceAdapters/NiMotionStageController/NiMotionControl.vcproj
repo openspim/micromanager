@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\FlexMotion\Include&quot;;&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\Include&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\..rdParty\NationalInstruments\NI-Motion\FlexMotion\Include&quot;;&quot;..\..\..rdParty\NationalInstruments\NI-Motion\Include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -67,7 +67,7 @@
 				AdditionalDependencies="FlexMS32.lib"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\FlexMotion\lib\Microsoft&quot;;&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\lib&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\..rdParty\NationalInstruments\NI-Motion\FlexMotion\lib\Microsoft&quot;;&quot;..\..\..rdParty\NationalInstruments\NI-Motion\lib&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				SubSystem="2"
@@ -96,7 +96,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -124,7 +124,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\FlexMotion\Include&quot;;&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\Include&quot;"
+				AdditionalIncludeDirectories="&quot;..\..\..rdParty\NationalInstruments\NI-Motion\FlexMotion\Include&quot;;&quot;..\..\..rdParty\NationalInstruments\NI-Motion\Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="true"
@@ -147,7 +147,7 @@
 				AdditionalDependencies="FlexMS32.lib"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\FlexMotion\lib\Microsoft&quot;;&quot;..\..\..\3rdParty\NationalInstruments\NI-Motion\lib&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\..rdParty\NationalInstruments\NI-Motion\FlexMotion\lib\Microsoft&quot;;&quot;..\..\..rdParty\NationalInstruments\NI-Motion\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -177,7 +177,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>

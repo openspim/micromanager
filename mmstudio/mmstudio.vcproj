@@ -24,7 +24,7 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml&#x0D;&#x0A;echo copy MMJ_.jar ..\bin_Win32&#x0D;&#x0A;copy MMJ_.jar ..\bin_Win32"
+				BuildCommandLine="call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml&#x0D;&#x0A;echo copy MMJ_.jar ..\bin_$(PlatformName)\plugins&#x0D;&#x0A;copy MMJ_.jar ..\bin_$(PlatformName)\plugins"
 				ReBuildCommandLine=""
 				CleanCommandLine=""
 				Output=""

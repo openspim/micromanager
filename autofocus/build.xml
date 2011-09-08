@@ -10,9 +10,9 @@
 	<property name="IJ" value="../../3rdpartypublic/classext/ij.jar"/>
 	<property name="beanshell" value="../../3rdpartypublic/classext/bsh-2.0b4.jar"/>
 	<property name="commonsmath" value="../../3rdpartypublic/classext/commons-math-2.0.jar"/>
-          <property name="MMCoreJ" value="../bin_Win32/MMCoreJ.jar"/>
+          <property name="MMCoreJ" value="../dist/jars/MMCoreJ.jar"/>
 	<property name="mmautofocus-inst" value="${InstallRoot}/mmautofocus"/>
-	<property name="Runtime" value="../bin_Win32"/>
+	<property name="Runtime" value="../dist/jars"/>
 
 	<path id="project.class.path">
 		<pathelement location="${IJ}" />

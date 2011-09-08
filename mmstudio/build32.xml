@@ -24,9 +24,9 @@
 	<property name="clojure" value="../../3rdpartypublic/classext/clojure.jar"/>
 	<property name="clooj" value="../../3rdpartypublic/classext/clooj.jar"/>
 	<property name="IJLauncher" value="../../3rdpartypublic/JavaLauncher/ImageJ.exe"/>
-	<property name="MMCoreJ" value="../bin_Win32/MMCoreJ.jar"/>
+	<property name="MMCoreJ" value="../dist/jars/MMCoreJ.jar"/>
 	<property name="MMPluginDir-inst" value="${InstallRoot}/plugins/Micro-Manager"/>
-	<property name="BinRoot" value="../bin_Win32"/>
+	<property name="BinRoot" value="../dist/jars/"/>
 
 	<path id="project.MMPlugins.path">
 		<pathelement location="${MMPluginDir}"/>

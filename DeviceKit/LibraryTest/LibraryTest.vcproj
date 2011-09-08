@@ -88,6 +88,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\dist\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -164,6 +165,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\dist\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>

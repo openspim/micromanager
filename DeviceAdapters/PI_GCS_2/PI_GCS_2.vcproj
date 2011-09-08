@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\projects\3rdparty\Microsoft\VisualC++\atlmfc\include"
+				AdditionalIncludeDirectories="C:\projectsrdparty\Microsoft\VisualC++tlmfc\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;MODULE_EXPORTS"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\3rdparty\Microsoft\VisualC++\atlmfc\include"
+				AdditionalIncludeDirectories="..\..\..rdparty\Microsoft\VisualC++tlmfc\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -99,7 +99,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -146,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\3rdparty\Microsoft\VisualC++\atlmfc\include"
+				AdditionalIncludeDirectories="..\..\..rdparty\Microsoft\VisualC++tlmfc\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -182,7 +182,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -225,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\3rdparty\Microsoft\VisualC++\atlmfc\include"
+				AdditionalIncludeDirectories="..\..\..rdparty\Microsoft\VisualC++tlmfc\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -262,7 +262,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -306,7 +306,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\3rdparty\Microsoft\VisualC++\atlmfc\include"
+				AdditionalIncludeDirectories="..\..\..rdparty\Microsoft\VisualC++tlmfc\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -343,7 +343,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -446,7 +446,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\resource.h"
+				RelativePath=".esource.h"
 				>
 			</File>
 		</Filter>

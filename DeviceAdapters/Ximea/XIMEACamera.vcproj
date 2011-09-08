@@ -93,7 +93,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -168,7 +168,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -198,7 +198,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Include&quot;;..\..\MMDevice;..\..\..\3rdparty\Ximea\Include"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Include&quot;;..\..\MMDevice;..\..\..rdparty\Ximea\Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -220,7 +220,7 @@
 				AdditionalDependencies="m3api.lib"
 				OutputFile="$(OutDir)\mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdparty\Ximea\Lib;&quot;$(SolutionDir)\Lib&quot;"
+				AdditionalLibraryDirectories="..\..\..rdparty\Ximea\Lib;&quot;$(SolutionDir)\Lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -247,7 +247,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -278,7 +278,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Include&quot;;..\..\MMDevice;..\..\..\3rdparty\Ximea\Include"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Include&quot;;..\..\MMDevice;..\..\..rdparty\Ximea\Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -300,7 +300,7 @@
 				AdditionalDependencies="m3apiX64.lib"
 				OutputFile="$(OutDir)\mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdparty\Ximea\Lib;&quot;$(SolutionDir)\Lib&quot;"
+				AdditionalLibraryDirectories="..\..\..rdparty\Ximea\Lib;&quot;$(SolutionDir)\Lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -327,7 +327,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>

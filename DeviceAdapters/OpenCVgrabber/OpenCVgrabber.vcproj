@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\3rdpartypublic\OpenCV2.3\include"
+				AdditionalIncludeDirectories="..\..\..rdpartypublic\OpenCV2.3\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -70,7 +70,7 @@
 				AdditionalDependencies="opencv_core231.lib opencv_highgui231.lib"
 				OutputFile="$(OutDir)\mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\OpenCV2.3\lib_x86"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\OpenCV2.3\lib_x86"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -97,7 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -126,7 +126,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\3rdpartypublic\OpenCV2.1\include\opencv"
+				AdditionalIncludeDirectories="..\..\..rdpartypublic\OpenCV2.1\include\opencv"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -152,7 +152,7 @@
 				AdditionalDependencies="cv210.lib cxcore210.lib cvaux210.lib highgui210.lib"
 				OutputFile="$(OutDir)\mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\OpenCV2.1\lib"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\OpenCV2.1\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -179,7 +179,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -207,7 +207,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\3rdpartypublic\OpenCV2.3\include"
+				AdditionalIncludeDirectories="..\..\..rdpartypublic\OpenCV2.3\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				ExceptionHandling="2"
 				RuntimeLibrary="0"
@@ -231,7 +231,7 @@
 				AdditionalDependencies="opencv_core231.lib opencv_highgui231.lib"
 				OutputFile="$(OutDir)\mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\OpenCV2.3\lib_x86"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\OpenCV2.3\lib_x86"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -260,7 +260,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -289,7 +289,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\3rdpartypublic\OpenCV2.3\include"
+				AdditionalIncludeDirectories="..\..\..rdpartypublic\OpenCV2.3\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				ExceptionHandling="2"
 				RuntimeLibrary="0"
@@ -313,7 +313,7 @@
 				AdditionalDependencies="opencv_core231.lib opencv_highgui231.lib"
 				OutputFile="$(OutDir)\mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\OpenCV2.3\lib_x64"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\OpenCV2.3\lib_x64"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -342,7 +342,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>

@@ -70,7 +70,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\boost\stage_$(PlatformName)\lib"
+				AdditionalLibraryDirectories="..\..\..rdpartypublicoost\stage_$(PlatformName)\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				SubSystem="2"
@@ -99,7 +99,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -154,7 +154,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\boost\stage_$(PlatformName)\lib"
+				AdditionalLibraryDirectories="..\..\..rdpartypublicoost\stage_$(PlatformName)\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				SubSystem="2"
@@ -183,7 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -236,7 +236,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\boost\stage_$(PlatformName)\lib"
+				AdditionalLibraryDirectories="..\..\..rdpartypublicoost\stage_$(PlatformName)\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -266,7 +266,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -320,7 +320,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\boost\stage_$(PlatformName)\lib"
+				AdditionalLibraryDirectories="..\..\..rdpartypublicoost\stage_$(PlatformName)\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -350,7 +350,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>

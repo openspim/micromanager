@@ -16,7 +16,7 @@
 	<property name="AdaptersRoot" value="../DeviceAdapters"/>
 	<property name="IJ" value="../../3rdpartypublic/classext/ij.jar"/>
 	<property name="IJLauncher" value="../../3rdpartypublic/JavaLauncher/ImageJ.exe"/>
-	<property name="MMCoreJ" value="../bin_Win32/MMCoreJ.jar"/>
+	<property name="MMCoreJ" value="../bin_Win32/plugins/MMCoreJ.jar"/>
 	<property name="MMPluginDir-inst" value="${InstallRoot}/plugins/Micro-Manager"/>
 	<property name="BinRoot" value="../bin_Win32"/>
 

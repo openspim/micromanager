@@ -67,7 +67,7 @@
 				AdditionalDependencies="MoticImageDevicesProxy.lib"
 				OutputFile="$(OutDir)\mmgr_dal_MoticCamera.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\Motic\x86"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\Motic\x86"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -143,7 +143,7 @@
 				AdditionalDependencies="MoticImageDevicesProxy.lib"
 				OutputFile="$(OutDir)\mmgr_dal_MoticCamera.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\Motic\x64"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\Motic\x64"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="17"
@@ -197,7 +197,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../MMDevice;..\..\..\3rdpartypublic\Motic"
+				AdditionalIncludeDirectories="../../MMDevice;..\..\..rdpartypublic\Motic"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				ExceptionHandling="2"
 				RuntimeLibrary="0"
@@ -220,7 +220,7 @@
 				AdditionalDependencies="MoticImageDevicesProxy.lib"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\Motic\x86"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\Motic\x86"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -247,7 +247,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -278,7 +278,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../MMDevice;..\..\..\3rdpartypublic\Motic"
+				AdditionalIncludeDirectories="../../MMDevice;..\..\..rdpartypublic\Motic"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				ExceptionHandling="2"
 				RuntimeLibrary="0"
@@ -301,7 +301,7 @@
 				AdditionalDependencies="MoticImageDevicesProxy.lib"
 				OutputFile="$(OutDir)/mmgr_dal_$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\3rdpartypublic\Motic\x64"
+				AdditionalLibraryDirectories="..\..\..rdpartypublic\Motic\x64"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -328,7 +328,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..in_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>

@@ -114,6 +114,7 @@ MODULE_API void DeleteDevice(MM::Device* pDevice)
 // The twister
 
 CSIABTwister::CSIABTwister()
+: serial_(20), handle_(NULL)
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABTwister::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, "101", MM::String, false, pAct, true);
@@ -281,6 +282,7 @@ bool CSIABTwister::IsContinuousFocusDrive() const
 // The Stage
 
 CSIABStage::CSIABStage()
+: serial_(105), handle_(NULL)
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, "102", MM::String, false, pAct, true);

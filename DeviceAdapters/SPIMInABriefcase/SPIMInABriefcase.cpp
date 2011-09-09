@@ -118,6 +118,7 @@ CSIABTwister::CSIABTwister()
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABTwister::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, "101", MM::String, false, pAct, true);
+	SetErrorText(1, "Could not initialize twister");
 }
 
 CSIABTwister::~CSIABTwister()
@@ -168,7 +169,7 @@ int CSIABTwister::Initialize()
 	handle_ = piConnectTwister(&error, serial_);
 	if (handle_)
 		piGetTwisterVelocity(&velocity_, handle_);
-	return !handle_;
+	return handle_ ? 0 : 1;
 }
 
 int CSIABTwister::Shutdown()
@@ -286,6 +287,7 @@ CSIABStage::CSIABStage()
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, "102", MM::String, false, pAct, true);
+	SetErrorText(1, "Could not initialize motor (Z stage)");
 }
 
 CSIABStage::~CSIABStage()
@@ -336,7 +338,7 @@ int CSIABStage::Initialize()
 	handle_ = piConnectMotor(&error, serial_);
 	if (handle_)
 		piGetMotorVelocity(&velocity_, handle_);
-	return !handle_;
+	return handle_ ? 0 : 1;
 }
 
 int CSIABStage::Shutdown()

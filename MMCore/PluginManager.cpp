@@ -79,6 +79,18 @@ std::map<std::string, MMThreadLock*> CPluginManager::moduleLocks_;
  */
 void CPluginManager::AddSearchPath(string path)
 {
+#ifdef WIN32
+   char buffer[32768];
+   DWORD len = GetEnvironmentVariable("PATH", buffer + 1, sizeof(buffer) - 3);
+   if (len && path.length() < sizeof(buffer) - 3 - len) {
+      buffer[0] = buffer[len + 1] = ';';
+	  buffer[len + 2] = '\0';
+	  if (!strstr(buffer, (string(";") + path + ";").c_str())) {
+         strcpy(buffer + len + 2, path.c_str());
+		 SetEnvironmentVariable("PATH", buffer + 1);
+	  }
+   }
+#endif
    searchPaths_.push_back(path);
 }
 

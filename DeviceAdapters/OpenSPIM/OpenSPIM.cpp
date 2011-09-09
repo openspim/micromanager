@@ -283,10 +283,10 @@ bool CSIABTwister::IsContinuousFocusDrive() const
 // The Stage
 
 CSIABStage::CSIABStage()
-: serial_(105), handle_(NULL)
+: serial_(107), handle_(NULL)
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
-	CreateProperty(g_Keyword_SerialNumber, "102", MM::String, false, pAct, true);
+	CreateProperty(g_Keyword_SerialNumber, "107", MM::String, false, pAct, true);
 	SetErrorText(1, "Could not initialize motor (Z stage)");
 }
 

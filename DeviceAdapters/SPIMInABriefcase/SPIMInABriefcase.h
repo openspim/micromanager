@@ -147,6 +147,13 @@ public:
 	int GetStepLimits(long& xMin, long& xMax, long& yMin, long& yMax);
 	double GetStepSizeXUm();
 	double GetStepSizeYUm();
+private:
+	int OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct);
+
+	int serialX_, serialY_;
+	int velocityX_, velocityY_;
+	void *handleX_, *handleY_;
 };
 
 #endif //_SPIMINABRIEFCASE_H_

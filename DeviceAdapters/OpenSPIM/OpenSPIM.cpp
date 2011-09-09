@@ -31,6 +31,8 @@ const char* g_TwisterDeviceName = "Picard Twister";
 const char* g_StageDeviceName = "Picard Z Stage";
 const char* g_XYStageDeviceName = "Picard XY Stage";
 const char* g_Keyword_SerialNumber = "Serial Number";
+const char* g_Keyword_SerialNumberX = "Serial Number (X)";
+const char* g_Keyword_SerialNumberY = "Serial Number (Y)";
 
 // windows DLL entry code
 #ifdef WIN32
@@ -450,15 +452,60 @@ bool CSIABStage::IsContinuousFocusDrive() const
 // The XY Stage
 
 CSIABXYStage::CSIABXYStage()
+: serialX_(105), serialY_(106), handleX_(NULL), handleY_(NULL)
 {
+	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
+	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
+	CreateProperty(g_Keyword_SerialNumberX, "105", MM::String, false, pActX, true);
+	CreateProperty(g_Keyword_SerialNumberY, "106", MM::String, false, pActY, true);
+	SetErrorText(1, "Could not initialize motor (X stage)");
+	SetErrorText(2, "Could not initialize motor (Y stage)");
 }
+
 CSIABXYStage::~CSIABXYStage()
 {
 }
 
+int CSIABXYStage::OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct)
+{
+   if (eAct == MM::BeforeGet)
+   {
+      // instead of relying on stored state we could actually query the device
+      pProp->Set((long)serialX_);
+   }
+   else if (eAct == MM::AfterSet)
+   {
+      long serial;
+      pProp->Get(serial);
+      serialX_ = (int)serial;
+   }
+   return DEVICE_OK;
+}
+
+int CSIABXYStage::OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct)
+{
+   if (eAct == MM::BeforeGet)
+   {
+      // instead of relying on stored state we could actually query the device
+      pProp->Set((long)serialY_);
+   }
+   else if (eAct == MM::AfterSet)
+   {
+      long serial;
+      pProp->Get(serial);
+      serialY_ = (int)serial;
+   }
+   return DEVICE_OK;
+}
+
 bool CSIABXYStage::Busy()
 {
-	return false;
+	BOOL movingX = FALSE, movingY = FALSE;
+	if (handleX_)
+		piGetMotorMovingStatus(&movingX, handleX_);
+	if (handleY_)
+		piGetMotorMovingStatus(&movingY, handleY_);
+	return movingX != FALSE || movingY != FALSE;
 }
 
 double CSIABXYStage::GetDelayMs() const
@@ -477,21 +524,38 @@ bool CSIABXYStage::UsesDelay()
 
 int CSIABXYStage::Initialize()
 {
-	return 0;
+	int errorX = -1, errorY = -1;
+	handleX_ = piConnectMotor(&errorX, serialX_);
+	if (handleX_)
+		piGetMotorVelocity(&velocityX_, handleX_);
+	handleY_ = piConnectMotor(&errorY, serialY_);
+	if (handleY_)
+		piGetMotorVelocity(&velocityY_, handleY_);
+	return handleX_ ? (handleY_ ? 0 : 2) : 1;
 }
 
 int CSIABXYStage::Shutdown()
 {
+	if (handleX_) {
+		piDisconnectMotor(handleX_);
+		handleX_ = NULL;
+	}
+	if (handleY_) {
+		piDisconnectMotor(handleY_);
+		handleY_ = NULL;
+	}
 	return 0;
 }
 
 void CSIABXYStage::GetName(char* name) const
 {
+	CDeviceUtils::CopyLimitedString(name, g_XYStageDeviceName);
 }
 
 int CSIABXYStage::SetPositionUm(double x, double y)
 {
-	return 0;
+	return piRunMotorToPosition((int)x, velocityX_, handleX_) ||
+		piRunMotorToPosition((int)y, velocityY_, handleY_);
 }
 
 int CSIABXYStage::SetRelativePositionUm(double dx, double dy)
@@ -506,60 +570,70 @@ int CSIABXYStage::SetAdapterOriginUm(double x, double y)
 
 int CSIABXYStage::GetPositionUm(double& x, double& y)
 {
-	return 0;
+	int positionX, positionY;
+	if (piGetMotorPosition(&positionX, handleX_) ||
+			piGetMotorPosition(&positionY, handleY_))
+		return DEVICE_ERR;
+	x = positionX;
+	y = positionY;
+	return DEVICE_OK;
 }
 
 int CSIABXYStage::GetLimitsUm(double& xMin, double& xMax, double& yMin, double& yMax)
 {
+	xMin = yMin = 1;
+	xMin = yMin = 2000;
 	return 0;
 }
 
 int CSIABXYStage::Move(double vx, double vy)
 {
+	velocityX_ = (int)vx;
+	velocityY_ = (int)vy;
 	return 0;
 }
 
 int CSIABXYStage::SetPositionSteps(long x, long y)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABXYStage::GetPositionSteps(long& x, long& y)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABXYStage::SetRelativePositionSteps(long x, long y)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABXYStage::Home()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABXYStage::Stop()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABXYStage::SetOrigin()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 int CSIABXYStage::GetStepLimits(long& xMin, long& xMax, long& yMin, long& yMax)
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 double CSIABXYStage::GetStepSizeXUm()
 {
-	return 0;
+	return DEVICE_ERR;
 }
 
 double CSIABXYStage::GetStepSizeYUm()
 {
-	return 0;
+	return DEVICE_ERR;
 }

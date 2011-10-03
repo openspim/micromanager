@@ -235,8 +235,8 @@ int CSIABTwister::SetOrigin()
 
 int CSIABTwister::GetLimits(double& lower, double& upper)
 {
-	lower = 0;
-	upper = 360;
+	lower = -32767;
+	upper = +32767;
 	return 0;
 }
 
@@ -405,7 +405,8 @@ int CSIABStage::SetOrigin()
 int CSIABStage::GetLimits(double& lower, double& upper)
 {
 	lower = 1;
-	upper = 2000;
+	// TODO: make this a property; the USB Motor I has an upper limit of 2000
+	upper = 8000;
 	return 0;
 }
 

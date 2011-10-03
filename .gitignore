@@ -28,3 +28,4 @@ Makefile
 /mmstudio/MMJ_.jar
 /mmstudio/src/org/json/*.class
 /dist/
+/build/

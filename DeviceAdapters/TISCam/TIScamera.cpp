@@ -196,6 +196,8 @@ perform most of the initialization in the Initialize() method.
 CTIScamera::CTIScamera() : CCameraBase<CTIScamera> (),
    initialized_(false),
 
+   pSelectDevice(NULL),
+   pShowProperties(NULL),
    lCCD_Width(0),
    lCCD_Height(0),
    uiCCD_BitsPerPixel(8),

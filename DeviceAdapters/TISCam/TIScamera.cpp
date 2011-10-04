@@ -231,6 +231,11 @@ CTIScamera::CTIScamera() : CCameraBase<CTIScamera> (),
    m_pSimpleProperties = NULL;
    seqThread_ = new AcqSequenceThread(this); 
 
+   for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
+   {
+      pBuf[ii] = NULL;
+   }
+
    // create a pre-initialization property and list all the available cameras
    char szPath[MAX_PATH];
    XMLPath = "";
@@ -857,7 +862,10 @@ int CTIScamera::Shutdown()
    }
    for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
    {
-      delete pBuf[ii];
+      if (pBuf[ii]) {
+         delete pBuf[ii];
+         pBuf[ii] = NULL;
+      }
    }
    delete pGrabber;
    pGrabber = 0;
@@ -1313,11 +1321,6 @@ void CTIScamera::RecalculateROI()
       pGrabber->startLive(false);
 #endif
 
-
-      for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
-      {
-         delete pBuf[ii];
-      }
 
       // Retrieve the output type and dimension of the handler sink.
       // The dimension of the sink could be different from the VideoFormat, when

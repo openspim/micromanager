@@ -128,10 +128,6 @@ DShowLib::tFrameHandlerSinkPtr     pSink;
 DShowLib::tMemBufferCollectionPtr  pCollection;
 
 
-#define NUMBER_OF_BUFFERS 1
-
-BYTE* pBuf[NUMBER_OF_BUFFERS];
-
 
 // ------------------------------ DLL main --------------------------------------
 //

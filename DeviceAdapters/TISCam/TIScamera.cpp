@@ -190,6 +190,8 @@ perform most of the initialization in the Initialize() method.
 CTIScamera::CTIScamera() : CCameraBase<CTIScamera> (),
    initialized_(false),
 
+   pSelectDevice(NULL),
+   pShowProperties(NULL),
    lCCD_Width(0),
    lCCD_Height(0),
    uiCCD_BitsPerPixel(8),
@@ -229,6 +231,11 @@ currentExpMS_(12.34), //ms
 
    m_pSimpleProperties = NULL;
    seqThread_ = new AcqSequenceThread(this); 
+
+   for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
+   {
+      pBuf[ii] = NULL;
+   }
 
    // create a pre-initialization property and list all the available cameras
    char szPath[MAX_PATH];
@@ -835,7 +842,10 @@ int CTIScamera::Shutdown()
    }
    for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
    {
-      delete pBuf[ii];
+      if (pBuf[ii]) {
+         delete pBuf[ii];
+         pBuf[ii] = NULL;
+      }
    }
    delete pGrabber;
    pGrabber = 0;
@@ -1265,11 +1275,6 @@ void CTIScamera::RecalculateROI()
 
       pGrabber->startLive(ACTIVEMOVIE);
 
-
-      for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
-      {
-         delete pBuf[ii];
-      }
 
       // Retrieve the output type and dimension of the handler sink.
       // The dimension of the sink could be different from the VideoFormat, when

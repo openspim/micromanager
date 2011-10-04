@@ -231,6 +231,11 @@ CTIScamera::CTIScamera() : CCameraBase<CTIScamera> (),
    m_pSimpleProperties = NULL;
    seqThread_ = new AcqSequenceThread(this); 
 
+   for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
+   {
+      pBuf[ii] = NULL;
+   }
+
    // create a pre-initialization property and list all the available cameras
    char szPath[MAX_PATH];
    XMLPath = "";
@@ -686,6 +691,8 @@ int CTIScamera::SetupProperties()
    // Allocate NUMBER_OF_BUFFERS image buffers of the above (info) buffer size.
    for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
    {
+      if (pBuf[ii])
+	     delete pBuf[ii];
       pBuf[ii] = new BYTE[info.buffersize];
       assert(pBuf[ii]);
    }
@@ -857,7 +864,10 @@ int CTIScamera::Shutdown()
    }
    for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
    {
-      delete pBuf[ii];
+      if (pBuf[ii]) {
+         delete pBuf[ii];
+         pBuf[ii] = NULL;
+      }
    }
    delete pGrabber;
    pGrabber = 0;
@@ -1316,7 +1326,10 @@ void CTIScamera::RecalculateROI()
 
       for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
       {
-         delete pBuf[ii];
+         if (pBuf[ii]) {
+            delete pBuf[ii];
+            pBuf[ii] = NULL;
+         }
       }
 
       // Retrieve the output type and dimension of the handler sink.
@@ -1332,6 +1345,8 @@ void CTIScamera::RecalculateROI()
       // Allocate NUMBER_OF_BUFFERS image buffers of the above (info) buffer size.
       for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
       {
+         if (pBuf[ii])
+            delete pBuf[ii];
          pBuf[ii] = new BYTE[info.buffersize];
          assert(pBuf[ii]);
       }

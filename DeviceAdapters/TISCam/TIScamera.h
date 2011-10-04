@@ -140,6 +140,10 @@ private:
 
 
 	bool initialized_;
+
+#define NUMBER_OF_BUFFERS 1
+	BYTE* pBuf[NUMBER_OF_BUFFERS];
+
 	double nominalPixelSizeUm_;
 	long lCCD_Width, lCCD_Height;
 	unsigned int uiCCD_BitsPerPixel;

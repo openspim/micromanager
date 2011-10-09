@@ -691,8 +691,6 @@ int CTIScamera::SetupProperties()
    // Allocate NUMBER_OF_BUFFERS image buffers of the above (info) buffer size.
    for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
    {
-      if (pBuf[ii])
-	     delete pBuf[ii];
       pBuf[ii] = new BYTE[info.buffersize];
       assert(pBuf[ii]);
    }
@@ -1324,14 +1322,6 @@ void CTIScamera::RecalculateROI()
 #endif
 
 
-      for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
-      {
-         if (pBuf[ii]) {
-            delete pBuf[ii];
-            pBuf[ii] = NULL;
-         }
-      }
-
       // Retrieve the output type and dimension of the handler sink.
       // The dimension of the sink could be different from the VideoFormat, when
       // you use filters.
@@ -1345,8 +1335,6 @@ void CTIScamera::RecalculateROI()
       // Allocate NUMBER_OF_BUFFERS image buffers of the above (info) buffer size.
       for (int ii = 0; ii < NUMBER_OF_BUFFERS; ++ii)
       {
-         if (pBuf[ii])
-            delete pBuf[ii];
          pBuf[ii] = new BYTE[info.buffersize];
          assert(pBuf[ii]);
       }

@@ -23,6 +23,9 @@
 #include "../../MMDevice/ModuleInterface.h"
 #include "../../../3rdpartypublic/picard/PiUsb.h"
 
+// We have a lot of stub implementations in here...
+#pragma warning(disable: 4100)
+
 using namespace std;
 
 // External names used used by the rest of the system

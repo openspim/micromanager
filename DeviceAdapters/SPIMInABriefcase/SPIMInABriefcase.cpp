@@ -36,6 +36,7 @@ const char* g_XYStageDeviceName = "Picard XY Stage";
 const char* g_Keyword_SerialNumber = "Serial Number";
 const char* g_Keyword_SerialNumberX = "Serial Number (X)";
 const char* g_Keyword_SerialNumberY = "Serial Number (Y)";
+const char* g_Keyword_Velocity = "Velocity";
 
 // windows DLL entry code
 #ifdef WIN32
@@ -292,6 +293,17 @@ CSIABStage::CSIABStage()
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, "107", MM::String, false, pAct, true);
+
+	pAct = new CPropertyAction (this, &CSIABStage::OnVelocity);
+	CreateProperty(g_Keyword_Velocity, "10", MM::Integer, false, pAct);
+	std::vector<std::string> allowed_velocities = std::vector<std::string>();
+	char buffer[20];
+	for (int i = 1; i <= 10; i++) {
+		sprintf(buffer, "%d", i);
+		allowed_velocities.push_back(buffer);
+	}
+	SetAllowedValues(g_Keyword_Velocity, allowed_velocities);
+
 	SetErrorText(1, "Could not initialize motor (Z stage)");
 }
 
@@ -311,6 +323,22 @@ int CSIABStage::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
       long serial;
       pProp->Get(serial);
       serial_ = (int)serial;
+   }
+   return DEVICE_OK;
+}
+
+int CSIABStage::OnVelocity(MM::PropertyBase* pProp, MM::ActionType eAct)
+{
+   if (eAct == MM::BeforeGet)
+   {
+      // instead of relying on stored state we could actually query the device
+      pProp->Set((long)velocity_);
+   }
+   else if (eAct == MM::AfterSet)
+   {
+      long velocity;
+      pProp->Get(velocity);
+      velocity_ = (int)velocity;
    }
    return DEVICE_OK;
 }

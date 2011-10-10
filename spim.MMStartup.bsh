@@ -1,0 +1,8 @@
+setAccessibility(true);
+
+import org.micromanager.MMStudioMainFrame.PluginItem;
+for (PluginItem plugin : gui.plugins_)
+	if (plugin.className.equals("SPIMAcquisition")) {
+		plugin.instantiate();
+		plugin.plugin.show();
+	}

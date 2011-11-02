@@ -516,8 +516,8 @@
         searchPaths.add(new File("/usr/lib/micro-manager"));
     }
     
-	try {
-	    loadLibrary(searchPaths, "MMCoreJ_wrap");
+    try {
+        loadLibrary(searchPaths, "MMCoreJ_wrap");
         for (File path : searchPaths) {
           System.out.println(path.getAbsolutePath());
           CMMCore.addSearchPath(path.getAbsolutePath());

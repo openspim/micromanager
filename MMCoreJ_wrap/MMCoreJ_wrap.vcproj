@@ -155,7 +155,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mmcored.lib Iphlpapi.lib"
+				AdditionalDependencies="mmcorer.lib Iphlpapi.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)/MMCoreJ_wrap.dll"
 				LinkIncremental="1"

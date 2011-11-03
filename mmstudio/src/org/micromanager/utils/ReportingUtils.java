@@ -26,6 +26,8 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 import java.util.Calendar;
 
@@ -65,6 +67,13 @@ public class ReportingUtils {
       } else {
          core_.logMessage(msg);
       }
+   }
+
+   public static void logException(String msg, Throwable e) {
+      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+      e.printStackTrace(new PrintStream(bytes));
+      logMessage(msg);
+      logMessage(bytes.toString());
    }
 
    public static void showMessage(String msg) {

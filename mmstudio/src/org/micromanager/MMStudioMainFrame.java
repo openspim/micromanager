@@ -4343,7 +4343,7 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface, Device
 
       try {
          long t1 = System.currentTimeMillis();
-         classes = JavaUtils.findClasses(new File("mmplugins"), 2);
+         classes = JavaUtils.findClasses(new File(IJ.getDirectory("imagej"), "mmplugins"), 2);
          //System.out.println("findClasses: " + (System.currentTimeMillis() - t1));
          ReportingUtils.logMessage("#uManager plugins: " + classes.size());
          for (Class<?> clazz : classes) {

@@ -89,7 +89,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\dist\mm\$(PlatformName)&#x0D;&#x0A;rem copy &quot;$(TargetPath)&quot; ..\dist\mm\$(PlatformName)\$(TargetName)d.lib&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\dist\mm\$(PlatformName)\$(TargetName)d.lib&#x0D;&#x0A;rem copy &quot;$(TargetPath)&quot; ..\dist\mm\$(PlatformName)\$(TargetName)d.lib&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration

@@ -3,7 +3,7 @@
 // PROJECT:       Micro-Manager
 // SUBSYSTEM:     DeviceAdapters
 //-----------------------------------------------------------------------------
-// DESCRIPTION:   The drivers required for the SPIM-in-a-briefcase project
+// DESCRIPTION:   The drivers required for the OpenSPIM project
 //                
 // AUTHOR:        Johannes Schindelin, 2011
 //

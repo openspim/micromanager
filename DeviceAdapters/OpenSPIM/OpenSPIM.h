@@ -3,7 +3,7 @@
 // PROJECT:       Micro-Manager
 // SUBSYSTEM:     DeviceAdapters
 //-----------------------------------------------------------------------------
-// DESCRIPTION:   The drivers for the SPIM-in-a-briefcase project
+// DESCRIPTION:   The drivers for the OpenSPIM project
 //                Based on the CDemoStage and CDemoXYStage classes
 //                
 // AUTHOR:        Johannes Schindelin
@@ -21,8 +21,8 @@
 //                CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 //                INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
 
-#ifndef _SPIMINABRIEFCASE_H_
-#define _SPIMINABRIEFCASE_H_
+#ifndef _OPENSPIM_H_
+#define _OPENSPIM_H_
 
 #include "../../MMDevice/DeviceBase.h"
 
@@ -157,4 +157,4 @@ private:
 	void *handleX_, *handleY_;
 };
 
-#endif //_SPIMINABRIEFCASE_H_
+#endif //_OPENSPIM_H_

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// FILE:          SPIMInABriefcase.cpp
+// FILE:          OpenSPIM.cpp
 // PROJECT:       Micro-Manager
 // SUBSYSTEM:     DeviceAdapters
 //-----------------------------------------------------------------------------
@@ -19,7 +19,7 @@
 //                CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 //                INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
 
-#include "SPIMInABriefcase.h"
+#include "OpenSPIM.h"
 #include "../../MMDevice/ModuleInterface.h"
 #include "../../../3rdpartypublic/picard/PiUsb.h"
 
@@ -29,7 +29,7 @@
 using namespace std;
 
 // External names used used by the rest of the system
-// to load particular device from the "SPIMInABriefcase.dll" library
+// to load particular device from the "OpenSPIM.dll" library
 const char* g_TwisterDeviceName = "Picard Twister";
 const char* g_StageDeviceName = "Picard Z Stage";
 const char* g_XYStageDeviceName = "Picard XY Stage";

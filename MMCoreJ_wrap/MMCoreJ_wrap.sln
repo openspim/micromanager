@@ -283,7 +283,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "..\mmstudio\mms
 		{E62C86EF-C3BD-494E-B9EF-BD53BB01F839} = {E62C86EF-C3BD-494E-B9EF-BD53BB01F839}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SPIMInABriefcase", "..\DeviceAdapters\SPIMInABriefcase\SPIMInABriefcase.vcproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenSPIM", "..\DeviceAdapters\OpenSPIM\OpenSPIM.vcproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SPIMInABriefcase"
+	Name="OpenSPIM"
 	ProjectGUID="{FB87D337-AFA5-4DA8-8D99-84461B363108}"
-	RootNamespace="SPIMInABriefcase"
+	RootNamespace="OpenSPIM"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -70,14 +70,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_SPIMInABriefcase.dll"
+				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/SPIMInABriefcase.pdb"
+				ProgramDatabaseFile="$(OutDir)/OpenSPIM.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/SPIMInABriefcase.lib"
+				ImportLibrary="$(OutDir)/OpenSPIM.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -152,7 +152,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_SPIMInABriefcase.dll"
+				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -160,7 +160,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/SPIMInABriefcase.lib"
+				ImportLibrary="$(OutDir)/OpenSPIM.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -238,14 +238,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_SPIMInABriefcase.dll"
+				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/SPIMInABriefcase.pdb"
+				ProgramDatabaseFile="$(OutDir)/OpenSPIM.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/SPIMInABriefcase.lib"
+				ImportLibrary="$(OutDir)/OpenSPIM.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -320,7 +320,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_SPIMInABriefcase.dll"
+				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -328,7 +328,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/SPIMInABriefcase.lib"
+				ImportLibrary="$(OutDir)/OpenSPIM.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -408,7 +408,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SPIMInABriefcase.cpp"
+				RelativePath=".\OpenSPIM.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -454,7 +454,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SPIMInABriefcase.h"
+				RelativePath=".\OpenSPIM.h"
 				>
 			</File>
 		</Filter>

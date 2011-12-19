@@ -247,38 +247,38 @@ int CSIABTwister::GetLimits(double& lower, double& upper)
 int CSIABTwister::IsStageSequenceable(bool& isSequenceable) const
 {
 	isSequenceable = false;
-	return 0;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::GetStageSequenceMaxLength(long& nrEvents) const
 {
 	nrEvents = 0;
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::StartStageSequence() const
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::StopStageSequence() const
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::ClearStageSequence()
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::AddToStageSequence(double position)
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABTwister::SendStageSequence() const
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 bool CSIABTwister::IsContinuousFocusDrive() const
@@ -448,32 +448,33 @@ int CSIABStage::IsStageSequenceable(bool& isSequenceable) const
 
 int CSIABStage::GetStageSequenceMaxLength(long& nrEvents) const
 {
-	return DEVICE_ERR;
+	nrEvents = 0;
+	return DEVICE_OK;
 }
 
 int CSIABStage::StartStageSequence() const
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABStage::StopStageSequence() const
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABStage::ClearStageSequence()
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABStage::AddToStageSequence(double position)
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 int CSIABStage::SendStageSequence() const
 {
-	return DEVICE_ERR;
+	return DEVICE_OK;
 }
 
 bool CSIABStage::IsContinuousFocusDrive() const

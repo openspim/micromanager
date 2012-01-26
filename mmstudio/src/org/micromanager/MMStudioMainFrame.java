@@ -621,7 +621,7 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface, Device
          @Override
          public void run() {
             try {
-               pipelineClass_  = Class.forName("org.micromanager.AcqEngine");
+               pipelineClass_  = getClass().getClassLoader().loadClass("org.micromanager.AcqEngine");
             } catch (Exception ex) {
                ReportingUtils.logError(ex);
                pipelineClass_ = null;

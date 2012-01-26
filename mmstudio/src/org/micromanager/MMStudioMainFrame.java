@@ -650,7 +650,7 @@ public class MMStudioMainFrame extends JFrame implements
          @Override
          public void run() {
             try {
-               acquisitionEngine2010Class  = Class.forName("org.micromanager.AcquisitionEngine2010");
+               acquisitionEngine2010Class  = getClass().getClassLoader().loadClass("org.micromanager.AcquisitionEngine2010");
             } catch (Exception ex) {
                ReportingUtils.logError(ex);
                acquisitionEngine2010Class = null;

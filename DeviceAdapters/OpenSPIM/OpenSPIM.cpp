@@ -77,13 +77,6 @@ MODULE_API void InitializeModuleData()
    AddAvailableDeviceName(g_TwisterDeviceName, "Twister");
    AddAvailableDeviceName(g_StageDeviceName, "Z stage");
    AddAvailableDeviceName(g_XYStageDeviceName, "XY stage");
-
-   if (DiscoverabilityTest())
-   {
-      SetDeviceIsDiscoverable(g_TwisterDeviceName, true); 
-      SetDeviceIsDiscoverable(g_StageDeviceName, true); 
-      SetDeviceIsDiscoverable(g_XYStageDeviceName, true);
-   }
 }
 
 MODULE_API MM::Device* CreateDevice(const char* deviceName)
@@ -669,4 +662,10 @@ double CSIABXYStage::GetStepSizeXUm()
 double CSIABXYStage::GetStepSizeYUm()
 {
 	return DEVICE_ERR;
+}
+
+int CSIABXYStage::IsXYStageSequenceable(bool& isSequenceable) const
+{
+	isSequenceable = false;
+	return DEVICE_OK;
 }

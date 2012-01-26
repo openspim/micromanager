@@ -148,6 +148,7 @@ public:
 	int GetStepLimits(long& xMin, long& xMax, long& yMin, long& yMax);
 	double GetStepSizeXUm();
 	double GetStepSizeYUm();
+	int IsXYStageSequenceable(bool& isSequenceable) const;
 private:
 	int OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct);
 	int OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct);

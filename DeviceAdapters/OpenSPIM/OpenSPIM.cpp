@@ -164,6 +164,11 @@ int CSIABTwister::Initialize()
 	handle_ = piConnectTwister(&error, serial_);
 	if (handle_)
 		piGetTwisterVelocity(&velocity_, handle_);
+	else {
+		std::ostringstream buffer;
+		buffer << "Could not initialize twister " << serial_ << " (error code " << error << ")";
+		LogMessage(buffer.str().c_str(), false);
+	}
 	return handle_ ? 0 : 1;
 }
 
@@ -333,6 +338,11 @@ int CSIABStage::Initialize()
 	handle_ = piConnectMotor(&error, serial_);
 	if (handle_)
 		piGetMotorVelocity(&velocity_, handle_);
+	else {
+		std::ostringstream buffer;
+		buffer << "Could not initialize motor " << serial_ << " (error code " << error << ")";
+		LogMessage(buffer.str().c_str(), false);
+	}
 	return handle_ ? 0 : 1;
 }
 
@@ -522,9 +532,19 @@ int CSIABXYStage::Initialize()
 	handleX_ = piConnectMotor(&errorX, serialX_);
 	if (handleX_)
 		piGetMotorVelocity(&velocityX_, handleX_);
+	else {
+		std::ostringstream buffer;
+		buffer << "Could not initialize X motor " << serialX_ << " (error code " << errorX << ")";
+		LogMessage(buffer.str().c_str(), false);
+	}
 	handleY_ = piConnectMotor(&errorY, serialY_);
 	if (handleY_)
 		piGetMotorVelocity(&velocityY_, handleY_);
+	else {
+		std::ostringstream buffer;
+		buffer << "Could not initialize Y motor " << serialY_ << " (error code " << errorY << ")";
+		LogMessage(buffer.str().c_str(), false);
+	}
 	return handleX_ ? (handleY_ ? 0 : 2) : 1;
 }
 

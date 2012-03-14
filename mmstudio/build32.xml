@@ -53,7 +53,7 @@
 		</copy>
 </target>
 
-	<target name="build" description="Build MMJ_.jar">
+	<target name="build" depends="compile" description="Build MMJ_.jar">
 
 		<copy file="./bin/plugins_mmstudio.config" tofile="./build/plugins.config"  overwrite="true" verbose="true" />
 		<jar jarfile="MMJ_.jar" basedir="build" manifest="./src/MANIFEST.MF" />

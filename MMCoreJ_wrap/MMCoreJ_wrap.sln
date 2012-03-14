@@ -242,7 +242,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tofra", "..\DeviceAdapters\Tofra\Tofra.vcproj", "{8D1E58FA-AD04-43A1-8BDF-0457103F8DE1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaumerOptronic", "..\DeviceAdapters\BaumerOptronic\BaumerOptronic.vcproj", "{B06A629B-7EAA-4265-A4C0-8A0EC03B00B0}"
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "..\mmstudio\mmstudio\mmstudio.vcproj", "{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "..\mmstudio\mmstudio.vcproj", "{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeicaDMSTC", "..\DeviceAdapters\LeicaDMSTC\LeicaDMSTC.vcproj", "{A41C689F-E343-4BDA-8132-FE2ADB166249}"
 EndProject

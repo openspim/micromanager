@@ -13,6 +13,8 @@ Makefile.in
 Makefile
 /MMCoreJ_wrap/mmcorej/*.java
 /MMCoreJ_wrap/mmcorej/*.class
+/acqEngine/MMAcqEngine.jar
+/acqEngine/classes/
 /bin_Win32/mmgr_dal_*.dll
 /MMCoreJ_wrap/MMCoreJ.jar
 /MMCoreJ_wrap/MMCoreJ_wrap.cxx
@@ -27,5 +29,10 @@ Makefile
 /mmstudio/build/
 /mmstudio/MMJ_.jar
 /mmstudio/src/org/json/*.class
+/CoreLog*.txt
+/IJ_Prefs.txt
+/Install_Win32/micro-manager/DSLRRemoteLib.dll
+/Install_Win32/micro-manager/NKRemoteLib.dll
+/Install_Win32/micro-manager/PSRemoteLib.dll
 /dist/
 /build/

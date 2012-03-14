@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\dist\mm\$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\dist\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\dist\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -183,7 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\dist\mm\$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\dist\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\dist\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration

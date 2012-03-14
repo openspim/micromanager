@@ -234,6 +234,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BaumerOptronic", "DeviceAda
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LeicaDMSTC", "DeviceAdapters\LeicaDMSTC\LeicaDMSTC.vcxproj", "{A41C689F-E343-4BDA-8132-FE2ADB166249}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "mmstudio\mmstudio.vcxproj", "{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LumencorCIA", "DeviceAdapters\LumencorCIA\LumencorCIA.vcxproj", "{2C362B1C-80C9-4867-AD96-2482535190D1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CSUW1", "DeviceAdapters\CSUW1\CSUW1.vcxproj", "{7C767DFF-87E6-4FE0-9557-2FF656ED1E57}"
@@ -693,6 +695,7 @@ Global
 		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Debug|Win32.ActiveCfg = Debug|Win32
 		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Debug|Win32.Build.0 = Debug|Win32
 		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Debug|x64.ActiveCfg = Debug|x64
+		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Debug|x64.Build.0 = Debug|x64
 		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Release|Win32.ActiveCfg = Release|Win32
 		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Release|Win32.Build.0 = Release|Win32
 		{0F47459C-3A45-4A07-AF18-FC7E5CD5A220}.Release|x64.ActiveCfg = Release|x64
@@ -1500,6 +1503,12 @@ Global
 		{C8ADF958-CB16-4A2F-94D0-39086E7E0F6D}.Release|Win32.Build.0 = Release|Win32
 		{C8ADF958-CB16-4A2F-94D0-39086E7E0F6D}.Release|x64.ActiveCfg = Release|x64
 		{C8ADF958-CB16-4A2F-94D0-39086E7E0F6D}.Release|x64.Build.0 = Release|x64
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Debug|Win32.Build.0 = Debug|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Debug|x64.ActiveCfg = Debug|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.ActiveCfg = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.Build.0 = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

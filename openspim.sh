@@ -142,6 +142,10 @@ in /src/fiji/modules/micromanager/. Then start Micro-Manager with
 
 EOF
 
-	cd /src/fiji/modules/micromanager/
+	cd /src/fiji/modules/micromanager/ &&
+	if ! git --no-pager diff --no-index /etc/profile.d/openspim.sh openspim.sh
+	then
+		printf "\nWARNING: detected differences in the profile.d/ script\n\n"
+	fi
 
 fi

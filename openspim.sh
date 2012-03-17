@@ -138,9 +138,9 @@ building everything by pressing <F7>, and then calling
 
     ./dist/ImageJ --build
 
-in /src/fiji/modules/micromanager/. Then start Fiji with
+in /src/fiji/modules/micromanager/. Then start Micro-Manager with
 
-    ./dist/ImageJ
+    ./start-openspim.sh
 
 
 EOF

@@ -135,7 +135,9 @@ building everything by pressing <F7>, and then calling
 
     ./bin_Win32/ImageJ --build
 
-in /src/fiji/modules/micromanager/.
+in /src/fiji/modules/micromanager/. Then start Micro-Manager with
+
+    ./start-openspim.sh
 
 
 EOF

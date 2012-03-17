@@ -21,6 +21,9 @@ then
 
 EOF
 
+elif test /src/fiji/modules/micromanager/openspim.sh -nt "$BASH_ARGV"
+then
+	. /src/fiji/modules/micromanager/openspim.sh
 else
 
 	if ! test -f /bin/git.exe
@@ -150,10 +153,6 @@ EOF
 
 exec "$(dirname "$0")"/dist/ImageJ.exe --run Micro-Manager_Studio "$@"
 EOF
-	fi &&
-	if ! git --no-pager diff --no-index /etc/profile.d/openspim.sh openspim.sh
-	then
-		printf "\nWARNING: detected differences in the profile.d/ script\n\n"
 	fi
 
 fi

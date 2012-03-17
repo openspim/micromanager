@@ -286,7 +286,7 @@ CSIABStage::CSIABStage()
 : serial_(107), handle_(NULL)
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
-	CreateProperty(g_Keyword_SerialNumber, "107", MM::String, false, pAct, true);
+	CreateProperty(g_Keyword_SerialNumber, "107", MM::Integer, false, pAct, true);
 	SetErrorText(1, "Could not initialize motor (Z stage)");
 }
 
@@ -460,8 +460,8 @@ CSIABXYStage::CSIABXYStage()
 {
 	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
-	CreateProperty(g_Keyword_SerialNumberX, "105", MM::String, false, pActX, true);
-	CreateProperty(g_Keyword_SerialNumberY, "106", MM::String, false, pActY, true);
+	CreateProperty(g_Keyword_SerialNumberX, "105", MM::Integer, false, pActX, true);
+	CreateProperty(g_Keyword_SerialNumberY, "106", MM::Integer, false, pActY, true);
 	SetErrorText(1, "Could not initialize motor (X stage)");
 	SetErrorText(2, "Could not initialize motor (Y stage)");
 }

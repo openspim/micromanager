@@ -148,10 +148,12 @@ EOF
 	cd /src/fiji/modules/micromanager/ &&
 	if ! test -x start-openspim.sh
 	then
-		cat > start-openspim.sh << \EOF
+		cat > start-openspim.sh << EOF
 #!/bin/sh
 
-exec "$(dirname "$0")"/dist/ImageJ.exe --run Micro-Manager_Studio "$@"
+export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
+export PATH="$FIJI_JAVA_HOME"/bin:\$PATH
+exec "\$(dirname "\$0")"/dist/ImageJ.exe --run Micro-Manager_Studio "\$@"
 EOF
 	fi
 

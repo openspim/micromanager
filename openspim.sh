@@ -122,7 +122,7 @@ EOF
 		./bin_Win32/ImageJ.exe --build
 	  fi)) &&
 
-	cat << EOF
+	cat << EOF &&
 
 Welcome to the OpenSPIM development environment!
 ------------------------------------------------
@@ -139,5 +139,7 @@ in /src/fiji/modules/micromanager/.
 
 
 EOF
+
+	cd /src/fiji/modules/micromanager/
 
 fi

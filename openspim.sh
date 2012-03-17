@@ -143,6 +143,14 @@ in /src/fiji/modules/micromanager/. Then start Fiji with
 EOF
 
 	cd /src/fiji/modules/micromanager/ &&
+	if ! test -x start-openspim.sh
+	then
+		cat > start-openspim.sh << \EOF
+#!/bin/sh
+
+exec "$(dirname "$0")"/dist/ImageJ.exe --run Micro-Manager_Studio "$@"
+EOF
+	fi &&
 	if ! git --no-pager diff --no-index /etc/profile.d/openspim.sh openspim.sh
 	then
 		printf "\nWARNING: detected differences in the profile.d/ script\n\n"

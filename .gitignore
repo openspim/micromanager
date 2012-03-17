@@ -36,3 +36,4 @@ Makefile
 /Install_Win32/micro-manager/PSRemoteLib.dll
 /dist/
 /build/
+/start-openspim.sh

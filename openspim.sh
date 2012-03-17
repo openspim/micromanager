@@ -43,7 +43,7 @@ else
 		echo /src/fiji/ >> /.git/info/exclude
 	 fi &&
 	 cd fiji/ &&
-	 if ! test ImageJ.exe
+	 if ! test -x ImageJ.exe
 	 then
 		echo "Building Fiji" &&
 		./Build.sh

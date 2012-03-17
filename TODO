@@ -1,0 +1,23 @@
+- fix properties focus issue (change value, click Set)
+
+make our own live view
+- move by dragging
+- move z by scrolling
+- auto-contrast
+
+Issues:
+Thread problem in RunTo (two competing threads)
+Update Live View has problems
+PiUsb crashes upon exit
+Update positions once per second if not moving
+
+Drivers:
+IIDC Camera (work with Gunnsted, maybe NI driver)
+
+Hardware:
+Chamber (O ring fitting not wide enough so objectives do not fit)
+Sample holder arm needs adjusting
+
+Nice to have:
+Motor control of the mirrors, slit, iris
+Better OOM handling in MMCore

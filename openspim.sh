@@ -132,6 +132,7 @@ in /src/fiji/modules/micromanager/. Then start Micro-Manager with
 
 EOF
 
-	cd /src/fiji/modules/micromanager/
+	cd /src/fiji/modules/micromanager/ &&
+	add-desktop-shortcut.sh
 
 fi

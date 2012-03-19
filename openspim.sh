@@ -131,12 +131,16 @@ exec "\$JAVA_HOME/bin/jvisualvm" "\$@"
 EOF
 	 fi &&
 	 (cd micromanager &&
-	  if ! test -f bin_Win32/ImageJ.exe
+	  if ! test -f bin_Win32/ImageJ-win32.exe
 	  then
 		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
 		curl $FIJI_URL |
 		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xzf - &&
+		 tar --strip-components=1 -xf /src/fiji/fiji.tar &&
+		 if test ! -f ImageJ-win32.exe
+		 then
+			cp ImageJ.exe ImageJ-win32.exe
+		 fi &&
 		 ./ImageJ-win32.exe --update add-update-site \
 			OpenSPIM http://openspim.org/update/ \
 			spim@openspim.org update/)
@@ -172,7 +176,7 @@ building everything by pressing <F7>, and then calling
 
 in $SRC/micromanager/. Then start Micro-Manager with
 
-    ./start-openspim.sh
+    ./start.sh
 
 
 EOF

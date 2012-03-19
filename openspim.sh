@@ -149,16 +149,7 @@ EOF
 	  if ! test -f bin_Win32/plugins/MMJ_.jar
 	  then
 		echo "Building Micro-Manager" &&
-		"$HOME/bin/vcexpress.sh" MMCoreJ_wrap/MMCoreJ_wrap.sln \
-			//build Debug \
-			//project mmstudio
-		start mmstudio/Debug/BuildLog.htm
-	  fi &&
-	  if ! test -f bin_Win32/jars/MMAcqEngine.jar
-	  then
-		echo "Building Micro-Manager's acquisition engine" &&
-		PATH=$FIJI_JAVA_HOME/bin:$PATH \
-		./bin_Win32/ImageJ.exe --build
+		./build.sh
 	  fi)) &&
 
 	cat << EOF &&
@@ -166,13 +157,9 @@ EOF
 Welcome to the OpenSPIM development environment!
 ------------------------------------------------
 
-You can build Micromanager by launching
+You can rebuild Micromanager by launching
 
-    vcexpress.sh /src/fiji/modules/micromanager/MMCoreJ_wrap/MMCoreJ_wrap.sln
-
-building everything by pressing <F7>, and then calling
-
-    ./bin_Win32/ImageJ --build
+    ./build.sh
 
 in $SRC/micromanager/. Then start Micro-Manager with
 

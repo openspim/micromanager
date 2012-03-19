@@ -132,7 +132,11 @@ EOF
 		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
 		curl $FIJI_URL |
 		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xzf - &&
+		 tar --strip-components=1 -xf /src/fiji/fiji.tar &&
+		 if test ! -f ImageJ-win32.exe
+		 then
+			cp ImageJ.exe ImageJ-win32.exe
+		 fi &&
 		 ./ImageJ-win32.exe --update add-update-site \
 			OpenSPIM http://openspim.org/update/ \
 			spim@openspim.org update/)

@@ -12,5 +12,5 @@ done &&
 
 cd "$(dirname "$0")" &&
 vcexpress.sh MMCoreJ_wrap/MMCoreJ_wrap.sln //build Debug //project mmstudio &&
-start mmstudio/Debug/BuildLog.htm &&
-PATH=$FIJI_JAVA_HOME/bin:$PATH ./dist/ImageJ.exe --build
+PATH=$FIJI_JAVA_HOME/bin:$PATH ./dist/ImageJ.exe --build &&
+start mmstudio/Debug/BuildLog.htm &

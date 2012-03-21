@@ -296,6 +296,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "..\mmstudio\mms
 		{E62C86EF-C3BD-494E-B9EF-BD53BB01F839} = {E62C86EF-C3BD-494E-B9EF-BD53BB01F839}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dc1394", "..\DeviceAdapters\dc1394\dc1394.vcproj", "{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -1147,6 +1149,12 @@ Global
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.ActiveCfg = Release|Win32
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.Build.0 = Release|Win32
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|x64.ActiveCfg = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|Win32.Build.0 = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|x64.ActiveCfg = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|Win32.ActiveCfg = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|Win32.Build.0 = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

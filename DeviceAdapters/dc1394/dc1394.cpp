@@ -1733,6 +1733,18 @@ int Cdc1394::ClearROI()
 // Utility methods
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef WIN32
+void usleep(unsigned long nanoseconds)
+{
+	Sleep(nanoseconds / 1000l);
+}
+
+void _usleep(unsigned long nanoseconds)
+{
+	Sleep(nanoseconds / 1000l);
+}
+#endif
+
 int Cdc1394::ResizeImageBuffer()
 {
    // there are two buffers, 1: DMA buffer that the camera_ streams into (frame)

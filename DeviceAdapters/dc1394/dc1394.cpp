@@ -795,9 +795,9 @@ int Cdc1394::OnExternalTrigger(MM::PropertyBase* pProp, MM::ActionType eAct)
    {
       err_ = dc1394_external_trigger_get_power(camera_, &pwr);
       logMsg_.str("");
-      logMsg_ << "Getting external trigger state:" << triggerStatus << " err_: " << err_;
       LogMessage (logMsg_.str().c_str(), true);
       triggerStatus = (pwr==DC1394_ON) ? 1L : 0L;
+      logMsg_ << "Getting external trigger state:" << triggerStatus << " err_: " << err_;
       pProp->Set(triggerStatus);
    }
    return DEVICE_OK;

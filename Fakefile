@@ -6,7 +6,7 @@ dist/mmplugins/spim.jar <- plugins/SPIMAcquisition/**/*
 
 dist/plugins/MMJ_.jar <- mmstudio/MMJ_.jar
 
-mmstudio/MMJ_.jar[./dist/fiji-win32.exe --ant -f mmstudio/build32.xml] <- mmstudio/src/**/*
+mmstudio/MMJ_.jar[./dist/ImageJ.exe --ant -f mmstudio/build32.xml] <- mmstudio/src/**/*
 
 dist/jars/MMAcqEngine.jar <- acqEngine/MMAcqEngine.jar
 

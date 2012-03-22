@@ -615,16 +615,18 @@ void CPluginManager::GetModules(vector<string> &modules, const char* searchPath)
    hFile = _findfirst(path.c_str(), &moduleFile);
    if( hFile != -1L )
    {
-      // remove prefix
-      string strippedName = std::string(moduleFile.name).substr(strlen(LIB_NAME_PREFIX));
-      strippedName = strippedName.substr(0, strippedName.find_first_of("."));
-      modules.push_back(strippedName);
-      while( _findnext( hFile, &moduleFile ) == 0 )
-      {
-         strippedName = std::string(moduleFile.name).substr(strlen(LIB_NAME_PREFIX));
-         strippedName = strippedName.substr(0, strippedName.find_first_of("."));
-         modules.push_back(strippedName);
-      }
+	  for (;;)
+	  {
+         // remove prefix
+	     int len = strlen(moduleFile.name);
+	     if (len < 4 || strcmp(moduleFile.name + len - 4, ".pdb"))
+		 {
+            string strippedName = std::string(moduleFile.name).substr(strlen(LIB_NAME_PREFIX));
+            strippedName = strippedName.substr(0, strippedName.find_first_of("."));
+            modules.push_back(strippedName);
+		 }
+         if( _findnext( hFile, &moduleFile ) != 0 ) break;
+	  }
 
       _findclose( hFile );
    }

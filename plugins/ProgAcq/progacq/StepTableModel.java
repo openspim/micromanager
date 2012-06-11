@@ -49,7 +49,7 @@ public class StepTableModel extends AbstractTableModel implements
 
 	public String[] getColumnNames() {
 		return columnNames;
-	};
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -88,7 +88,6 @@ public class StepTableModel extends AbstractTableModel implements
 				map.put(columnNames[i], row[i]);
 			tempData.add(map);
 		}
-		;
 
 		columnNames = new String[columns.size()];
 		columns.copyInto(columnNames);
@@ -103,7 +102,6 @@ public class StepTableModel extends AbstractTableModel implements
 
 			data.add(newRow);
 		}
-		;
 
 		this.fireTableStructureChanged();
 		this.fireTableDataChanged();

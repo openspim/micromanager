@@ -30,7 +30,7 @@ import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
 
 // Big epic TODO to get my attention: You should really make this implement
-// ActionListener! Enough with the anonymous classes...
+// ActionListener!
 public class ProgrammaticAcquisitor implements MMPlugin {
 	public static String menuName = "Programmatic Acquisitor";
 	public static String tooltipDescription = "Allows the acquiring of complex series of images.";
@@ -128,9 +128,9 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 								((StepTableModel) (stepsTbl.getModel()))
 										.setColumns(SelectStringsDialog
 												.getFinalList());
-							};
+							}
 						});
-			};
+			}
 		});
 
 		JButton addRanges = new JButton("Add Ranges...");
@@ -151,8 +151,7 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 					JOptionPane.showMessageDialog(frame,
 							"You must select at least one device.");
 				}
-				;
-			};
+			}
 		});
 		JButton addDisc = new JButton("Add Discretes...");
 		JButton remStep = new JButton("Remove Steps");
@@ -228,7 +227,6 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 				row.add(val);
 				rows.add(row);
 			}
-			;
 		} else {
 			for (double val : first) {
 				Vector<Vector<Double>> subrows = getRows(subranges.subList(1,
@@ -239,11 +237,8 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 					newRow.add(0, val);
 					rows.add(newRow);
 				}
-				;
 			}
-			;
 		}
-		;
 
 		return rows;
 	}
@@ -280,9 +275,7 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 				throw new Error("Couldn't resolve type of device \""
 						+ stepsTbl.getModel().getColumnName(i) + "\"", e);
 			}
-			;
 		}
-		;
 
 		Vector<Vector<Double>> rows = getRows(values);
 
@@ -301,9 +294,7 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 			} else {
 				((StepTableModel) stepsTbl.getModel()).insertRow(row.toArray());
 			}
-			;
 		}
-		;
 	};
 
 	/**
@@ -358,12 +349,10 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 						throw new Exception("Malformed number for device \""
 								+ dev + "\", row " + step, e);
 					}
-					;
 
 					if (waitEach)
 						core.waitForDevice(dev);
 				}
-				;
 
 				if (!waitEach)
 					for (String dev : devices)
@@ -373,9 +362,7 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 
 				++step;
 			}
-			;
 		}
-		;
 	};
 
 	private static double parseX(String pair) {

@@ -183,7 +183,6 @@ public class SelectStringsDialog extends JDialog implements ActionListener {
 			values[idx + delta] = values[idx];
 			values[idx] = tmp;
 		}
-		;
 
 		dlm.clear();
 		for (Object val : values)
@@ -221,6 +220,5 @@ public class SelectStringsDialog extends JDialog implements ActionListener {
 		} else {
 			throw new RuntimeException("Who broke the action listener? :|");
 		}
-		;
 	};
 };

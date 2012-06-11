@@ -193,9 +193,7 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 			} else {
 				results.set(i, null);
 			}
-			;
 		}
-		;
 
 		this.dispose();
 	}

@@ -96,6 +96,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class MySequenceThread;
+class CDemoXYStage;
 
 class CDemoCamera : public CCameraBase<CDemoCamera>  
 {
@@ -143,6 +144,8 @@ public:
    int GetBinning() const;
    int SetBinning(int bS);
    int IsExposureSequenceable(bool& isSequenceable) const {isSequenceable = false; return DEVICE_OK;}
+
+   CDemoXYStage *find_xystage();
 
    unsigned  GetNumberOfComponents() const { return nComponents_;};
 

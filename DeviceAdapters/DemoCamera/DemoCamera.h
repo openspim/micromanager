@@ -96,6 +96,7 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class MySequenceThread;
+class CDemoXYStage;
 
 class CDemoCamera : public CCameraBase<CDemoCamera>  
 {
@@ -150,6 +151,8 @@ public:
    int ClearExposureSequence();
    int AddToExposureSequence(double exposureTime_ms);
    int SendExposureSequence() const;
+
+   CDemoXYStage *find_xystage();
 
    unsigned  GetNumberOfComponents() const { return nComponents_;};
 

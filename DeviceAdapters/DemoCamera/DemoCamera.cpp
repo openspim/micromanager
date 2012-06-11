@@ -287,6 +287,16 @@ void CDemoCamera::GetName(char* name) const
    CDeviceUtils::CopyLimitedString(name, g_CameraDeviceName);
 }
 
+inline CDemoXYStage *CDemoCamera::find_xystage()
+{
+	static CDemoXYStage *stage = NULL;
+
+	if(stage == NULL)
+		stage = static_cast<CDemoXYStage*>(GetDevice(g_XYStageDeviceName));
+
+	return stage;
+};
+
 /**
 * Intializes the hardware.
 * Required by the MM::Device API.
@@ -1753,6 +1763,7 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
    double dLinePhase = 0.0;
    const double dAmp = exp;
    const double cLinePhaseInc = 2.0 * cPi / 4.0 / img.Height();
+//   const double cLinePhaseInc = 0;
 
    static bool debugRGB = false;
 #ifdef TIFFDEMO
@@ -1761,8 +1772,6 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
    static  unsigned char* pDebug  = NULL;
    static unsigned long dbgBufferSize = 0;
    static long iseq = 1;
-
- 
 
 	// for integer images: bitDepth_ is 8, 10, 12, 16 i.e. it is depth per component
    long maxValue = (1L << bitDepth_)-1;
@@ -1774,6 +1783,17 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
 	if( saturatePixels_)
 		pixelsToSaturate = (long)(0.5 + fractionOfPixelsToDropOrSaturate_*img.Height()*img.Width());
 
+	// Try and find our stage; offer some simulation of an actual camera...
+	// What a fantastically simple world, where the stage moves in pixels.
+	CDemoXYStage *stage = find_xystage();
+	double stageX = 0;
+	double stageY = 0;
+	if(stage)
+		stage->GetPositionUm(stageX, stageY);
+	std::ostringstream os1;
+	os1 << "(" << stageX << ", " << stageY << ")";
+	LogMessage(os1.str().c_str());
+
    unsigned j, k;
    if (pixelType.compare(g_PixelType_8bit) == 0)
    {
@@ -1784,7 +1804,9 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
          for (k=0; k<img.Width(); k++)
          {
             long lIndex = img.Width()*j + k;
-            *(pBuf + lIndex) = (unsigned char) (g_IntensityFactor_ * min(255.0, (pedestal + dAmp * sin(dPhase_ + dLinePhase + (2.0 * cPi * k) / lPeriod))));
+			// I have no idea why the stageY inclusion here doesn't work. This
+			// functionality works for now; I'll just deal with it...
+            *(pBuf + lIndex) = (unsigned char) (g_IntensityFactor_ * min(255.0, (pedestal + dAmp * sin(dPhase_ + (j - stageY)*cLinePhaseInc + (2.0 * cPi * (k - stageX)) / lPeriod))));
          }
          dLinePhase += cLinePhaseInc;
       }
@@ -1968,7 +1990,8 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
       }
 	}
 
-   dPhase_ += cPi / 4.;
+   // It's hard to check position-dependant imagery when the picture is moving. Naughty naughty.
+   //dPhase_ += cPi / 4.;
 }
 
 

@@ -51,6 +51,10 @@ public class StepTableModel extends AbstractTableModel implements
 		return columnNames;
 	}
 
+	public Vector<String[]> getRows() {
+		return data;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

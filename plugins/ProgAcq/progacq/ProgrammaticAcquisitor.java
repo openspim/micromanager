@@ -1,5 +1,11 @@
 package progacq;
 
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -25,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -48,7 +55,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 	private ScriptInterface app;
 	private CMMCore core;
-	private MMStudioMainFrame gui;
+	private static MMStudioMainFrame gui;
 
 	private JFrame frame;
 	private JTable stepsTbl;
@@ -100,10 +107,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		xyDevCmbo.setModel(new DefaultComboBoxModel(core
 				.getLoadedDevicesOfType(DeviceType.XYStageDevice).toArray()));
 		xyDevCmbo.setMaximumSize(xyDevCmbo.getPreferredSize());
+		xyDevCmbo.setSelectedItem(core.getXYStageDevice());
 
 		zDevCmbo.setModel(new DefaultComboBoxModel(core.getLoadedDevicesOfType(
 				DeviceType.StageDevice).toArray()));
 		zDevCmbo.setMaximumSize(zDevCmbo.getPreferredSize());
+		zDevCmbo.setSelectedItem(core.getFocusDevice());
 
 		zDevCB.setEnabled(zDevCmbo.getItemCount() > 0);
 		zDevCB.setSelected(zDevCmbo.getItemCount() > 0);
@@ -383,67 +392,82 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					JOptionPane.showMessageDialog(frame,
 							"Please enter a count or disable timing.");
 					countBox.requestFocusInWindow();
+					return;
 				} else if (stepBox.getText().isEmpty()) {
 					JOptionPane.showMessageDialog(frame,
 							"Please enter a time step or disable timing.");
 					stepBox.requestFocusInWindow();
+					return;
 				}
-			} else {
-				try {
-					if ("SPIM".equals(tabs.getSelectedComponent().getName())) {
-						List<double[]> ranges = new Vector<double[]>(
-								Arrays.asList(rangeX.getRange(),
-										rangeY.getRange()));
+			}
 
-						List<String> devs = new Vector<String>(
-								Arrays.asList(xyDevCmbo.getSelectedItem()
-										.toString()));
+			try {
+				if ("SPIM".equals(tabs.getSelectedComponent().getName())) {
+					List<double[]> ranges = new Vector<double[]>(Arrays.asList(
+							rangeX.getRange(), rangeY.getRange()));
 
-						if (zDevCB.isSelected()) {
-							ranges.add(rangeZ.getRange());
-							devs.add(zDevCmbo.getSelectedItem().toString());
-						}
+					List<String> devs = new Vector<String>(
+							Arrays.asList(xyDevCmbo.getSelectedItem()
+									.toString()));
 
-						if (tDevCB.isSelected()) {
-							ranges.add(rangeTheta.getRange());
-							devs.add(tDevCmbo.getSelectedItem().toString());
-						}
-
-						String[] devsa = toArray(devs);
-
-						List<String[]> rows = generateRowsFromRanges(ranges,
-								devsa);
-
-						performAcquisition(
-								core,
-								devsa,
-								rows,
-								false,
-								timeCB.isSelected() ? Integer.parseInt(countBox
-										.getText()) : 1,
-								timeCB.isSelected() ? Integer.parseInt(stepBox
-										.getText()) : 0);
-					} else {
-						performAcquisition(
-								core,
-								((StepTableModel) stepsTbl.getModel())
-										.getColumnNames(),
-								((StepTableModel) stepsTbl.getModel())
-										.getRows(),
-								false,
-								timeCB.isSelected() ? Integer.parseInt(countBox
-										.getText()) : 1,
-								timeCB.isSelected() ? Double
-										.parseDouble(stepBox.getText()) : 0);
+					if (zDevCB.isSelected()) {
+						ranges.add(rangeZ.getRange());
+						devs.add(zDevCmbo.getSelectedItem().toString());
 					}
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					JOptionPane.showMessageDialog(frame,
-							"Error during acquisition: " + e1.getMessage());
+
+					if (tDevCB.isSelected()) {
+						ranges.add(rangeTheta.getRange());
+						devs.add(tDevCmbo.getSelectedItem().toString());
+					}
+
+					String[] devsa = toArray(devs);
+
+					List<String[]> rows = generateRowsFromRanges(ranges, devsa);
+
+					// performAcquisition(
+					performAndShowAcq(
+							core,
+							devsa,
+							rows,
+							false,
+							timeCB.isSelected() ? Integer.parseInt(countBox
+									.getText()) : 1,
+							timeCB.isSelected() ? Double.parseDouble(stepBox
+									.getText()) : 0);
+				} else {
+					// performAcquisition(
+					performAndShowAcq(
+							core,
+							((StepTableModel) stepsTbl.getModel())
+									.getColumnNames(),
+							((StepTableModel) stepsTbl.getModel()).getRows(),
+							false,
+							timeCB.isSelected() ? Integer.parseInt(countBox
+									.getText()) : 1,
+							timeCB.isSelected() ? Double.parseDouble(stepBox
+									.getText()) : 0);
 				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(frame,
+						"Error during acquisition: " + e1.getMessage());
 			}
 		} else {
 			throw new Error("Who broke the action listener? :(");
+		}
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource().equals(zDevCB)) {
+			rangeZ.setEnabled(zDevCB.isSelected());
+			zDevCmbo.setEnabled(zDevCB.isSelected());
+		} else if (e.getSource().equals(tDevCB)) {
+			rangeTheta.setEnabled(tDevCB.isSelected());
+			tDevCmbo.setEnabled(tDevCB.isSelected());
+		} else if (e.getSource().equals(timeCB)) {
+			countBox.setEnabled(timeCB.isSelected());
+			stepBox.setEnabled(timeCB.isSelected());
 		}
 	}
 
@@ -473,7 +497,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return rows;
 	}
 
-	private Vector<String[]> generateRowsFromRanges(List<double[]> ranges,
+	public Vector<String[]> generateRowsFromRanges(List<double[]> ranges,
 			String[] devs) {
 		// Each element of range is a triplet of min/step/max.
 		// This function determines the discrete values of each range, then
@@ -545,8 +569,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	// TODO related to this function:
 	// 1. Threading!
 	// 2. Fix application of timestep!
-	// 3. Rephrase to use ImagePlus (ala SPIMAcquisition.java)!
-	// 3.1. Add metadata and the like!
 	/**
 	 * This function runs a generalized acquisition sequence. It's a mixture of
 	 * Micro-Manager's built in sequencing support (confusing) and waiting for
@@ -580,13 +602,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
-	public static void performAcquisition(CMMCore core, String[] devices,
+	public static ImagePlus performAcquisition(CMMCore core, String[] devices,
 			List<String[]> rows, boolean waitEach, int timeseqs, double timestep)
 			throws Exception {
 
 		core.removeImageSynchroAll();
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
+
+		ImageStack img = new ImageStack((int) core.getImageWidth(),
+				(int) core.getImageHeight());
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			int step = 0;
@@ -617,18 +642,114 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					for (String dev : devices)
 						core.waitForDevice(dev);
 
-				core.snapImage();
+				// TODO: This is probably wrong.
+				synchronized (core) {
+					core.snapImage();
+				}
+
+				img.addSlice(generateMeta(seq * timestep, core, devices),
+						newImageProcessor(core));
 
 				++step;
 			}
 
 			core.sleep(timestep);
 		}
+
+		return new ImagePlus("SPIM!", img);
+	}
+
+	public static void performAndShowAcq(final CMMCore core,
+			final String[] devs, final List<String[]> rows, final boolean wait,
+			final int timeseqs, final double timestep) {
+		if (SwingUtilities.isEventDispatchThread()) {
+			new Thread() {
+				@Override
+				public void run() {
+					performAndShowAcq(core, devs, rows, wait, timeseqs,
+							timestep);
+				}
+			}.start();
+			return;
+		}
+
+		try {
+			performAcquisition(core, devs, rows, wait, timeseqs, timestep)
+					.show();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Generates an image processor object (IJ) based off the latest image taken
+	 * by the specified core.
+	 * 
+	 * @param core
+	 *            The Micro-Manager core reference to acquire via.
+	 * @return An ImageProcessor object containing the pixels in MM's image.
+	 * @throws Exception
+	 *             On unsupported image modes.
+	 */
+	private static ImageProcessor newImageProcessor(CMMCore core)
+			throws Exception {
+		if (core.getBytesPerPixel() == 1) {
+			return new ByteProcessor((int) core.getImageWidth(),
+					(int) core.getImageHeight(), (byte[]) core.getImage(),
+					null);
+		} else if (core.getBytesPerPixel() == 2) {
+			return new ShortProcessor((int) core.getImageWidth(),
+					(int) core.getImageHeight(), (short[]) core.getImage(),
+					null);
+		} else if (core.getBytesPerPixel() == 4) {
+			if (core.getNumberOfComponents() > 1) {
+				return new ColorProcessor((int) core.getImageWidth(),
+						(int) core.getImageHeight(),
+						bToI((byte[]) core.getImage()));
+			} else {
+				return new FloatProcessor((int) core.getImageWidth(),
+						(int) core.getImageHeight(),
+						bToF((byte[]) core.getImage()));
+			}
+		} else if (core.getBytesPerPixel() == 8) {
+			if (core.getNumberOfComponents() > 1) {
+				throw new Exception("No support for 64-bit color!");
+			} else {
+				throw new Exception("Bwuh");
+			}
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private static String generateMeta(Double t, CMMCore core, String[] devs) {
+		String out = "t=" + t + "?; ";
+
+		for (String dev : devs)
+			try {
+				out += dev + "=";
+				if (core.getDeviceType(dev).equals(DeviceType.XYStageDevice)) {
+					out += core.getXPosition(dev) + ", "
+							+ core.getYPosition(dev);
+				} else if (core.getDeviceType(dev).equals(
+						DeviceType.StageDevice)) {
+					out += core.getPosition(dev);
+				} else {
+					out += "<unknown>";
+				}
+				out += "; ";
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "<<<EXCEPTION: " + e.getMessage() + ">>>";
+			}
+
+		return out;
 	};
 
 	private static double parseX(String pair) {
 		return Double.parseDouble(pair.substring(0, pair.indexOf(',')));
-	};
+	}
 
 	private static double parseY(String pair) {
 		return Double.parseDouble(pair.substring(pair.indexOf(' ') + 1));
@@ -645,7 +766,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			all.remove(stepsTbl.getModel().getColumnName(i));
 
 		return all;
-	};
+	}
 
 	private Vector<String> getUsedDevs() {
 		Vector<String> res = new Vector<String>();
@@ -655,18 +776,4 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		return res;
 	}
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource().equals(zDevCB)) {
-			rangeZ.setEnabled(zDevCB.isSelected());
-			zDevCmbo.setEnabled(zDevCB.isSelected());
-		} else if (e.getSource().equals(tDevCB)) {
-			rangeTheta.setEnabled(tDevCB.isSelected());
-			tDevCmbo.setEnabled(zDevCB.isSelected());
-		} else if (e.getSource().equals(timeCB)) {
-			countBox.setEnabled(timeCB.isSelected());
-			stepBox.setEnabled(timeCB.isSelected());
-		}
-	};
 };

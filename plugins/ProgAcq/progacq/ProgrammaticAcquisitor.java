@@ -29,9 +29,12 @@ import org.micromanager.MMStudioMainFrame;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
 
-// Big epic TODO to get my attention: You should really make this implement
-// ActionListener!
-public class ProgrammaticAcquisitor implements MMPlugin {
+public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
+	private static final String BTN_START = "Start";
+	private static final String BTN_REMOVE_STEPS = "Remove Steps";
+	private static final String BTN_ADD_RANGES = "Add Ranges...";
+	private static final String BTN_SELECT_DEVICES = "Select Devices...";
+
 	public static String menuName = "Programmatic Acquisitor";
 	public static String tooltipDescription = "Allows the acquiring of complex series of images.";
 
@@ -41,6 +44,9 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 
 	private JFrame frame;
 	private JTable stepsTbl;
+	private JTextField stepBox;
+	private JTextField countBox;
+	private JCheckBox timeCB;
 
 	@Override
 	public void dispose() {
@@ -117,51 +123,17 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 		stepsBtns.setLayout(new BoxLayout(stepsBtns, BoxLayout.PAGE_AXIS));
 		stepsBtns.setAlignmentY(Component.TOP_ALIGNMENT);
 
-		JButton selDevs = new JButton("Select Devices...");
-		selDevs.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				SelectStringsDialog.doInstance(frame, getUnusedDevs(),
-						getUsedDevs(), new WindowAdapter() {
-							@Override
-							public void windowClosed(WindowEvent e) {
-								((StepTableModel) (stepsTbl.getModel()))
-										.setColumns(SelectStringsDialog
-												.getFinalList());
-							}
-						});
-			}
-		});
+		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
+		selDevs.addActionListener(this);
 
-		JButton addRanges = new JButton("Add Ranges...");
-		addRanges.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Vector<String> devs = getUsedDevs();
-				if (devs.size() > 0) {
-					AddStepsDialog.doInstance(frame, core, getUsedDevs(),
-							new WindowAdapter() {
-								@Override
-								public void windowClosed(WindowEvent e) {
-									insertRowsByRanges(AddStepsDialog
-											.getResults());
-								};
-							});
-				} else {
-					JOptionPane.showMessageDialog(frame,
-							"You must select at least one device.");
-				}
-			}
-		});
+		JButton addRanges = new JButton(BTN_ADD_RANGES);
+		addRanges.addActionListener(this);
+
+		// TODO: Add discrete row support.
 		JButton addDisc = new JButton("Add Discretes...");
-		JButton remStep = new JButton("Remove Steps");
-		remStep.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				((StepTableModel) stepsTbl.getModel()).removeRows(stepsTbl
-						.getSelectedRows());
-			}
-		});
+
+		JButton remStep = new JButton(BTN_REMOVE_STEPS);
+		remStep.addActionListener(this);
 
 		stepsBtns.add(selDevs);
 		stepsBtns.add(addRanges);
@@ -179,24 +151,25 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 		timeBox.setLayout(new BoxLayout(timeBox, BoxLayout.LINE_AXIS));
 		timeBox.setBorder(BorderFactory.createTitledBorder("Time"));
 
-		final JCheckBox timeCB = new JCheckBox("");
+		timeCB = new JCheckBox("");
+		timeCB.setSelected(true);
 
 		JLabel step = new JLabel("Interval:");
 		// TODO: Enforce a minimum? The stage needs time to move.
-		step.setToolTipText("Delay between acquisition sequences in milliseconds. Be careful not to set this too short!");
-		final JTextField stepBox = new JTextField(8);
+		step.setToolTipText("Delay between acquisition sequences in milliseconds.");
+		stepBox = new JTextField(8);
 		stepBox.setMaximumSize(stepBox.getPreferredSize());
 
 		JLabel count = new JLabel("Count:");
 		count.setToolTipText("Number of acquisition sequences to perform. Each is described by the table above.");
-		final JTextField countBox = new JTextField(8);
+		countBox = new JTextField(8);
 		countBox.setMaximumSize(countBox.getPreferredSize());
 
 		timeCB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				stepBox.setEnabled(timeCB.getModel().isSelected());
-				countBox.setEnabled(timeCB.getModel().isSelected());
+				stepBox.setEnabled(timeCB.isSelected());
+				countBox.setEnabled(timeCB.isSelected());
 			}
 		});
 
@@ -208,7 +181,8 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 
 		bottom.add(timeBox);
 
-		JButton go = new JButton("Start");
+		JButton go = new JButton(BTN_START);
+		go.addActionListener(this);
 
 		bottom.add(go);
 
@@ -216,6 +190,67 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 
 		frame.pack();
 	};
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (BTN_SELECT_DEVICES.equals(e.getActionCommand())) {
+			SelectStringsDialog.doInstance(frame, getUnusedDevs(),
+					getUsedDevs(), new WindowAdapter() {
+						@Override
+						public void windowClosed(WindowEvent e) {
+							((StepTableModel) stepsTbl.getModel())
+									.setColumns(SelectStringsDialog
+											.getFinalList());
+						}
+					});
+		} else if (BTN_ADD_RANGES.equals(e.getActionCommand())) {
+			if (getUsedDevs().size() <= 0)
+				JOptionPane.showMessageDialog(frame,
+						"You must select at least one device!");
+			else
+				AddStepsDialog.doInstance(frame, core, getUsedDevs(),
+						new WindowAdapter() {
+							@Override
+							public void windowClosed(WindowEvent e) {
+								insertRowsByRanges(AddStepsDialog.getResults());
+							}
+						});
+		} else if (BTN_REMOVE_STEPS.equals(e.getActionCommand())) {
+			((StepTableModel) stepsTbl.getModel()).removeRows(stepsTbl
+					.getSelectedRows());
+		} else if (BTN_START.equals(e.getActionCommand())) {
+			if (timeCB.isSelected()) {
+				if (countBox.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(frame,
+							"Please enter a count or disable timing.");
+					countBox.requestFocusInWindow();
+				} else if (stepBox.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(frame,
+							"Please enter a time step or disable timing.");
+					stepBox.requestFocusInWindow();
+				}
+			} else {
+				try {
+					performAcquisition(
+							core,
+							((StepTableModel) stepsTbl.getModel())
+									.getColumnNames(),
+							((StepTableModel) stepsTbl.getModel()).getRows(),
+							false,
+							timeCB.isSelected() ? Integer.parseInt(countBox
+									.getText()) : 1,
+							timeCB.isSelected() ? Double.parseDouble(stepBox
+									.getText()) : 0);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(frame,
+							"Error during acquisition: " + e1.getMessage());
+				}
+			}
+		} else {
+			throw new Error("Who broke the action listener? :(");
+		}
+	}
 
 	private Vector<Vector<Double>> getRows(List<double[]> subranges) {
 		double[] first = (double[]) subranges.get(0);
@@ -250,7 +285,7 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 		Vector<double[]> values = new Vector<double[]>(ranges.size());
 
 		for (double[] triplet : ranges) {
-			double[] discretes = new double[(int) ((triplet[2] - triplet[0]) / triplet[1])];
+			double[] discretes = new double[(int) ((triplet[2] - triplet[0]) / triplet[1]) + 1];
 
 			for (int i = 0; i < discretes.length; ++i)
 				discretes[i] = triplet[0] + triplet[1] * i;
@@ -297,44 +332,58 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 		}
 	};
 
+	// TODO related to this function:
+	// 1. Threading!
+	// 2. Fix application of timestep!
+	// 3. Rephrase to use ImagePlus (ala SPIMAcquisition.java)!
+	// 3.1. Add metadata and the like!
 	/**
 	 * This function runs a generalized acquisition sequence. It's a mixture of
 	 * Micro-Manager's built in sequencing support (confusing) and waiting for
 	 * motors.
 	 * 
 	 * @param core
-	 *            The Micro-Manager core reference to work with.
-	 * @param sequences
+	 *            The Micro-Manager core reference to work with. This class has
+	 *            a reference, but it's possible (in the future) that this class
+	 *            may be referenced without being instantiated.
+	 * @param devices
+	 *            A list of devices to work with. Should be as long as each row
+	 *            in 'steps'. Should only contain stage and X/Y stage device
+	 *            labels (nothing else is supported just yet!).
+	 * @param steps
 	 *            A list of states for all devices. Each 'row' should have the
-	 *            same length, and the first 'row' should be a list of device
-	 *            names (columns).
+	 *            same length, the length of the above. For X/Y stages, elements
+	 *            should be ordered pairs. For stage devices, elements should be
+	 *            doubles as strings. No other devices are yet supported (state
+	 *            based devices will hopefully be added soon!).
 	 * @param waitEach
 	 *            If true, waits for each device in turn rather than moving them
-	 *            simultaneously.
+	 *            simultaneously; if false, it still waits at the end of issuing
+	 *            all movements for each device to be finished before acquiring.
 	 * @param steps
 	 *            Number of acquisition sequences to run.
 	 * @param timestep
 	 *            Delay in milliseconds between the beginning of each
-	 *            acquisition. Arbitrary if only a single acquisition.
+	 *            acquisition. Arbitrary if only a single acquisition. Also
+	 *            lying right now; for the moment, it's a delay.
 	 * @throws Exception
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
-	public static void performAcquisition(CMMCore core,
-			Vector<Vector<String>> sequences, boolean waitEach, int steps,
+	public static void performAcquisition(CMMCore core, String[] devices,
+			Vector<String[]> steps, boolean waitEach, int timesteps,
 			double timestep) throws Exception {
-		Vector<String> devices = sequences.remove(0);
 
 		core.removeImageSynchroAll();
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
 
-		for (int seq = 0; seq < steps; ++seq) {
+		for (int seq = 0; seq < timesteps; ++seq) {
 			int step = 0;
-			for (Vector<String> positions : sequences) {
-				for (int i = 0; i < devices.size(); ++i) {
-					String dev = devices.get(i);
-					String pos = positions.get(i);
+			for (String[] positions : steps) {
+				for (int i = 0; i < devices.length; ++i) {
+					String dev = devices[i];
+					String pos = positions[i];
 					try {
 						if (core.getDeviceType(dev).equals(
 								DeviceType.StageDevice))
@@ -362,11 +411,13 @@ public class ProgrammaticAcquisitor implements MMPlugin {
 
 				++step;
 			}
+
+			core.sleep(timestep);
 		}
 	};
 
 	private static double parseX(String pair) {
-		return Double.parseDouble(pair.substring(0, pair.indexOf(' ')));
+		return Double.parseDouble(pair.substring(0, pair.indexOf(',')));
 	};
 
 	private static double parseY(String pair) {

@@ -164,7 +164,10 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		}
 	}
 
+	@Override
 	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+
 		min.setEnabled(b);
 		step.setEnabled(b);
 		max.setEnabled(b);

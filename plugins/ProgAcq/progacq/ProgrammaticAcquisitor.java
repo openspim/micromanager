@@ -1,22 +1,28 @@
 package progacq;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -29,7 +35,9 @@ import org.micromanager.MMStudioMainFrame;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
 
-public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
+public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
+		ChangeListener {
+	private static final String BTN_ADD_DISCRETES = "Add Discretes...";
 	private static final String BTN_START = "Start";
 	private static final String BTN_REMOVE_STEPS = "Remove Steps";
 	private static final String BTN_ADD_RANGES = "Add Ranges...";
@@ -47,6 +55,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 	private JTextField stepBox;
 	private JTextField countBox;
 	private JCheckBox timeCB;
+	private JCheckBox tDevCB;
+	private JCheckBox zDevCB;
+	private RangeSlider rangeX;
+	private RangeSlider rangeY;
+	private RangeSlider rangeZ;
+	private RangeSlider rangeTheta;
+	private JComboBox tDevCmbo;
+	private JComboBox zDevCmbo;
+	private JComboBox xyDevCmbo;
+	private JTabbedPane tabs;
 
 	@Override
 	public void dispose() {
@@ -77,6 +95,26 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		// TODO:
 		// Our table is broken! We'll have to inform the user and drop any
 		// columns of the table that aren't valid any more.
+
+		// Part 1: The Sliders tab.
+		xyDevCmbo.setModel(new DefaultComboBoxModel(core
+				.getLoadedDevicesOfType(DeviceType.XYStageDevice).toArray()));
+		xyDevCmbo.setMaximumSize(xyDevCmbo.getPreferredSize());
+
+		zDevCmbo.setModel(new DefaultComboBoxModel(core.getLoadedDevicesOfType(
+				DeviceType.StageDevice).toArray()));
+		zDevCmbo.setMaximumSize(zDevCmbo.getPreferredSize());
+
+		zDevCB.setEnabled(zDevCmbo.getItemCount() > 0);
+		zDevCB.setSelected(zDevCmbo.getItemCount() > 0);
+
+		tDevCmbo.setModel(new DefaultComboBoxModel(core.getLoadedDevicesOfType(
+				DeviceType.StageDevice).toArray()));
+		tDevCmbo.setMaximumSize(tDevCmbo.getPreferredSize());
+		tDevCmbo.setSelectedIndex(tDevCmbo.getItemCount() - 1);
+
+		tDevCB.setEnabled(tDevCmbo.getItemCount() > 1);
+		tDevCB.setSelected(tDevCmbo.getItemCount() > 1);
 	};
 
 	@Override
@@ -107,9 +145,119 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		frame.getContentPane().setLayout(
 				new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
 
-		JPanel top = new JPanel();
-		top.setLayout(new BoxLayout(top, BoxLayout.LINE_AXIS));
-		top.setBorder(BorderFactory.createTitledBorder("Steps"));
+		tabs = new JTabbedPane();
+
+		JPanel sliders = new JPanel();
+		sliders.setName("SPIM");
+		sliders.setAlignmentX(Component.LEFT_ALIGNMENT);
+		sliders.setLayout(new BoxLayout(sliders, BoxLayout.PAGE_AXIS));
+
+		tabs.add("SPIM", sliders);
+
+		JPanel xy = new JPanel();
+		xy.setLayout(new BoxLayout(xy, BoxLayout.PAGE_AXIS));
+		xy.setBorder(BorderFactory.createTitledBorder("X/Y Stage"));
+
+		JPanel xyDev = new JPanel();
+		xyDev.setLayout(new BoxLayout(xyDev, BoxLayout.LINE_AXIS));
+
+		JLabel xyDevLbl = new JLabel("X/Y Stage Device:");
+		xyDevCmbo = new JComboBox(core.getLoadedDevicesOfType(
+				DeviceType.XYStageDevice).toArray());
+		xyDevCmbo.setMaximumSize(xyDevCmbo.getPreferredSize());
+
+		xyDev.add(xyDevLbl);
+		xyDev.add(xyDevCmbo);
+
+		xy.add(xyDev);
+
+		// These names keep getting more and more convoluted.
+		JPanel xyXY = new JPanel();
+		xyXY.setLayout(new BoxLayout(xyXY, BoxLayout.LINE_AXIS));
+
+		JPanel xy_x = new JPanel();
+		xy_x.setBorder(BorderFactory.createTitledBorder("Stage X"));
+
+		rangeX = new RangeSlider(-100D, 100D);
+
+		xy_x.add(rangeX);
+
+		xyXY.add(xy_x);
+
+		JPanel xy_y = new JPanel();
+		xy_y.setBorder(BorderFactory.createTitledBorder("Stage Y"));
+
+		rangeY = new RangeSlider(-100D, 100D);
+
+		xy_y.add(rangeY);
+
+		xyXY.add(xy_y);
+
+		xy.add(xyXY);
+
+		sliders.add(xy);
+
+		JPanel z = new JPanel();
+		z.setBorder(BorderFactory.createTitledBorder("Stage Z"));
+		z.setLayout(new BoxLayout(z, BoxLayout.PAGE_AXIS));
+
+		JPanel zDev = new JPanel();
+		zDev.setLayout(new BoxLayout(zDev, BoxLayout.LINE_AXIS));
+
+		zDevCB = new JCheckBox("");
+		zDevCB.addChangeListener(this);
+		JLabel zDevLbl = new JLabel("Z Stage Device:");
+		zDevCmbo = new JComboBox(core.getLoadedDevicesOfType(
+				DeviceType.StageDevice).toArray());
+		zDevCmbo.setMaximumSize(zDevCmbo.getPreferredSize());
+
+		zDev.add(zDevCB);
+		zDev.add(zDevLbl);
+		zDev.add(zDevCmbo);
+
+		z.add(zDev);
+
+		z.add(Box.createRigidArea(new Dimension(10, 4)));
+
+		rangeZ = new RangeSlider(-100D, 100D);
+
+		z.add(rangeZ);
+
+		sliders.add(z);
+
+		JPanel t = new JPanel();
+		t.setBorder(BorderFactory.createTitledBorder("Theta"));
+		t.setLayout(new BoxLayout(t, BoxLayout.PAGE_AXIS));
+
+		JPanel tDev = new JPanel();
+		tDev.setLayout(new BoxLayout(tDev, BoxLayout.LINE_AXIS));
+
+		tDevCB = new JCheckBox("");
+		tDevCB.addChangeListener(this);
+		JLabel tDevLbl = new JLabel("Theta Device:");
+		tDevLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+		tDevCmbo = new JComboBox(core.getLoadedDevicesOfType(
+				DeviceType.StageDevice).toArray());
+		tDevCmbo.setMaximumSize(tDevCmbo.getPreferredSize());
+		tDevCmbo.setSelectedIndex(tDevCmbo.getItemCount() - 1);
+		tDevCmbo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+		tDev.add(tDevCB);
+		tDev.add(tDevLbl);
+		tDev.add(tDevCmbo);
+
+		t.add(tDev);
+
+		t.add(Box.createRigidArea(new Dimension(10, 4)));
+
+		rangeTheta = new RangeSlider(-180D, 180D);
+
+		t.add(rangeTheta);
+
+		sliders.add(t);
+
+		JPanel steps = new JPanel();
+		steps.setLayout(new BoxLayout(steps, BoxLayout.LINE_AXIS));
 
 		stepsTbl = new JTable();
 		stepsTbl.setFillsViewportHeight(true);
@@ -117,20 +265,20 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		stepsTbl.setModel(new StepTableModel());
 
 		JScrollPane tblScroller = new JScrollPane(stepsTbl);
-		top.add(tblScroller);
+		steps.add(tblScroller);
 
 		JPanel stepsBtns = new JPanel();
 		stepsBtns.setLayout(new BoxLayout(stepsBtns, BoxLayout.PAGE_AXIS));
-		stepsBtns.setAlignmentY(Component.TOP_ALIGNMENT);
 
 		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
 		selDevs.addActionListener(this);
+		selDevs.setAlignmentY(Component.TOP_ALIGNMENT);
 
 		JButton addRanges = new JButton(BTN_ADD_RANGES);
 		addRanges.addActionListener(this);
 
 		// TODO: Add discrete row support.
-		JButton addDisc = new JButton("Add Discretes...");
+		JButton addDisc = new JButton(BTN_ADD_DISCRETES);
 
 		JButton remStep = new JButton(BTN_REMOVE_STEPS);
 		remStep.addActionListener(this);
@@ -140,9 +288,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		stepsBtns.add(addDisc);
 		stepsBtns.add(remStep);
 
-		top.add(stepsBtns);
+		steps.add(stepsBtns);
 
-		frame.getContentPane().add(top);
+		tabs.add("Advanced", steps);
+
+		frame.getContentPane().add(tabs);
 
 		JPanel bottom = new JPanel();
 		bottom.setLayout(new BoxLayout(bottom, BoxLayout.LINE_AXIS));
@@ -165,13 +315,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		countBox = new JTextField(8);
 		countBox.setMaximumSize(countBox.getPreferredSize());
 
-		timeCB.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				stepBox.setEnabled(timeCB.isSelected());
-				countBox.setEnabled(timeCB.isSelected());
-			}
-		});
+		timeCB.addChangeListener(this);
 
 		timeBox.add(timeCB);
 		timeBox.add(step);
@@ -189,6 +333,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		frame.getContentPane().add(bottom);
 
 		frame.pack();
+
+		// Simulate a configuration change; this finishes off a few little UI
+		// bits that couldn't be taken care of above (component creation order).
+		configurationChanged();
 	};
 
 	@Override
@@ -212,9 +360,20 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 						new WindowAdapter() {
 							@Override
 							public void windowClosed(WindowEvent e) {
-								insertRowsByRanges(AddStepsDialog.getResults());
+								StepTableModel mdl = (StepTableModel) stepsTbl
+										.getModel();
+
+								Vector<String[]> data = generateRowsFromRanges(
+										AddStepsDialog.getResults(),
+										mdl.getColumnNames());
+
+								for (String[] row : data)
+									mdl.insertRow(row);
 							}
 						});
+		} else if (BTN_ADD_DISCRETES.equals(e.getActionCommand())) {
+			JOptionPane.showMessageDialog(frame,
+					"Not supported yet! (Add a single-elements range?)");
 		} else if (BTN_REMOVE_STEPS.equals(e.getActionCommand())) {
 			((StepTableModel) stepsTbl.getModel()).removeRows(stepsTbl
 					.getSelectedRows());
@@ -231,16 +390,52 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 				}
 			} else {
 				try {
-					performAcquisition(
-							core,
-							((StepTableModel) stepsTbl.getModel())
-									.getColumnNames(),
-							((StepTableModel) stepsTbl.getModel()).getRows(),
-							false,
-							timeCB.isSelected() ? Integer.parseInt(countBox
-									.getText()) : 1,
-							timeCB.isSelected() ? Double.parseDouble(stepBox
-									.getText()) : 0);
+					if ("SPIM".equals(tabs.getSelectedComponent().getName())) {
+						List<double[]> ranges = new Vector<double[]>(
+								Arrays.asList(rangeX.getRange(),
+										rangeY.getRange()));
+
+						List<String> devs = new Vector<String>(
+								Arrays.asList(xyDevCmbo.getSelectedItem()
+										.toString()));
+
+						if (zDevCB.isSelected()) {
+							ranges.add(rangeZ.getRange());
+							devs.add(zDevCmbo.getSelectedItem().toString());
+						}
+
+						if (tDevCB.isSelected()) {
+							ranges.add(rangeTheta.getRange());
+							devs.add(tDevCmbo.getSelectedItem().toString());
+						}
+
+						String[] devsa = toArray(devs);
+
+						List<String[]> rows = generateRowsFromRanges(ranges,
+								devsa);
+
+						performAcquisition(
+								core,
+								devsa,
+								rows,
+								false,
+								timeCB.isSelected() ? Integer.parseInt(countBox
+										.getText()) : 1,
+								timeCB.isSelected() ? Integer.parseInt(stepBox
+										.getText()) : 0);
+					} else {
+						performAcquisition(
+								core,
+								((StepTableModel) stepsTbl.getModel())
+										.getColumnNames(),
+								((StepTableModel) stepsTbl.getModel())
+										.getRows(),
+								false,
+								timeCB.isSelected() ? Integer.parseInt(countBox
+										.getText()) : 1,
+								timeCB.isSelected() ? Double
+										.parseDouble(stepBox.getText()) : 0);
+					}
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(frame,
@@ -278,7 +473,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 		return rows;
 	}
 
-	private void insertRowsByRanges(Vector<double[]> ranges) {
+	private Vector<String[]> generateRowsFromRanges(List<double[]> ranges,
+			String[] devs) {
 		// Each element of range is a triplet of min/step/max.
 		// This function determines the discrete values of each range, then
 		// works out all possible values and adds them as rows to the table.
@@ -293,28 +489,32 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 			values.add(discretes);
 		}
 
+		return condenseXY(getRows(values), devs);
+	}
+
+	private Vector<String[]> condenseXY(List<? extends List<Double>> rows,
+			String[] devs) {
 		// Build a quick list of indices of X/Y stage devices.
 		// Below, we condense the X and Y coordinates into an ordered pair so
 		// they can be inserted into the table. This list is used to determine
 		// which sets of indices need to be squished into a single value.
-		Vector<Integer> xyStages = new Vector<Integer>(stepsTbl.getModel()
-				.getColumnCount());
-		for (int i = 0; i < stepsTbl.getModel().getColumnCount(); ++i) {
+		Vector<Integer> xyStages = new Vector<Integer>(devs.length);
+		for (int i = 0; i < devs.length; ++i) {
 			try {
-				if (core.getDeviceType(stepsTbl.getModel().getColumnName(i))
+				if (core.getDeviceType(devs[i])
 						.equals(DeviceType.XYStageDevice))
 					xyStages.add(i);
 			} catch (Exception e) {
 				// I can't think of a more graceless way to resolve this issue.
 				// But then, nor can I think of a more graceful one.
-				throw new Error("Couldn't resolve type of device \""
-						+ stepsTbl.getModel().getColumnName(i) + "\"", e);
+				throw new Error("Couldn't resolve type of device \"" + devs[i]
+						+ "\"", e);
 			}
 		}
 
-		Vector<Vector<Double>> rows = getRows(values);
+		Vector<String[]> finalRows = new Vector<String[]>();
 
-		for (Vector<Double> row : rows) {
+		for (List<Double> row : rows) {
 			if (xyStages.size() > 0) {
 				Vector<String> finalRow = new Vector<String>();
 
@@ -324,13 +524,23 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 					else
 						finalRow.add("" + row.get(i));
 
-				((StepTableModel) stepsTbl.getModel()).insertRow(finalRow
-						.toArray());
+				finalRows.add(toArray(finalRow));
 			} else {
-				((StepTableModel) stepsTbl.getModel()).insertRow(row.toArray());
+				finalRows.add(toArray(row));
 			}
 		}
-	};
+
+		return finalRows;
+	}
+
+	private String[] toArray(List<? extends Object> anything) {
+		String[] ret = new String[anything.size()];
+
+		for (int i = 0; i < anything.size(); ++i)
+			ret[i] = anything.get(i).toString();
+
+		return ret;
+	}
 
 	// TODO related to this function:
 	// 1. Threading!
@@ -350,7 +560,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 	 *            A list of devices to work with. Should be as long as each row
 	 *            in 'steps'. Should only contain stage and X/Y stage device
 	 *            labels (nothing else is supported just yet!).
-	 * @param steps
+	 * @param rows
 	 *            A list of states for all devices. Each 'row' should have the
 	 *            same length, the length of the above. For X/Y stages, elements
 	 *            should be ordered pairs. For stage devices, elements should be
@@ -360,7 +570,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 	 *            If true, waits for each device in turn rather than moving them
 	 *            simultaneously; if false, it still waits at the end of issuing
 	 *            all movements for each device to be finished before acquiring.
-	 * @param steps
+	 * @param timeseqs
 	 *            Number of acquisition sequences to run.
 	 * @param timestep
 	 *            Delay in milliseconds between the beginning of each
@@ -371,16 +581,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
 	public static void performAcquisition(CMMCore core, String[] devices,
-			Vector<String[]> steps, boolean waitEach, int timesteps,
-			double timestep) throws Exception {
+			List<String[]> rows, boolean waitEach, int timeseqs, double timestep)
+			throws Exception {
 
 		core.removeImageSynchroAll();
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
 
-		for (int seq = 0; seq < timesteps; ++seq) {
+		for (int seq = 0; seq < timeseqs; ++seq) {
 			int step = 0;
-			for (String[] positions : steps) {
+			for (String[] positions : rows) {
 				for (int i = 0; i < devices.length; ++i) {
 					String dev = devices[i];
 					String pos = positions[i];
@@ -444,5 +654,19 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener {
 			res.add(stepsTbl.getModel().getColumnName(i));
 
 		return res;
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource().equals(zDevCB)) {
+			rangeZ.setEnabled(zDevCB.isSelected());
+			zDevCmbo.setEnabled(zDevCB.isSelected());
+		} else if (e.getSource().equals(tDevCB)) {
+			rangeTheta.setEnabled(tDevCB.isSelected());
+			tDevCmbo.setEnabled(zDevCB.isSelected());
+		} else if (e.getSource().equals(timeCB)) {
+			countBox.setEnabled(timeCB.isSelected());
+			stepBox.setEnabled(timeCB.isSelected());
+		}
 	};
 };

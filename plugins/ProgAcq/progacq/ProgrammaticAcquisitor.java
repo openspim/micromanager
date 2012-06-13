@@ -3,6 +3,8 @@ package progacq;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
@@ -31,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -99,9 +100,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 	@Override
 	public void configurationChanged() {
-		// TODO:
-		// Our table is broken! We'll have to inform the user and drop any
-		// columns of the table that aren't valid any more.
+		// Note: This doesn't seem to actually be called on config changes...
 
 		// Part 1: The Sliders tab.
 		xyDevCmbo.setModel(new DefaultComboBoxModel(core
@@ -124,6 +123,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		tDevCB.setEnabled(tDevCmbo.getItemCount() > 1);
 		tDevCB.setSelected(tDevCmbo.getItemCount() > 1);
+
+		// Part 2: Steps tab
+
 	};
 
 	@Override
@@ -311,24 +313,27 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		timeBox.setBorder(BorderFactory.createTitledBorder("Time"));
 
 		timeCB = new JCheckBox("");
-		timeCB.setSelected(true);
+		timeCB.setSelected(false);
 
 		JLabel step = new JLabel("Interval:");
 		// TODO: Enforce a minimum? The stage needs time to move.
 		step.setToolTipText("Delay between acquisition sequences in milliseconds.");
 		stepBox = new JTextField(8);
 		stepBox.setMaximumSize(stepBox.getPreferredSize());
+		stepBox.setEnabled(false);
 
 		JLabel count = new JLabel("Count:");
 		count.setToolTipText("Number of acquisition sequences to perform. Each is described by the table above.");
 		countBox = new JTextField(8);
 		countBox.setMaximumSize(countBox.getPreferredSize());
+		countBox.setEnabled(false);
 
 		timeCB.addChangeListener(this);
 
 		timeBox.add(timeCB);
 		timeBox.add(step);
 		timeBox.add(stepBox);
+		timeBox.add(Box.createRigidArea(new Dimension(4, 10)));
 		timeBox.add(count);
 		timeBox.add(countBox);
 
@@ -630,8 +635,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 							throw new Exception("Unknown device type for \""
 									+ dev + "\"");
 					} catch (NumberFormatException e) {
-						throw new Exception("Malformed number for device \""
-								+ dev + "\", row " + step, e);
+						throw new Exception("Malformed number \"" + pos
+								+ "\" for device \"" + dev + "\", row " + step,
+								e);
 					}
 
 					if (waitEach)
@@ -644,11 +650,17 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 				// TODO: This is probably wrong.
 				synchronized (core) {
+					core.waitForImageSynchro();
 					core.snapImage();
 				}
 
-				img.addSlice(generateMeta(seq * timestep, core, devices),
-						newImageProcessor(core));
+				String meta = generateMeta(seq * timestep, core, devices);
+				ImageProcessor ip = newImageProcessor(core);
+
+				img.addSlice(meta, ip);
+
+				if (Thread.interrupted())
+					return new ImagePlus("ProgAcqd", img);
 
 				++step;
 			}
@@ -656,46 +668,73 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			core.sleep(timestep);
 		}
 
-		return new ImagePlus("SPIM!", img);
+		return new ImagePlus("ProgAcqd", img);
 	}
 
-	public static void performAndShowAcq(final CMMCore core,
+	public static Thread performAndShowAcq(final CMMCore core,
 			final String[] devs, final List<String[]> rows, final boolean wait,
 			final int timeseqs, final double timestep) {
-		if (SwingUtilities.isEventDispatchThread()) {
-			new Thread() {
-				@Override
-				public void run() {
-					performAndShowAcq(core, devs, rows, wait, timeseqs,
-							timestep);
+		Thread ret = new Thread() {
+			@Override
+			public void run() {
+				try {
+					performAcquisition(core, devs, rows, wait, timeseqs,
+							timestep).show();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null,
+							"Error acquiring: " + e.getMessage());
+					throw new Error("Error acquiring!", e);
 				}
-			}.start();
-			return;
-		}
+			}
+		};
+		ret.start();
 
-		try {
-			performAcquisition(core, devs, rows, wait, timeseqs, timestep)
-					.show();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return ret;
 	}
 
-	private static ImageProcessor newImageProcessor(CMMCore core) {
-		try {
-			if (core.getBytesPerPixel() == 1) {
-				return new ByteProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(), (byte[]) core.getImage());
-			} else if (core.getBytesPerPixel() == 2) {
-				return new ShortProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(), (short[]) core.getImage(),
-						null);
+	private static int[] bToI(byte[] b) throws Exception {
+		if (b.length % 4 != 0)
+			throw new Exception("4-byte length mismatch!");
+
+		int[] r = new int[b.length / 4];
+
+		for (int bi = 0; bi < r.length; ++bi)
+			r[bi] = (b[bi * 4 + 0] << 24) | (b[bi * 4 + 1] << 16)
+					| (b[bi * 4 + 2] << 8) | (b[bi * 4 + 3]);
+
+		return r;
+	}
+
+	private static ImageProcessor newImageProcessor(CMMCore core)
+			throws Exception {
+		if (core.getBytesPerPixel() == 1) {
+			return new ByteProcessor((int) core.getImageWidth(),
+					(int) core.getImageHeight(), (byte[]) core.getImage());
+		} else if (core.getBytesPerPixel() == 2) {
+			return new ShortProcessor((int) core.getImageWidth(),
+					(int) core.getImageHeight(), (short[]) core.getImage(),
+					null);
+		} else if (core.getBytesPerPixel() == 4) {
+			if (core.getNumberOfComponents() > 1) {
+				return new ColorProcessor((int) core.getImageWidth(),
+						(int) core.getImageHeight(),
+						bToI((byte[]) core.getImage()));
 			} else {
-				throw new Exception("Bwuh");
+				return new FloatProcessor((int) core.getImageWidth(),
+						(int) core.getImageHeight(), (float[]) core.getImage());
 			}
-		} catch (Exception e) {
-			return null;
+		} else if (core.getBytesPerPixel() == 8) {
+			if (core.getNumberOfComponents() > 1) {
+				// TODO: Fails silently!
+				throw new Exception("No support for 64-bit color!");
+			} else {
+				return new FloatProcessor((int) core.getImageWidth(),
+						(int) core.getImageHeight(), (double[]) core.getImage());
+			}
+		} else {
+			// TODO: Expand support to include all modes... (also fails quietly)
+			throw new Exception("Unsupported image depth ("
+					+ core.getBytesPerPixel() + " bytes/pixel)");
 		}
 	}
 

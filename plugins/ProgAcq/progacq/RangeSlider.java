@@ -152,15 +152,19 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			sliderMin.setMaximum(sliderMax.getValue());
 			max.setText("" + sliderMax.getValue());
 		} else if (e.getSource().equals(sliderStep)) {
-			sliderMin.setMajorTickSpacing(sliderStep.getValue() * 2);
-			sliderMax.setMajorTickSpacing(sliderStep.getValue() * 2);
-			sliderMin.setMinorTickSpacing(sliderStep.getValue());
-			sliderMax.setMinorTickSpacing(sliderStep.getValue());
-			sliderMin.setLabelTable(sliderMin.createStandardLabels(sliderStep
-					.getValue() * 2));
-			sliderMax.setLabelTable(sliderMax.createStandardLabels(sliderStep
-					.getValue() * 2));
-			step.setText("" + sliderStep.getValue());
+			int val = sliderStep.getValue();
+			step.setText("" + val);
+
+			// Need to clamp this for label generation.
+			// Note that the value of the text box should never be clamped.
+			if (val <= 0)
+				val = 1;
+			sliderMin.setMajorTickSpacing(val * 2);
+			sliderMax.setMajorTickSpacing(val * 2);
+			sliderMin.setMinorTickSpacing(val);
+			sliderMax.setMinorTickSpacing(val);
+			sliderMin.setLabelTable(sliderMin.createStandardLabels(val * 2));
+			sliderMax.setLabelTable(sliderMax.createStandardLabels(val * 2));
 		}
 	}
 
@@ -202,6 +206,9 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			sliderMax.setValue(value);
 		} else if (e.getComponent().equals(step)) {
 			sliderStep.setValue(value);
+			if (value <= 0)
+				value = 1;
+
 			sliderMin.setMajorTickSpacing(value * 2);
 			sliderMax.setMajorTickSpacing(value * 2);
 			sliderMin.setMinorTickSpacing(value);

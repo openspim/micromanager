@@ -287,16 +287,6 @@ void CDemoCamera::GetName(char* name) const
    CDeviceUtils::CopyLimitedString(name, g_CameraDeviceName);
 }
 
-inline CDemoXYStage *CDemoCamera::find_xystage()
-{
-	static CDemoXYStage *stage = NULL;
-
-	if(stage == NULL)
-		stage = static_cast<CDemoXYStage*>(GetDevice(g_XYStageDeviceName));
-
-	return stage;
-};
-
 /**
 * Intializes the hardware.
 * Required by the MM::Device API.
@@ -483,6 +473,19 @@ int CDemoCamera::Initialize()
    AddAllowedValue(propName.c_str(), "Yes");
    AddAllowedValue(propName.c_str(), "No");
 
+   CreateProperty("3D-Enable", "0", MM::Integer, false);
+   AddAllowedValue("3D-Enable", "0");
+   AddAllowedValue("3D-Enable", "1");
+
+   CreateProperty("3D-NearZ", "1", MM::Float, false);
+   SetPropertyLimits("3D-NearZ", 1, 5000);
+
+   CreateProperty("3D-FarZ", "1000", MM::Float, false);
+   SetPropertyLimits("3D-FarZ", 10, 10000);
+
+   CreateProperty("3D-FOV", "90", MM::Float, false);
+   SetPropertyLimits("3D-FOV", 10, 170);
+
    // synchronize all properties
    // --------------------------
    nRet = UpdateStatus();
@@ -555,6 +558,14 @@ int CDemoCamera::SnapImage()
    }
 
    GenerateSyntheticImage(img_, exp);
+   double expUs = exp * 1000.0;
+
+   long do3d = 0;
+   GetProperty("3D-Enable", do3d);
+   if(do3d)
+       GenerateSyntheticImage3D(img_);
+   else
+       GenerateSyntheticImage(img_, exp);
 
    MM::MMTime s0(0,0);
    if( s0 < startTime )
@@ -1740,7 +1751,230 @@ void CDemoCamera::GenerateEmptyImage(ImgBuffer& img)
    memset(pBuf, 0, img.Height()*img.Width()*img.Depth());
 }
 
+#define NUM_DOTS 8
+#define DOT_RADIUS 256
+const static float dots[NUM_DOTS][4] = {
+	{ -5.0f, -5.0f, -5.0f, 1 },
+	{ -5.0f, -5.0f, 5.0f, 1 },
+	{ -5.0f, 5.0f, -5.0f, 1 },
+	{ -5.0f, 5.0f, 5.0f, 1 },
+	{ 5.0f, -5.0f, -5.0f, 1 },
+	{ 5.0f, -5.0f, 5.0f, 1 },
+	{ 5.0f, 5.0f, -5.0f, 1 },
+	{ 5.0f, 5.0f, 5.0f, 1 }
+};
 
+void CDemoCamera::GetStagePositions(double* x, double* y, double* z, double* t)
+{
+	CDemoXYStage *xy = static_cast<CDemoXYStage*>(GetDevice(g_XYStageDeviceName));
+	CDemoStage *zs = static_cast<CDemoStage*>(GetDevice(g_StageDeviceName));
+	CDemoStage *ts = static_cast<CDemoStage*>(GetDevice("DStage2"));
+
+	if(xy != NULL)
+		xy->GetPositionUm(*x, *y);
+	else
+		LogMessage("Couldn't find X/Y stage.");
+
+	if(zs != NULL)
+		zs->GetPositionUm(*z);
+	else
+		LogMessage("Couldn't find Z stage.");
+
+	if(ts != NULL)
+		ts->GetPositionUm(*t);
+	else
+		LogMessage("Couldn't find theta stage.");
+};
+
+const static unsigned char numbers[NUM_DOTS][4][3] = {
+	{
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0x00},
+	},
+	{
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0xFF},
+	},
+	{
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0xFF},
+	},
+	{
+		{0xFF, 0x00, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF},
+	},
+	{
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0xFF},
+	},
+	{
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0x00, 0x00},
+		{0xFF, 0x00, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+	},
+	{
+		{0xFF, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF},
+	},
+	{
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+	},
+};
+
+const static float colors[NUM_DOTS][3] = {
+	{ 1.0f, 0.0f, 0.0f },
+	{ 1.0f, 1.0f, 0.0f },
+	{ 0.0f, 1.0f, 0.0f },
+	{ 0.0f, 1.0f, 1.0f },
+	{ 0.0f, 0.0f, 1.0f },
+	{ 1.0f, 0.0f, 1.0f },
+	{ 0.5f, 0.5f, 0.5f },
+	{ 1.0f, 1.0f, 1.0f }
+};
+
+/**
+* Purpose: Be cooler than the function below here.
+*/
+void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
+{
+	MMThreadGuard g(imgPixelsLock_);
+
+	char buf[MM::MaxStrLength];
+	GetProperty(MM::g_Keyword_PixelType, buf);
+
+	double stageX = 0, stageY = 0, stageZ = 0, stageT = 0;
+	double zn = 1, zf = 1000;
+	double w2 = img.Width() / 2.0;
+	double h2 = img.Height() / 2.0;
+	double fov = 90;
+
+	GetStagePositions(&stageX, &stageY, &stageZ, &stageT);
+	stageT *= 3.14159/180;
+
+	GetProperty("3D-NearZ", zn);
+	GetProperty("3D-FarZ", zf);
+	GetProperty("3D-FOV", fov);
+
+	double q = zf/(zf-zn);
+	double cfo2 = 1/tan(fov*3.14159/360);
+
+	double composite[4][4] = {
+		{ w2*cfo2*cos(stageT) + w2*q*zn*sin(stageT),       0, w2*q*zn*cos(stageT) - w2*cfo2*sin(stageT), stageX*w2*cfo2 + stageZ*w2*q*zn },
+		{                       h2*q*zn*sin(stageT), h2*cfo2,                       h2*q*zn*cos(stageT), stageY*h2*cfo2 + stageZ*h2*q*zn },
+		{                             q*sin(stageT),       0,                             q*cos(stageT),                    stageZ*q - 1 },
+		{                          q*zn*sin(stageT),       0,                          q*zn*cos(stageT),                     stageZ*q*zn }
+	};
+
+	img.ResetPixels();
+	unsigned char* pBuf = img.GetPixelsRW();
+	
+	for(int i=0; i < NUM_DOTS; ++i)
+	{
+		double w = composite[3][0]*dots[i][0] +
+					composite[3][1]*dots[i][1] +
+					composite[3][2]*dots[i][2] +
+					composite[3][3]*dots[i][3];
+
+		double x = composite[0][0]*dots[i][0] +
+				  composite[0][1]*dots[i][1] +
+				  composite[0][2]*dots[i][2] +
+				  composite[0][3]*dots[i][3];
+
+		double y = composite[1][0]*dots[i][0] +
+				  composite[1][1]*dots[i][1] +
+				  composite[1][2]*dots[i][2] +
+				  composite[1][3]*dots[i][3];
+
+		double z = composite[2][0]*dots[i][0] +
+					composite[2][1]*dots[i][1] +
+					composite[2][2]*dots[i][2] +
+					composite[2][3]*dots[i][3];
+
+		if(z < zn || z > zf)
+			continue;
+
+		double r = DOT_RADIUS / w;
+				  
+		x /= w;
+		y /= w;
+		z /= w;
+		w /= w;
+
+		if(x < -r || y < -r ||
+			x > img.Width()+r || y > img.Height()+r)
+			continue;
+
+		for(int iy = (int)(y-r); iy < (int)(y+r); ++iy)
+		{
+			if(iy < 0 || iy >= (int)img.Height())
+				continue;
+				
+			for(int ix = (int)(x-r); ix < (int)(x+r); ++ix)
+			{
+				if(ix < 0 || ix >= (int)img.Width())
+					continue;
+
+				if(ix-(x-r) < 3 && iy-(y-r) < 4 && strcmp(buf, g_PixelType_8bit) == 0)
+					pBuf[iy*img.Width()+ix] = numbers[i][(int)(iy-(y-r))][(int)(ix-(x-r))];
+
+				double dist = sqrt((ix-x)*(ix-x) + (iy-y)*(iy-y));
+
+				if(dist > r)
+					continue;
+				
+				if(strcmp(buf, g_PixelType_8bit) == 0) {
+					unsigned int sum = pBuf[iy*img.Width()+ix] + (unsigned char)(255*(1-dist/r));
+					if(sum > 255)
+						sum = 255;
+
+					pBuf[iy*img.Width()+ix] = (unsigned char)sum;
+				} else if(strcmp(buf, g_PixelType_16bit) == 0) {
+					unsigned short *buf = reinterpret_cast<unsigned short*>(pBuf);
+
+					unsigned int sum = buf[iy*img.Width()+ix] + (unsigned short)(65535*(1-dist/r));
+					if(sum > 65535)
+						sum = 65535;
+
+					buf[iy*img.Width()+ix] = (unsigned short)sum;
+				} else if(strcmp(buf, g_PixelType_32bit) == 0) {
+					float *buf = reinterpret_cast<float*>(pBuf);
+					buf[iy*img.Width()+ix] = (float)(1-dist/r);
+				} else if(strcmp(buf, g_PixelType_32bitRGB) == 0) {
+					unsigned int *buf = reinterpret_cast<unsigned int*>(pBuf);
+
+					float I = (float)(255*(1-dist/r));
+
+					unsigned int A = 0;
+					unsigned int R = (unsigned int)(colors[i][0]*I);
+					unsigned int G = (unsigned int)(colors[i][1]*I);
+					unsigned int B = (unsigned int)(colors[i][2]*I);
+
+					if(R > 255) R = 255;
+					if(G > 255) G = 255;
+					if(B > 255) B = 255;
+
+					buf[iy*img.Width()+ix] = (A << 24) | (R << 16) | (G << 8) | B;
+				};
+			};
+		};
+	};
+};
 
 /**
 * Generate a spatial sine wave.
@@ -1763,7 +1997,6 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
    double dLinePhase = 0.0;
    const double dAmp = exp;
    const double cLinePhaseInc = 2.0 * cPi / 4.0 / img.Height();
-//   const double cLinePhaseInc = 0;
 
    static bool debugRGB = false;
 #ifdef TIFFDEMO
@@ -1783,17 +2016,6 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
 	if( saturatePixels_)
 		pixelsToSaturate = (long)(0.5 + fractionOfPixelsToDropOrSaturate_*img.Height()*img.Width());
 
-	// Try and find our stage; offer some simulation of an actual camera...
-	// What a fantastically simple world, where the stage moves in pixels.
-	CDemoXYStage *stage = find_xystage();
-	double stageX = 0;
-	double stageY = 0;
-	if(stage)
-		stage->GetPositionUm(stageX, stageY);
-	std::ostringstream os1;
-	os1 << "(" << stageX << ", " << stageY << ")";
-	LogMessage(os1.str().c_str());
-
    unsigned j, k;
    if (pixelType.compare(g_PixelType_8bit) == 0)
    {
@@ -1804,9 +2026,7 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
          for (k=0; k<img.Width(); k++)
          {
             long lIndex = img.Width()*j + k;
-			// I have no idea why the stageY inclusion here doesn't work. This
-			// functionality works for now; I'll just deal with it...
-            *(pBuf + lIndex) = (unsigned char) (g_IntensityFactor_ * min(255.0, (pedestal + dAmp * sin(dPhase_ + (j - stageY)*cLinePhaseInc + (2.0 * cPi * (k - stageX)) / lPeriod))));
+            *(pBuf + lIndex) = (unsigned char) (g_IntensityFactor_ * min(255.0, (pedestal + dAmp * sin(dPhase_ + dLinePhase + (2.0 * cPi * k) / lPeriod))));
          }
          dLinePhase += cLinePhaseInc;
       }
@@ -1990,8 +2210,7 @@ void CDemoCamera::GenerateSyntheticImage(ImgBuffer& img, double exp)
       }
 	}
 
-   // It's hard to check position-dependant imagery when the picture is moving. Naughty naughty.
-   //dPhase_ += cPi / 4.;
+   dPhase_ += cPi / 4.;
 }
 
 

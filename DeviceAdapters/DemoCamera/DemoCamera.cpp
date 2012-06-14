@@ -1705,8 +1705,6 @@ const static float dots[NUM_DOTS][4] = {
 
 void CDemoCamera::GetStagePositions(double* x, double* y, double* z, double* t)
 {
-	static CDemoXYStage *stage = NULL;
-
 	CDemoXYStage *xy = static_cast<CDemoXYStage*>(GetDevice(g_XYStageDeviceName));
 	CDemoStage *zs = static_cast<CDemoStage*>(GetDevice(g_StageDeviceName));
 	CDemoStage *ts = static_cast<CDemoStage*>(GetDevice("DStage2"));
@@ -1727,6 +1725,57 @@ void CDemoCamera::GetStagePositions(double* x, double* y, double* z, double* t)
 		LogMessage("Couldn't find theta stage.");
 };
 
+const static unsigned char numbers[NUM_DOTS][4][3] = {
+	{
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0x00},
+	},
+	{
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0xFF, 0xFF},
+	},
+	{
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0xFF},
+	},
+	{
+		{0xFF, 0x00, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF},
+	},
+	{
+		{0x00, 0xFF, 0xFF},
+		{0x00, 0xFF, 0x00},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0xFF, 0xFF},
+	},
+	{
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0x00, 0x00},
+		{0xFF, 0x00, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+	},
+	{
+		{0xFF, 0xFF, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF},
+		{0x00, 0x00, 0xFF},
+	},
+	{
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+		{0xFF, 0xFF, 0xFF},
+	},
+};
+
 /**
 * Purpose: Be cooler than the function below here.
 */
@@ -1734,55 +1783,63 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 {
 	MMThreadGuard g(imgPixelsLock_);
 
-	// Direct addressing via img.GetPixels() (byte*).
 	double stageX = 0, stageY = 0, stageZ = 0, stageT = 0;
+	double zn = 1, zf = 1000;
+	double w2 = img.Width() / 2.0;
+	double h2 = img.Height() / 2.0;
+	double fov = 90;
+
 	GetStagePositions(&stageX, &stageY, &stageZ, &stageT);
 	stageT *= 3.14159/180;
 
-	double w2 = img.Width() / 2.0;
-	double h2 = img.Height() / 2.0;
-
-	double zn = 1, zf = 1000;
 	GetProperty("3D-NearZ", zn);
 	GetProperty("3D-FarZ", zf);
-	double q = zf/(zf-zn);
-	double fov = 90;
 	GetProperty("3D-FOV", fov);
-	double cfo2 = 1/tan(fov/2);
 
+	double q = zf/(zf-zn);
+	double cfo2 = 1/tan(fov/2);
+/*
 	double composite[4][4] = {
 		{  (w2*cfo2*cos(stageT)),       0, stageX*cos(stageT) + stageZ*sin(stageT) + sin(stageT)*q, (w2*cfo2*cos(stageT)) - zn*sin(stageT)*q},
 		{                      0, h2*cfo2,                                                  stageY,                                  h2*cfo2},
 		{ -(w2*cfo2*sin(stageT)),       0, stageZ*cos(stageT) - stageX*sin(stageT) + cos(stageT)*q,  -zn*cos(stageT)*q - w2*cfo2*sin(stageT)},
 		{                      0,       0,                                                       1,                                        0}
 	};
+*/
+	// Non-transposed projection matrix...
+	double composite[4][4] = {
+		{  w2*cfo2*cos(stageT),       0, sin(stageT)*q - zn*(stageX*cos(stageT) + stageZ*sin(stageT))*q, sin(stageT) + w2*cfo2*cos(stageT)},
+		{                    0, h2*cfo2,                                                   -stageY*zn*q,                           h2*cfo2},
+		{ -w2*cfo2*sin(stageT),       0, cos(stageT)*q - zn*(stageZ*cos(stageT) - stageX*sin(stageT))*q, cos(stageT) - w2*cfo2*sin(stageT)},
+		{                    0,       0,                                                          -zn*q,                                 0}
+	};
 
+	img.ResetPixels();
 	unsigned char* pBuf = img.GetPixelsRW();
-	memset(pBuf, 0x00, img.Width()*img.Height()*img.Depth());
 	
 	for(int i=0; i < NUM_DOTS; ++i)
 	{
 		double w = composite[3][0]*dots[i][0] +
 					composite[3][1]*dots[i][1] +
 					composite[3][2]*dots[i][2] +
-					composite[3][3]*1;
+					composite[3][3]*dots[i][3];
 
 		double x = composite[0][0]*dots[i][0] +
 				  composite[0][1]*dots[i][1] +
 				  composite[0][2]*dots[i][2] +
-				  composite[0][3]*1;
+				  composite[0][3]*dots[i][3];
 
 		double y = composite[1][0]*dots[i][0] +
 				  composite[1][1]*dots[i][1] +
 				  composite[1][2]*dots[i][2] +
-				  composite[1][3]*1;
+				  composite[1][3]*dots[i][3];
 
 		double z = composite[2][0]*dots[i][0] +
 					composite[2][1]*dots[i][1] +
 					composite[2][2]*dots[i][2] +
-					composite[2][3]*1;
+					composite[2][3]*dots[i][3];
 
-		if(z < 0)
+		if(z < zn || z > zf)
 			continue;
 
 		x /= w;
@@ -1802,6 +1859,7 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 		ostr << "Example X/Y/Z/W (" << i << "): " << x << ", " << y << ", " << z << " (" << w << ")";
 		LogMessage(ostr.str().c_str());
 */
+
 		for(int iy = (int)(y-r); iy < (int)(y+r); ++iy)
 		{
 			if(iy < 0 || iy > (int)img.Height())
@@ -1811,7 +1869,10 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 			{
 				if(ix < 0 || ix > (int)img.Width())
 					continue;
-				
+
+				if(ix-(x-r) < 3 && iy-(y-r) < 4)
+					pBuf[iy*img.Width()+ix] = numbers[i][(int)(iy-(y-r))][(int)(ix-(x-r))];
+
 				double dist = sqrt((ix-x)*(ix-x) + (iy-y)*(iy-y));
 
 				if(dist > r)

@@ -175,7 +175,7 @@ public:
       return DEVICE_OK;
    }
 
-   CDemoXYStage *find_xystage();
+   void GetStagePositions(double*,double*,double*,double*);
 
    unsigned  GetNumberOfComponents() const { return nComponents_;};
 
@@ -205,6 +205,7 @@ private:
    void TestResourceLocking(const bool);
    void GenerateEmptyImage(ImgBuffer& img);
    void GenerateSyntheticImage(ImgBuffer& img, double exp);
+   void GenerateSyntheticImage3D(ImgBuffer& img);
    int ResizeImageBuffer();
 
    static const double nominalPixelSizeUm_;

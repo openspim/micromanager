@@ -1580,7 +1580,7 @@ void CDemoCamera::GenerateEmptyImage(ImgBuffer& img)
 }
 
 #define NUM_DOTS 8
-#define DOT_RADIUS 256
+#define DOT_RADIUS 32
 const static float dots[NUM_DOTS][4] = {
 	{ -5.0f, -5.0f, -5.0f, 1 },
 	{ -5.0f, -5.0f, 5.0f, 1 },
@@ -1694,7 +1694,7 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 		{ -(w2*cfo2*sin(stageT)),       0, stageZ*cos(stageT) - stageX*sin(stageT) + cos(stageT)*q,  -zn*cos(stageT)*q - w2*cfo2*sin(stageT)},
 		{                      0,       0,                                                       1,                                        0}
 	};
-*/
+
 	// Non-transposed projection matrix...
 	double composite[4][4] = {
 		{  w2*cfo2*cos(stageT),       0, sin(stageT)*q - zn*(stageX*cos(stageT) + stageZ*sin(stageT))*q, sin(stageT) + w2*cfo2*cos(stageT)},
@@ -1702,13 +1702,41 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 		{ -w2*cfo2*sin(stageT),       0, cos(stageT)*q - zn*(stageZ*cos(stageT) - stageX*sin(stageT))*q, cos(stageT) - w2*cfo2*sin(stageT)},
 		{                    0,       0,                                                          -zn*q,                                 0}
 	};
+*/
+	double rotate[4][4] = {
+		{ cos(stageT), 0, -sin(stageT), 0 },
+		{ 0,		   1,			 0, 0 },
+		{ sin(stageT), 0,  cos(stageT), 0 },
+		{ 0,		   0,			 0, 1 }
+	};
+
+	double translate[4][4] = {
+		{ 1, 0, 0, stageX },
+		{ 0, 1, 0, stageY },
+		{ 0, 0, 1, stageZ },
+		{ 0, 0, 0,      1 }
+	};
+
+	double project[4][4] = {
+		{ cfo2,    0,     0,  0 },
+		{ 0,    cfo2,     0,  0 },
+		{ 0,       0,     q, -1 },
+		{ 0,       0,  zn*q,  0 }
+	};
+
+	double window[4][4] = {
+		{ w2,  0, 0, w2 },
+		{  0, h2, 0, h2 },
+		{  0,  0, 1,  0 },
+		{  0,  0, 0,  1 }
+	};
 
 	img.ResetPixels();
 	unsigned char* pBuf = img.GetPixelsRW();
 	
 	for(int i=0; i < NUM_DOTS; ++i)
 	{
-		double w = composite[3][0]*dots[i][0] +
+/*		double w = composite[3][0]*dots[i][0] +
 					composite[3][1]*dots[i][1] +
 					composite[3][2]*dots[i][2] +
 					composite[3][3]*dots[i][3];
@@ -1727,6 +1755,86 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 					composite[2][1]*dots[i][1] +
 					composite[2][2]*dots[i][2] +
 					composite[2][3]*dots[i][3];
+*/
+		double x = rotate[0][0]*dots[i][0] +
+				   rotate[0][1]*dots[i][1] +
+				   rotate[0][2]*dots[i][2] +
+				   rotate[0][3]*dots[i][3];
+
+		double y = rotate[1][0]*dots[i][0] +
+			       rotate[1][1]*dots[i][1] +
+				   rotate[1][2]*dots[i][2] +
+				   rotate[1][3]*dots[i][3];
+
+		double z = rotate[2][0]*dots[i][0] +
+			       rotate[2][1]*dots[i][1] +
+				   rotate[2][2]*dots[i][2] +
+				   rotate[2][3]*dots[i][3];
+
+		double w = rotate[3][0]*dots[i][0] +
+			       rotate[3][1]*dots[i][1] +
+				   rotate[3][2]*dots[i][2] +
+				   rotate[3][3]*dots[i][3];
+
+		x = translate[0][0]*x +
+			translate[0][1]*y +
+			translate[0][2]*z +
+			translate[0][3]*w;
+
+		y = translate[1][0]*x +
+			translate[1][1]*y +
+			translate[1][2]*z +
+			translate[1][3]*w;
+
+		z = translate[2][0]*x +
+			translate[2][1]*y +
+			translate[2][2]*z +
+			translate[2][3]*w;
+
+		w = translate[3][0]*x +
+			translate[3][1]*y +
+			translate[3][2]*z +
+			translate[3][3]*w;
+
+		x = project[0][0]*x +
+			project[0][1]*y +
+			project[0][2]*z +
+			project[0][3]*w;
+
+		y = project[1][0]*x +
+			project[1][1]*y +
+			project[1][2]*z +
+			project[1][3]*w;
+
+		z = project[2][0]*x +
+			project[2][1]*y +
+			project[2][2]*z +
+			project[2][3]*w;
+
+		w = project[3][0]*x +
+			project[3][1]*y +
+			project[3][2]*z +
+			project[3][3]*w;
+
+		x = window[0][0]*x +
+			window[0][1]*y +
+			window[0][2]*z +
+			window[0][3]*w;
+
+		y = window[1][0]*x +
+			window[1][1]*y +
+			window[1][2]*z +
+			window[1][3]*w;
+
+		z = window[2][0]*x +
+			window[2][1]*y +
+			window[2][2]*z +
+			window[2][3]*w;
+
+		w = window[3][0]*x +
+			window[3][1]*y +
+			window[3][2]*z +
+			window[3][3]*w;
 
 		if(z < zn || z > zf)
 			continue;
@@ -1734,29 +1842,22 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 		x /= w;
 		y /= w;
 		z /= w;
-
-		x += w2;
-		y += h2;
+		w /= w;
 
 		double r = DOT_RADIUS / z;
 				  
 		if(x < -r || y < -r ||
 			x > img.Width()+r || y > img.Height()+r)
 			continue;
-/*
-		std::ostringstream ostr;
-		ostr << "Example X/Y/Z/W (" << i << "): " << x << ", " << y << ", " << z << " (" << w << ")";
-		LogMessage(ostr.str().c_str());
-*/
 
 		for(int iy = (int)(y-r); iy < (int)(y+r); ++iy)
 		{
-			if(iy < 0 || iy > (int)img.Height())
+			if(iy < 0 || iy >= (int)img.Height())
 				continue;
 				
 			for(int ix = (int)(x-r); ix < (int)(x+r); ++ix)
 			{
-				if(ix < 0 || ix > (int)img.Width())
+				if(ix < 0 || ix >= (int)img.Width())
 					continue;
 
 				if(ix-(x-r) < 3 && iy-(y-r) < 4)

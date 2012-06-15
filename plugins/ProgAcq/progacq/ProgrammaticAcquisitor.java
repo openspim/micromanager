@@ -15,7 +15,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
@@ -40,12 +39,15 @@ import javax.swing.event.ChangeListener;
 import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 
-import org.micromanager.MMStudioMainFrame;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
 
 public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		ChangeListener {
+	private static final String TAB_TABLE = "Tabular";
+	private static final String TAB_NDIM = "N-Dim";
+	private static final String TAB_SPIM = "SPIM";
+
 	private static final String BTN_ADD_DISCRETES = "Add Discretes...";
 	private static final String BTN_START = "Start";
 	private static final String BTN_REMOVE_STEPS = "Remove Steps";
@@ -55,9 +57,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	public static String menuName = "Programmatic Acquisitor";
 	public static String tooltipDescription = "Allows the acquiring of complex series of images.";
 
-	private ScriptInterface app;
 	private CMMCore core;
-	private static MMStudioMainFrame gui;
 
 	private JFrame frame;
 	private JTable stepsTbl;
@@ -74,7 +74,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	private JComboBox zDevCmbo;
 	private JComboBox xyDevCmbo;
 	private JTabbedPane tabs;
-	private NDimRangesTab ranges;
+	private NDimRangesTab nDimRanges;
 
 	@Override
 	public void dispose() {
@@ -87,9 +87,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 	@Override
 	public void setApp(ScriptInterface app) {
-		this.app = app;
 		this.core = app.getMMCore();
-		this.gui = MMStudioMainFrame.getInstance(); // Removeme if unneeded!
 	};
 
 	@Override
@@ -100,22 +98,30 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		frame.setVisible(true);
 	};
 
+	/**
+	 * Specified by the MMPlugin interface; this method is (apparently) supposed
+	 * to be called by Micro-Manager when the user modifies the current hardware
+	 * configuration so plugins can adapt. (I've never observed this to happen.)
+	 * For ProgAcq, we rebuild the lists of devices used across tabs.
+	 */
 	@Override
 	public void configurationChanged() {
 		// Note: This doesn't seem to actually be called on config changes...
 
 		Vector<String> used = getUsedDevs();
-		List<String> available = Arrays.asList(core.getLoadedDevices().toArray());
-		
-		for(String dev : used)
-			if(!available.contains(dev))
+		List<String> available = Arrays.asList(core.getLoadedDevices()
+				.toArray());
+
+		for (String dev : used)
+			if (!available.contains(dev))
 				used.remove(dev);
-		
-		if(used.isEmpty())
-		{
+
+		// If there are no devices specified, use the default X/Y and focus
+		// stages.
+		if (used.isEmpty()) {
 			used.add(core.getXYStageDevice());
 			used.add(core.getFocusDevice());
-		};
+		}
 
 		// Part 1: The Sliders tab.
 		xyDevCmbo.setModel(new DefaultComboBoxModel(core
@@ -140,10 +146,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		tDevCB.setSelected(tDevCmbo.getItemCount() > 1);
 
 		// Part 2: N-Dim sliders tab
-		ranges.setDevices(used.toArray(new String[0]));
-		
+		nDimRanges.setDevices(used.toArray(new String[0]));
+
 		// Part 3: Table tab
-		((StepTableModel)stepsTbl.getModel()).setColumns(used);
+		((StepTableModel) stepsTbl.getModel()).setColumns(used);
 	};
 
 	@Override
@@ -166,6 +172,14 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return "I have rights?";
 	};
 
+	/**
+	 * Builds the GUI of the ProgAcq interface into frame. Currently, three tabs
+	 * offer different methods of setting up the table of settings to acquire
+	 * images at: SPIM sliders (X/Y, Z, and theta), N-Dimensional sliders (like
+	 * SPIM sliders, only any devices can be used in any order), and tabular
+	 * (lets users specify each row for each device manually, with some
+	 * convenience generators).
+	 */
 	private void buildFrame() {
 		if (frame != null)
 			return;
@@ -176,11 +190,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		tabs = new JTabbedPane();
 
-		// //////////////
-		// 4D Sliders //
-		// //////////////
+		/**
+		 * 4D Sliders
+		 */
 		JPanel sliders = new JPanel();
-		sliders.setName("SPIM");
+		sliders.setName(TAB_SPIM);
 		sliders.setAlignmentX(Component.LEFT_ALIGNMENT);
 		sliders.setLayout(new BoxLayout(sliders, BoxLayout.PAGE_AXIS));
 
@@ -211,6 +225,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		rangeX = new RangeSlider(0D, 8000D);
 
 		xy_x.add(rangeX);
+		xy_x.setMaximumSize(xy_x.getPreferredSize());
 
 		xyXY.add(xy_x);
 
@@ -220,10 +235,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		rangeY = new RangeSlider(0D, 8000D);
 
 		xy_y.add(rangeY);
+		xy_y.setMaximumSize(xy_y.getPreferredSize());
 
 		xyXY.add(xy_y);
 
 		xy.add(xyXY);
+		xy.setMaximumSize(xy.getPreferredSize());
 
 		sliders.add(xy);
 
@@ -252,6 +269,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		rangeZ = new RangeSlider(0D, 8000D);
 
 		z.add(rangeZ);
+		z.setMaximumSize(z.getPreferredSize());
 
 		sliders.add(z);
 
@@ -283,16 +301,17 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		rangeTheta = new RangeSlider(-180D, 180D);
 
 		t.add(rangeTheta);
+		t.setMaximumSize(t.getPreferredSize());
 
 		sliders.add(t);
 
-		tabs.add("SPIM", sliders);
+		tabs.add(TAB_SPIM, sliders);
 
-		// ///////////////////////////////
-		// N-Dimensional Range Sliders //
-		// ///////////////////////////////
+		/**
+		 * N-Dimensional Range Sliders
+		 */
 		JPanel rangePanel = new JPanel();
-		rangePanel.setName("Sliders");
+		rangePanel.setName(TAB_NDIM);
 		rangePanel.setLayout(new BoxLayout(rangePanel, BoxLayout.PAGE_AXIS));
 
 		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
@@ -300,17 +319,20 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		rangePanel.add(selDevs);
 
-		JScrollPane rangePane = new JScrollPane(ranges = new NDimRangesTab(
+		JScrollPane rangePane = new JScrollPane(nDimRanges = new NDimRangesTab(
 				core, new String[] {}));
+
+		nDimRanges.setOwner(rangePane);
 
 		rangePanel.add(rangePane);
 
-		tabs.add("N-Dim", rangePanel);
+		tabs.add(TAB_NDIM, rangePanel);
 
-		// /////////////////
-		// Tabular Entry //
-		// /////////////////
+		/**
+		 * Tabular Entry
+		 */
 		JPanel steps = new JPanel();
+		steps.setName(TAB_TABLE);
 		steps.setLayout(new BoxLayout(steps, BoxLayout.LINE_AXIS));
 
 		stepsTbl = new JTable();
@@ -343,7 +365,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		steps.add(stepsBtns);
 
-		tabs.add("Tabular", steps);
+		tabs.add(TAB_TABLE, steps);
 
 		frame.getContentPane().add(tabs);
 
@@ -395,6 +417,13 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		configurationChanged();
 	};
 
+	/**
+	 * Buttons on the UI specify 'this' as an ActionListener; this branches off
+	 * depending on which button triggered it to perform various tasks.
+	 *
+	 * @param e
+	 *            ActionEvent generated by the AWT framework.
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (BTN_SELECT_DEVICES.equals(e.getActionCommand())) {
@@ -406,8 +435,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									.setColumns(SelectStringsDialog
 											.getFinalList());
 
-							ranges.setDevices(toStrArray(SelectStringsDialog
-									.getFinalList()));
+							nDimRanges.setDevices(SelectStringsDialog
+									.getFinalList().toArray(new String[0]));
 						}
 					});
 		} else if (BTN_ADD_RANGES.equals(e.getActionCommand())) {
@@ -437,6 +466,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			((StepTableModel) stepsTbl.getModel()).removeRows(stepsTbl
 					.getSelectedRows());
 		} else if (BTN_START.equals(e.getActionCommand())) {
+			// Okay, we've been asked to run the acquisition sequence(s). Check
+			// the timing options first.
+
 			if (timeCB.isSelected()) {
 				if (countBox.getText().isEmpty()) {
 					JOptionPane.showMessageDialog(frame,
@@ -452,7 +484,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			}
 
 			try {
-				if ("SPIM".equals(tabs.getSelectedComponent().getName())) {
+				// I'd like a better way to do this, but it works for now.
+				// Branch off based on the name of the tab currently selected.
+				if (TAB_SPIM.equals(tabs.getSelectedComponent().getName())) {
+					// SPIM mode. Build our ranges, generate rows, and begin.
 					List<double[]> ranges = new Vector<double[]>(Arrays.asList(
 							rangeX.getRange(), rangeY.getRange()));
 
@@ -470,11 +505,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						devs.add(tDevCmbo.getSelectedItem().toString());
 					}
 
-					String[] devsa = toStrArray(devs);
+					String[] devsa = devs.toArray(new String[devs.size()]);
 
 					List<String[]> rows = generateRowsFromRanges(ranges, devsa);
 
-					// performAcquisition(
 					performAndShowAcq(
 							core,
 							devsa,
@@ -484,8 +518,27 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									.getText()) : 1,
 							timeCB.isSelected() ? Double.parseDouble(stepBox
 									.getText()) : 0);
-				} else {
-					// performAcquisition(
+				} else if (TAB_NDIM.equals(tabs.getSelectedComponent()
+						.getName())) {
+					// Get ranges from the 'ranges' object, generate rows.
+					List<double[]> rangeList = nDimRanges.getRanges();
+					String[] devs = getUsedDevs().toArray(new String[0]);
+
+					List<String[]> rows = generateRowsFromRanges(rangeList,
+							devs);
+
+					performAndShowAcq(
+							core,
+							devs,
+							rows,
+							false,
+							timeCB.isSelected() ? Integer.parseInt(countBox
+									.getText()) : 1,
+							timeCB.isSelected() ? Double.parseDouble(stepBox
+									.getText()) : 0);
+				} else if (TAB_TABLE.equals(tabs.getSelectedComponent()
+						.getName())) {
+					// Tabular. This one's easy; just fetch the rows.
 					performAndShowAcq(
 							core,
 							((StepTableModel) stepsTbl.getModel())
@@ -507,6 +560,13 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		}
 	}
 
+	/**
+	 * Checkboxes in the UI register 'this' as a change listener; here we take
+	 * care of whatever changes go on in them.
+	 * 
+	 * @param e
+	 *            ChangeEvent generated by AWT framework.
+	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource().equals(zDevCB)) {
@@ -521,11 +581,19 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		}
 	}
 
-	private Vector<Vector<Double>> getRows(List<double[]> subranges) {
-		double[] first = (double[]) subranges.get(0);
+	/**
+	 * Takes a list of steps and concatenates them together recursively. This is
+	 * what builds out rows from a list of lists of positions.
+	 * 
+	 * @param steps
+	 *            A list of lists of discrete values used to make up rows.
+	 * @return A list of every possible combination of the input.
+	 */
+	private Vector<Vector<Double>> getRows(List<double[]> steps) {
+		double[] first = (double[]) steps.get(0);
 		Vector<Vector<Double>> rows = new Vector<Vector<Double>>();
 
-		if (subranges.size() == 1) {
+		if (steps.size() == 1) {
 			for (double val : first) {
 				Vector<Double> row = new Vector<Double>();
 				row.add(val);
@@ -533,8 +601,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			}
 		} else {
 			for (double val : first) {
-				Vector<Vector<Double>> subrows = getRows(subranges.subList(1,
-						subranges.size()));
+				Vector<Vector<Double>> subrows = getRows(steps.subList(1,
+						steps.size()));
 
 				for (Vector<Double> row : subrows) {
 					Vector<Double> newRow = new Vector<Double>(row);
@@ -547,6 +615,18 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return rows;
 	}
 
+	/**
+	 * Takes a list of ranges (min/step/max triplets), splits them into discrete
+	 * values, permutes them, then condenses X/Y into ordered pairs.
+	 * 
+	 * @param ranges
+	 *            List of triplets corresponding to the devices.
+	 * @param devs
+	 *            List of devices being used (to determine X/Y stages)
+	 * @return A list of string arrays, each element being a column for that
+	 *         'row'. Can be passed directly into the 'rows' parameter of the
+	 *         performAcquisition method.
+	 */
 	public Vector<String[]> generateRowsFromRanges(List<double[]> ranges,
 			String[] devs) {
 		// Each element of range is a triplet of min/step/max.
@@ -566,6 +646,17 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return condenseXY(getRows(values), devs);
 	}
 
+	/**
+	 * Takes the rows of doubles and a list of devices, and boils them down into
+	 * rows of string arrays. X/Y stage positions (originally separate as two
+	 * doubles) are 'condensed' (hence the name) into ordered pair strings.
+	 * 
+	 * @param rows
+	 *            Rows of positions to be cleaned up into strings.
+	 * @param devs
+	 *            A list of devices for determining which columns are X/Y.
+	 * @return A fully 'condensed' list of rows.
+	 */
 	private Vector<String[]> condenseXY(List<? extends List<Double>> rows,
 			String[] devs) {
 		// Build a quick list of indices of X/Y stage devices.
@@ -598,22 +689,13 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					else
 						finalRow.add("" + row.get(i));
 
-				finalRows.add(toStrArray(finalRow));
+				finalRows.add(finalRow.toArray(new String[finalRow.size()]));
 			} else {
-				finalRows.add(toStrArray(row));
+				finalRows.add(row.toArray(new String[row.size()]));
 			}
 		}
 
 		return finalRows;
-	}
-
-	private String[] toStrArray(List<? extends Object> anything) {
-		String[] ret = new String[anything.size()];
-
-		for (int i = 0; i < anything.size(); ++i)
-			ret[i] = anything.get(i).toString();
-
-		return ret;
 	}
 
 	// TODO related to this function:
@@ -716,6 +798,26 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return new ImagePlus("ProgAcqd", img);
 	}
 
+	/**
+	 * Creates a new thread to run the acquisition on, with the intent to show
+	 * the generated ImagePlus object via ImageJ. The thread is started and then
+	 * returned.
+	 * 
+	 * @param core
+	 *            The Micro-Manager core to acquire via.
+	 * @param devs
+	 *            The list of devices each column of each row specifies
+	 * @param rows
+	 *            The list of rows (steps) which are run through.
+	 * @param wait
+	 *            Whether to wait for each device individually, or set them all
+	 *            moving at once and wait at the end.
+	 * @param timeseqs
+	 *            How many times to repeat the acquisition with delays.
+	 * @param timestep
+	 *            Delay between each acquisition sequence.
+	 * @return A thread running the acquisition.
+	 */
 	public static Thread performAndShowAcq(final CMMCore core,
 			final String[] devs, final List<String[]> rows, final boolean wait,
 			final int timeseqs, final double timestep) {
@@ -737,6 +839,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return ret;
 	}
 
+	/**
+	 * Utility function to convert an array of bytes into an array of integers.
+	 * Effectively a reinterpret_cast.
+	 * 
+	 * @param b
+	 *            Array of bytes (image data).
+	 * @return Array of integers b represents.
+	 * @throws Exception
+	 *             If b has an impossible length.
+	 */
 	private static int[] bToI(byte[] b) throws Exception {
 		if (b.length % 4 != 0)
 			throw new Exception("4-byte length mismatch!");
@@ -750,6 +862,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return r;
 	}
 
+	/**
+	 * Generates an image processor object (IJ) based off the latest image taken
+	 * by the specified core.
+	 * 
+	 * @param core
+	 *            The Micro-Manager core reference to acquire via.
+	 * @return An ImageProcessor object containing the pixels in MM's image.
+	 * @throws Exception
+	 *             On unsupported image modes.
+	 */
 	private static ImageProcessor newImageProcessor(CMMCore core)
 			throws Exception {
 		if (core.getBytesPerPixel() == 1) {
@@ -770,19 +892,31 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			}
 		} else if (core.getBytesPerPixel() == 8) {
 			if (core.getNumberOfComponents() > 1) {
-				// TODO: Fails silently!
 				throw new Exception("No support for 64-bit color!");
 			} else {
 				return new FloatProcessor((int) core.getImageWidth(),
 						(int) core.getImageHeight(), (double[]) core.getImage());
 			}
 		} else {
-			// TODO: Expand support to include all modes... (also fails quietly)
+			// TODO: Expand support to include all modes...
 			throw new Exception("Unsupported image depth ("
 					+ core.getBytesPerPixel() + " bytes/pixel)");
 		}
 	}
 
+	/**
+	 * Generates a string of metadata for an image, based on a list of devices
+	 * (reports their values).
+	 * 
+	 * @param t
+	 *            The time this image is at, relative to the start of
+	 *            acquisition.
+	 * @param core
+	 *            The Micro-Manager core with the list of devices.
+	 * @param devs
+	 *            List of devices with positions to report in the metadata.
+	 * @return A combined string containing the time and device informations.
+	 */
 	private static String generateMeta(Double t, CMMCore core, String[] devs) {
 		String out = "t=" + t + "?; ";
 
@@ -807,14 +941,37 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return out;
 	};
 
+	/**
+	 * Simple function to pull the X coordinate out of an ordered pair string.
+	 * This function doesn't care at all if the string you pass it is wrong, so
+	 * don't pass it a wrong string. :)
+	 * 
+	 * @param pair
+	 *            An ordered pair.
+	 * @return The X coordinate of that ordered pair.
+	 */
 	private static double parseX(String pair) {
 		return Double.parseDouble(pair.substring(0, pair.indexOf(',')));
 	}
 
+	/**
+	 * Pulls the Y component of an ordered pair.
+	 * 
+	 * @see parseX
+	 * 
+	 * @param pair
+	 *            An ordered pair.
+	 * @return The Y coordinate of that ordered pair.
+	 */
 	private static double parseY(String pair) {
 		return Double.parseDouble(pair.substring(pair.indexOf(' ') + 1));
 	}
 
+	/**
+	 * Gets a list of devices not currently in the 'used devices' list.
+	 * 
+	 * @return A list of unused devices (based on the table on tab 3.)
+	 */
 	private Vector<String> getUnusedDevs() {
 		Vector<String> all = new Vector<String>((int) core.getLoadedDevices()
 				.size());
@@ -828,6 +985,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return all;
 	}
 
+	/**
+	 * Gets a list of devices being sequenced (the columns of the table on tab
+	 * number 3).
+	 * 
+	 * @return A list of devices in use (being given positions for acquisition).
+	 */
 	private Vector<String> getUsedDevs() {
 		Vector<String> res = new Vector<String>();
 

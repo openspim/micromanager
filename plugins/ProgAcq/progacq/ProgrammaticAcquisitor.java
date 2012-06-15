@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
@@ -73,6 +74,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	private JComboBox zDevCmbo;
 	private JComboBox xyDevCmbo;
 	private JTabbedPane tabs;
+	private NDimRangesTab ranges;
 
 	@Override
 	public void dispose() {
@@ -102,6 +104,19 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	public void configurationChanged() {
 		// Note: This doesn't seem to actually be called on config changes...
 
+		Vector<String> used = getUsedDevs();
+		List<String> available = Arrays.asList(core.getLoadedDevices().toArray());
+		
+		for(String dev : used)
+			if(!available.contains(dev))
+				used.remove(dev);
+		
+		if(used.isEmpty())
+		{
+			used.add(core.getXYStageDevice());
+			used.add(core.getFocusDevice());
+		};
+
 		// Part 1: The Sliders tab.
 		xyDevCmbo.setModel(new DefaultComboBoxModel(core
 				.getLoadedDevicesOfType(DeviceType.XYStageDevice).toArray()));
@@ -124,8 +139,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		tDevCB.setEnabled(tDevCmbo.getItemCount() > 1);
 		tDevCB.setSelected(tDevCmbo.getItemCount() > 1);
 
-		// Part 2: Steps tab
-
+		// Part 2: N-Dim sliders tab
+		ranges.setDevices(used.toArray(new String[0]));
+		
+		// Part 3: Table tab
+		((StepTableModel)stepsTbl.getModel()).setColumns(used);
 	};
 
 	@Override
@@ -158,12 +176,13 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		tabs = new JTabbedPane();
 
+		// //////////////
+		// 4D Sliders //
+		// //////////////
 		JPanel sliders = new JPanel();
 		sliders.setName("SPIM");
 		sliders.setAlignmentX(Component.LEFT_ALIGNMENT);
 		sliders.setLayout(new BoxLayout(sliders, BoxLayout.PAGE_AXIS));
-
-		tabs.add("SPIM", sliders);
 
 		JPanel xy = new JPanel();
 		xy.setLayout(new BoxLayout(xy, BoxLayout.PAGE_AXIS));
@@ -184,12 +203,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		// These names keep getting more and more convoluted.
 		JPanel xyXY = new JPanel();
-		xyXY.setLayout(new BoxLayout(xyXY, BoxLayout.LINE_AXIS));
+		xyXY.setLayout(new BoxLayout(xyXY, BoxLayout.PAGE_AXIS));
 
 		JPanel xy_x = new JPanel();
 		xy_x.setBorder(BorderFactory.createTitledBorder("Stage X"));
 
-		rangeX = new RangeSlider(-100D, 100D);
+		rangeX = new RangeSlider(0D, 8000D);
 
 		xy_x.add(rangeX);
 
@@ -198,7 +217,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JPanel xy_y = new JPanel();
 		xy_y.setBorder(BorderFactory.createTitledBorder("Stage Y"));
 
-		rangeY = new RangeSlider(-100D, 100D);
+		rangeY = new RangeSlider(0D, 8000D);
 
 		xy_y.add(rangeY);
 
@@ -230,7 +249,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		z.add(Box.createRigidArea(new Dimension(10, 4)));
 
-		rangeZ = new RangeSlider(-100D, 100D);
+		rangeZ = new RangeSlider(0D, 8000D);
 
 		z.add(rangeZ);
 
@@ -267,6 +286,30 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		sliders.add(t);
 
+		tabs.add("SPIM", sliders);
+
+		// ///////////////////////////////
+		// N-Dimensional Range Sliders //
+		// ///////////////////////////////
+		JPanel rangePanel = new JPanel();
+		rangePanel.setName("Sliders");
+		rangePanel.setLayout(new BoxLayout(rangePanel, BoxLayout.PAGE_AXIS));
+
+		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
+		selDevs.addActionListener(this);
+
+		rangePanel.add(selDevs);
+
+		JScrollPane rangePane = new JScrollPane(ranges = new NDimRangesTab(
+				core, new String[] {}));
+
+		rangePanel.add(rangePane);
+
+		tabs.add("N-Dim", rangePanel);
+
+		// /////////////////
+		// Tabular Entry //
+		// /////////////////
 		JPanel steps = new JPanel();
 		steps.setLayout(new BoxLayout(steps, BoxLayout.LINE_AXIS));
 
@@ -281,10 +324,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JPanel stepsBtns = new JPanel();
 		stepsBtns.setLayout(new BoxLayout(stepsBtns, BoxLayout.PAGE_AXIS));
 
-		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
-		selDevs.addActionListener(this);
-		selDevs.setAlignmentY(Component.TOP_ALIGNMENT);
-
 		JButton addRanges = new JButton(BTN_ADD_RANGES);
 		addRanges.addActionListener(this);
 
@@ -294,6 +333,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JButton remStep = new JButton(BTN_REMOVE_STEPS);
 		remStep.addActionListener(this);
 
+		selDevs = new JButton(BTN_SELECT_DEVICES);
+		selDevs.addActionListener(this);
+
 		stepsBtns.add(selDevs);
 		stepsBtns.add(addRanges);
 		stepsBtns.add(addDisc);
@@ -301,7 +343,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		steps.add(stepsBtns);
 
-		tabs.add("Advanced", steps);
+		tabs.add("Tabular", steps);
 
 		frame.getContentPane().add(tabs);
 
@@ -315,15 +357,15 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		timeCB = new JCheckBox("");
 		timeCB.setSelected(false);
 
-		JLabel step = new JLabel("Interval:");
-		// TODO: Enforce a minimum? The stage needs time to move.
+		JLabel step = new JLabel("Interval (ms):");
+		// TODO: Enforce a minimum? The stage needs time to move...
 		step.setToolTipText("Delay between acquisition sequences in milliseconds.");
 		stepBox = new JTextField(8);
 		stepBox.setMaximumSize(stepBox.getPreferredSize());
 		stepBox.setEnabled(false);
 
 		JLabel count = new JLabel("Count:");
-		count.setToolTipText("Number of acquisition sequences to perform. Each is described by the table above.");
+		count.setToolTipText("Number of acquisition sequences to perform.");
 		countBox = new JTextField(8);
 		countBox.setMaximumSize(countBox.getPreferredSize());
 		countBox.setEnabled(false);
@@ -363,6 +405,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 							((StepTableModel) stepsTbl.getModel())
 									.setColumns(SelectStringsDialog
 											.getFinalList());
+
+							ranges.setDevices(toStrArray(SelectStringsDialog
+									.getFinalList()));
 						}
 					});
 		} else if (BTN_ADD_RANGES.equals(e.getActionCommand())) {
@@ -425,7 +470,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						devs.add(tDevCmbo.getSelectedItem().toString());
 					}
 
-					String[] devsa = toArray(devs);
+					String[] devsa = toStrArray(devs);
 
 					List<String[]> rows = generateRowsFromRanges(ranges, devsa);
 
@@ -553,16 +598,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					else
 						finalRow.add("" + row.get(i));
 
-				finalRows.add(toArray(finalRow));
+				finalRows.add(toStrArray(finalRow));
 			} else {
-				finalRows.add(toArray(row));
+				finalRows.add(toStrArray(row));
 			}
 		}
 
 		return finalRows;
 	}
 
-	private String[] toArray(List<? extends Object> anything) {
+	private String[] toStrArray(List<? extends Object> anything) {
 		String[] ret = new String[anything.size()];
 
 		for (int i = 0; i < anything.size(); ++i)

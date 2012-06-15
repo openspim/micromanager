@@ -28,6 +28,19 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 	// XYStageDevs have a second min/step/max (obviously; for X/Y).
 	private static Vector<double[]> results;
 
+	/**
+	 * Generates an instance of this class and displays it. The window listener
+	 * will be alerted when the popup is closed.
+	 *
+	 * @param parent
+	 *            Passed to the super constructor (required by JDialog).
+	 * @param core
+	 *            The Micro-Manager core the devices exist on (for info).
+	 * @param devices
+	 *            The list of devices to request ranges for.
+	 * @param listener
+	 *            A window listener to alert when the popup closes.
+	 */
 	public static void doInstance(JFrame parent, CMMCore core,
 			Vector<String> devices, WindowListener listener) {
 		AddStepsDialog dlg = new AddStepsDialog(parent, core, devices);
@@ -126,7 +139,7 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 
 		this.getContentPane().add(master);
 		this.pack();
-	};
+	}
 
 	private static JPanel labelledField(String lbl) {
 		JPanel box = new JPanel();

@@ -20,6 +20,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 
 	private JTextField min, step, max;
 	private JSlider sliderMin, sliderStep, sliderMax;
+	private boolean triggering;
 
 	public RangeSlider(Double minv, Double maxv) {
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
@@ -111,6 +112,8 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 				return new Dimension(width, height);
 			}
 		});
+
+		triggering = false;
 	}
 
 	public double[] getRange() {
@@ -144,6 +147,10 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		// A slider moved. Figure out which and update everything else.
+		if (triggering)
+			return;
+		else
+			triggering = true;
 
 		if (e.getSource().equals(sliderMin)) {
 			sliderMax.setMinimum(sliderMin.getValue());
@@ -166,6 +173,8 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			sliderMin.setLabelTable(sliderMin.createStandardLabels(val * 2));
 			sliderMax.setLabelTable(sliderMax.createStandardLabels(val * 2));
 		}
+
+		triggering = false;
 	}
 
 	@Override
@@ -190,11 +199,17 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		if (triggering)
+			return;
+		else
+			triggering = true;
+
 		int value = 1;
 
 		try {
 			value = Integer.parseInt(((JTextField) e.getComponent()).getText());
 		} catch (NumberFormatException nfe) {
+			triggering = false;
 			return;
 		}
 
@@ -216,5 +231,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			sliderMin.setLabelTable(sliderMin.createStandardLabels(value * 2));
 			sliderMax.setLabelTable(sliderMax.createStandardLabels(value * 2));
 		}
+
+		triggering = false;
 	}
 }

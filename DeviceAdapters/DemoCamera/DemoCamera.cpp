@@ -1691,7 +1691,7 @@ void CDemoCamera::GenerateEmptyImage(ImgBuffer& img)
 }
 
 #define NUM_DOTS 8
-#define DOT_RADIUS 32
+#define DOT_RADIUS 256
 const static float dots[NUM_DOTS][4] = {
 	{ -5.0f, -5.0f, -5.0f, 1 },
 	{ -5.0f, -5.0f, 5.0f, 1 },
@@ -1797,7 +1797,7 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 	GetProperty("3D-FOV", fov);
 
 	double q = zf/(zf-zn);
-	double cfo2 = 1/tan(fov/2);
+	double cfo2 = 1/tan(fov*3.14159/360);
 /*
 	double composite[4][4] = {
 		{  (w2*cfo2*cos(stageT)),       0, stageX*cos(stageT) + stageZ*sin(stageT) + sin(stageT)*q, (w2*cfo2*cos(stageT)) - zn*sin(stageT)*q},
@@ -1950,13 +1950,13 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 		if(z < zn || z > zf)
 			continue;
 
+		double r = DOT_RADIUS / w;
+				  
 		x /= w;
 		y /= w;
 		z /= w;
 		w /= w;
 
-		double r = DOT_RADIUS / z;
-				  
 		if(x < -r || y < -r ||
 			x > img.Width()+r || y > img.Height()+r)
 			continue;

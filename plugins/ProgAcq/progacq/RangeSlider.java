@@ -23,6 +23,8 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	private boolean triggering;
 
 	public RangeSlider(Double minv, Double maxv) {
+		triggering = true;
+
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
 		JPanel left = new JPanel();
@@ -40,9 +42,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		min.setAlignmentX(LEFT_ALIGNMENT);
 		min.addKeyListener(this);
 
-		int estStep = (int) ((maxv - minv) / 4);
-
-		step = new JTextField("" + estStep, 8);
+		step = new JTextField(8);
 		step.setMaximumSize(step.getPreferredSize());
 		step.setAlignmentX(CENTER_ALIGNMENT);
 		step.addKeyListener(this);
@@ -70,16 +70,12 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 				minv.intValue());
 		sliderMin.setPaintTicks(true);
 		sliderMin.setPaintLabels(true);
-		sliderMin.setMinorTickSpacing(estStep / 2);
-		sliderMin.setMajorTickSpacing(estStep);
 		sliderMin.addChangeListener(this);
 
 		sliderMax = new JSlider(minv.intValue(), maxv.intValue(),
 				maxv.intValue());
 		sliderMax.setPaintTicks(true);
 		sliderMax.setPaintLabels(true);
-		sliderMax.setMinorTickSpacing(estStep / 2);
-		sliderMax.setMajorTickSpacing(estStep);
 		sliderMax.addChangeListener(this);
 
 		bot.add(sliderMin);
@@ -89,12 +85,12 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 
 		this.add(left);
 
-		sliderStep = new JSlider(JSlider.VERTICAL, 0, 2 * estStep, estStep);
+		sliderStep = new JSlider(JSlider.VERTICAL);
 		sliderStep.setPaintLabels(true);
 		sliderStep.setPaintTicks(true);
-		sliderStep.setMajorTickSpacing(estStep);
-		sliderStep.setMinorTickSpacing(estStep / 2);
 		sliderStep.addChangeListener(this);
+
+		setMinMax(minv, maxv);
 
 		this.add(sliderStep);
 

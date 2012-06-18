@@ -609,22 +609,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			values.add(discretes);
 		}
 
-		return condenseXY(getRows(values), devs);
-	}
-
-	/**
-	 * Takes the rows of doubles and a list of devices, and boils them down into
-	 * rows of string arrays. X/Y stage positions (originally separate as two
-	 * doubles) are 'condensed' (hence the name) into ordered pair strings.
-	 * 
-	 * @param rows
-	 *            Rows of positions to be cleaned up into strings.
-	 * @param devs
-	 *            A list of devices for determining which columns are X/Y.
-	 * @return A fully 'condensed' list of rows.
-	 */
-	private Vector<String[]> condenseXY(List<? extends List<Double>> rows,
-			String[] devs) {
 		// Build a quick list of indices of X/Y stage devices.
 		// Below, we condense the X and Y coordinates into an ordered pair so
 		// they can be inserted into the table. This list is used to determine
@@ -645,7 +629,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		Vector<String[]> finalRows = new Vector<String[]>();
 
-		for (List<Double> row : rows) {
+		for (List<Double> row : getRows(values)) {
 			if (xyStages.size() > 0) {
 				Vector<String> finalRow = new Vector<String>();
 
@@ -665,8 +649,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	}
 
 	// TODO related to this function:
-	// 1. Threading!
-	// 2. Fix application of timestep!
+	// 1. Fix application of timestep!
 	/**
 	 * This function runs a generalized acquisition sequence. It's a mixture of
 	 * Micro-Manager's built in sequencing support (confusing) and waiting for
@@ -888,7 +871,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	private static String generateMeta(Double t, CMMCore core, String[] devs) {
 		String out = "t=" + t + "?; ";
 
-		for (String dev : devs)
+		for (String dev : devs) {
 			try {
 				out += dev + "=";
 				if (core.getDeviceType(dev).equals(DeviceType.XYStageDevice)) {
@@ -905,6 +888,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				e.printStackTrace();
 				return "<<<EXCEPTION: " + e.getMessage() + ">>>";
 			}
+		}
 
 		return out;
 	};

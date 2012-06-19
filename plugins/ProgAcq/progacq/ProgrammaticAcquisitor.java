@@ -731,7 +731,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					core.snapImage();
 				}
 
-				String meta = generateMeta(seq * timestep, core, devices);
+				String meta = generateMeta(System.nanoTime() / 1e6 - beginAll,
+						core, devices);
 				ImageProcessor ip = newImageProcessor(core);
 
 				img.addSlice(meta, ip);
@@ -759,7 +760,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * returned.
 	 * 
 	 * @param core
-	 *            The Micro-Manager core to acquire via.
+	 *            The Micro-Manager core in use.
 	 * @param devs
 	 *            The list of devices each column of each row specifies
 	 * @param rows
@@ -867,25 +868,25 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * 
 	 * @param t
 	 *            The time this image is at, relative to the start of
-	 *            acquisition.
+	 *            acquisition, in milliseconds.
 	 * @param core
 	 *            The Micro-Manager core with the list of devices.
 	 * @param devs
 	 *            List of devices with positions to report in the metadata.
 	 * @return A combined string containing the time and device informations.
 	 */
-	private static String generateMeta(Double t, CMMCore core, String[] devs) {
-		String out = "t=" + t + "?; ";
+	private static String generateMeta(double t, CMMCore core, String[] devs) {
+		String out = String.format("t=%.4fms; ", t);
 
 		for (String dev : devs) {
 			try {
 				out += dev + "=";
 				if (core.getDeviceType(dev).equals(DeviceType.XYStageDevice)) {
-					out += core.getXPosition(dev) + ", "
-							+ core.getYPosition(dev);
+					out += String.format("%.4fum, %.4fum",
+							core.getXPosition(dev), core.getYPosition(dev));
 				} else if (core.getDeviceType(dev).equals(
 						DeviceType.StageDevice)) {
-					out += core.getPosition(dev);
+					out += String.format("%.4f", core.getPosition(dev));
 				} else {
 					out += "<unknown>";
 				}

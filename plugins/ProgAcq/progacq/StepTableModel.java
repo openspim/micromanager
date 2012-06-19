@@ -5,6 +5,7 @@ package progacq;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
@@ -83,7 +84,7 @@ public class StepTableModel extends AbstractTableModel implements
 	 * @param columns
 	 *            The new vector of column headers to use.
 	 */
-	public void setColumns(Vector<String> columns) {
+	public void setColumns(List<String> columns) {
 		// Build a temporary map of our data.
 		Vector<HashMap<String, String>> tempData = new Vector<HashMap<String, String>>();
 		for (String[] row : data) {
@@ -93,8 +94,8 @@ public class StepTableModel extends AbstractTableModel implements
 			tempData.add(map);
 		}
 
-		columnNames = new String[columns.size()];
-		columns.copyInto(columnNames);
+		columnNames = columns.toArray(new String[columns.size()]);
+
 		data = new Vector<String[]>();
 
 		for (HashMap<String, String> row : tempData) {

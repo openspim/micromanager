@@ -462,7 +462,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 								StepTableModel mdl = (StepTableModel) stepsTbl
 										.getModel();
 
-								Vector<String[]> data = generateRowsFromRanges(
+								List<String[]> data = generateRowsFromRanges(
 										AddStepsDialog.getResults(),
 										mdl.getColumnNames());
 
@@ -471,7 +471,26 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 							}
 						});
 		} else if (BTN_INS_DISCRETES.equals(e.getActionCommand())) {
+			if (getUsedDevs().size() <= 0)
+				JOptionPane.showMessageDialog(frame,
+						"You must select at least one device!");
+			else
+				DiscreteValuesDialog.doInstance(frame, core, getUsedDevs(),
+						new WindowAdapter() {
+							@Override
+							public void windowClosed(WindowEvent e) {
+								DiscreteValuesDialog d = (DiscreteValuesDialog) e
+										.getComponent();
 
+								List<String[]> rows = d.getRows();
+
+								StepTableModel mdl = (StepTableModel) stepsTbl
+										.getModel();
+
+								for (String[] row : rows)
+									mdl.insertRow(row);
+							}
+						});
 		} else if (BTN_REMOVE_STEPS.equals(e.getActionCommand())) {
 			((StepTableModel) stepsTbl.getModel()).removeRows(stepsTbl
 					.getSelectedRows());
@@ -599,7 +618,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *         'row'. Can be passed directly into the 'rows' parameter of the
 	 *         performAcquisition method.
 	 */
-	public Vector<String[]> generateRowsFromRanges(List<double[]> ranges,
+	public List<String[]> generateRowsFromRanges(List<double[]> ranges,
 			String[] devs) {
 		// Each element of range is a triplet of min/step/max.
 		// This function determines the discrete values of each range, then

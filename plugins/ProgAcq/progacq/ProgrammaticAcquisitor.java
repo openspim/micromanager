@@ -49,10 +49,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	private static final String TAB_NDIM = "N-Dim";
 	private static final String TAB_SPIM = "SPIM";
 
-	private static final String BTN_ADD_DISCRETES = "Add Discretes...";
+	private static final String BTN_INS_DISCRETES = "Insert Discretes...";
 	private static final String BTN_START = "Start";
 	private static final String BTN_REMOVE_STEPS = "Remove Steps";
-	private static final String BTN_ADD_RANGES = "Add Ranges...";
+	private static final String BTN_INS_RANGES = "Insert Ranges...";
 	private static final String BTN_SELECT_DEVICES = "Select Devices...";
 
 	public static String menuName = "Programmatic Acquisitor";
@@ -112,7 +112,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	public void configurationChanged() {
 		// Note: This doesn't seem to actually be called on config changes...
 
-		Vector<String> used = getUsedDevs();
+		List<String> used = getUsedDevs();
 		List<String> available = Arrays.asList(core.getLoadedDevices()
 				.toArray());
 
@@ -348,11 +348,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JPanel stepsBtns = new JPanel();
 		stepsBtns.setLayout(new BoxLayout(stepsBtns, BoxLayout.PAGE_AXIS));
 
-		JButton addRanges = new JButton(BTN_ADD_RANGES);
+		JButton addRanges = new JButton(BTN_INS_RANGES);
 		addRanges.addActionListener(this);
 
 		// TODO: Add discrete row support.
-		JButton addDisc = new JButton(BTN_ADD_DISCRETES);
+		JButton addDisc = new JButton(BTN_INS_DISCRETES);
+		addDisc.addActionListener(this);
 
 		JButton remStep = new JButton(BTN_REMOVE_STEPS);
 		remStep.addActionListener(this);
@@ -449,7 +450,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									.getFinalList().toArray(new String[0]));
 						}
 					});
-		} else if (BTN_ADD_RANGES.equals(e.getActionCommand())) {
+		} else if (BTN_INS_RANGES.equals(e.getActionCommand())) {
 			if (getUsedDevs().size() <= 0)
 				JOptionPane.showMessageDialog(frame,
 						"You must select at least one device!");
@@ -469,9 +470,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									mdl.insertRow(row);
 							}
 						});
-		} else if (BTN_ADD_DISCRETES.equals(e.getActionCommand())) {
-			JOptionPane.showMessageDialog(frame,
-					"Not supported yet! (Add a single-elements range?)");
+		} else if (BTN_INS_DISCRETES.equals(e.getActionCommand())) {
+
 		} else if (BTN_REMOVE_STEPS.equals(e.getActionCommand())) {
 			((StepTableModel) stepsTbl.getModel()).removeRows(stepsTbl
 					.getSelectedRows());
@@ -979,12 +979,14 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * 
 	 * @return A list of unused devices (based on the table on tab 3.)
 	 */
-	private Vector<String> getUnusedDevs() {
-		Vector<String> all = new Vector<String>((int) core.getLoadedDevices()
-				.size());
+	private List<String> getUnusedDevs() {
+		String[] xyStages = core.getLoadedDevicesOfType(
+				DeviceType.XYStageDevice).toArray();
+		String[] stages = core.getLoadedDevicesOfType(DeviceType.StageDevice)
+				.toArray();
 
-		for (String entry : core.getLoadedDevices())
-			all.add(entry);
+		List<String> all = Arrays.asList(xyStages);
+		all.addAll(Arrays.asList(stages));
 
 		for (int i = 0; i < stepsTbl.getModel().getColumnCount(); ++i)
 			all.remove(stepsTbl.getModel().getColumnName(i));
@@ -998,7 +1000,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * 
 	 * @return A list of devices in use (being given positions for acquisition).
 	 */
-	private Vector<String> getUsedDevs() {
+	private List<String> getUsedDevs() {
 		Vector<String> res = new Vector<String>();
 
 		for (int i = 0; i < stepsTbl.getModel().getColumnCount(); ++i)

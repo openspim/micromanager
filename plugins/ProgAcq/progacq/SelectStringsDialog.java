@@ -3,6 +3,7 @@ package progacq;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -24,16 +25,16 @@ public class SelectStringsDialog extends JDialog implements ActionListener {
 	private JButton moveUp, moveDown, moveTop, moveBottom;
 	private JButton ok, cancel;
 
-	public static void doInstance(JFrame owner, Vector<String> left,
-			Vector<String> right, WindowListener done) {
+	public static void doInstance(JFrame owner, List<String> left,
+			List<String> right, WindowListener done) {
 		SelectStringsDialog ssd = new SelectStringsDialog(owner, left, right);
 
 		ssd.addWindowListener(done);
 		ssd.setVisible(true);
 	};
 
-	public SelectStringsDialog(JFrame owner, Vector<String> leftList,
-			Vector<String> rightList) {
+	public SelectStringsDialog(JFrame owner, List<String> leftList,
+			List<String> rightList) {
 		super(owner, "Select", true);
 
 		outputList = new Vector<String>(rightList);
@@ -58,15 +59,15 @@ public class SelectStringsDialog extends JDialog implements ActionListener {
 		JScrollPane rightScroller = new JScrollPane(right);
 		rightScroller.setSize(128, 128);
 
-		// TODO: Polish the UI more; replace all these with icons.
+		// TODO: Polish the UI more; replace all these with icons?
+		allLeft = new JButton("<<");
+		allLeft.addActionListener(this);
+
 		oneLeft = new JButton("<");
 		oneLeft.addActionListener(this);
 
 		oneRight = new JButton(">");
 		oneRight.addActionListener(this);
-
-		allLeft = new JButton("<<");
-		allLeft.addActionListener(this);
 
 		allRight = new JButton(">>");
 		allRight.addActionListener(this);
@@ -145,7 +146,7 @@ public class SelectStringsDialog extends JDialog implements ActionListener {
 		return res;
 	};
 
-	private static void addAll(Vector<String> from, DefaultListModel to) {
+	private static void addAll(List<String> from, DefaultListModel to) {
 		for (String val : from)
 			to.addElement(val);
 	};

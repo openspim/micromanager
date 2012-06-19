@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -42,14 +43,14 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 	 *            A window listener to alert when the popup closes.
 	 */
 	public static void doInstance(JFrame parent, CMMCore core,
-			Vector<String> devices, WindowListener listener) {
+			List<String> devices, WindowListener listener) {
 		AddStepsDialog dlg = new AddStepsDialog(parent, core, devices);
 
 		dlg.addWindowListener(listener);
 		dlg.setVisible(true);
 	}
 
-	public AddStepsDialog(JFrame parent, CMMCore core, Vector<String> devices) {
+	public AddStepsDialog(JFrame parent, CMMCore core, List<String> devices) {
 		super(parent, "Add Steps");
 
 		JPanel master = new JPanel();

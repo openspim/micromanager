@@ -216,6 +216,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		xyDev.add(xyDevLbl);
 		xyDev.add(xyDevCmbo);
+		xyDev.add(Box.createHorizontalGlue());
 
 		xy.add(xyDev);
 
@@ -265,6 +266,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		zDev.add(zDevCB);
 		zDev.add(zDevLbl);
 		zDev.add(zDevCmbo);
+		zDev.add(Box.createHorizontalGlue());
 
 		z.add(zDev);
 
@@ -297,6 +299,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		tDev.add(tDevCB);
 		tDev.add(tDevLbl);
 		tDev.add(tDevCmbo);
+		tDev.add(Box.createHorizontalGlue());
 
 		t.add(tDev);
 
@@ -317,11 +320,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JPanel rangePanel = new JPanel();
 		rangePanel.setName(TAB_NDIM);
 		rangePanel.setLayout(new BoxLayout(rangePanel, BoxLayout.PAGE_AXIS));
-
-		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
-		selDevs.addActionListener(this);
-
-		rangePanel.add(selDevs);
 
 		JScrollPane rangePane = new JScrollPane(nDimRanges = new NDimRangesTab(
 				core, new String[] {}));
@@ -359,13 +357,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JButton remStep = new JButton(BTN_REMOVE_STEPS);
 		remStep.addActionListener(this);
 
-		selDevs = new JButton(BTN_SELECT_DEVICES);
-		selDevs.addActionListener(this);
-
-		stepsBtns.add(selDevs);
 		stepsBtns.add(addRanges);
 		stepsBtns.add(addDisc);
 		stepsBtns.add(remStep);
+		stepsBtns.add(Box.createGlue());
 
 		steps.add(stepsBtns);
 
@@ -384,7 +379,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		timeCB.setSelected(false);
 
 		JLabel step = new JLabel("Interval (ms):");
-		// TODO: Enforce a minimum? The stage needs time to move...
 		step.setToolTipText("Delay between acquisition sequences in milliseconds.");
 		stepBox = new JTextField(8);
 		stepBox.setMaximumSize(stepBox.getPreferredSize());
@@ -407,10 +401,22 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		bottom.add(timeBox);
 
+		bottom.add(Box.createGlue());
+
+		JPanel btnsPanel = new JPanel();
+		btnsPanel.setBorder(BorderFactory.createTitledBorder("Acquisition"));
+		btnsPanel.setLayout(new BoxLayout(btnsPanel, BoxLayout.LINE_AXIS));
+
 		goBtn = new JButton(BTN_START);
 		goBtn.addActionListener(this);
 
-		bottom.add(goBtn);
+		JButton selDevs = new JButton(BTN_SELECT_DEVICES);
+		selDevs.addActionListener(this);
+
+		btnsPanel.add(selDevs);
+		btnsPanel.add(goBtn);
+
+		bottom.add(btnsPanel);
 
 		frame.getContentPane().add(bottom);
 
@@ -648,8 +654,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return finalRows;
 	}
 
-	// TODO related to this function:
-	// 1. Fix application of timestep!
 	/**
 	 * This function runs a generalized acquisition sequence. It's a mixture of
 	 * Micro-Manager's built in sequencing support (confusing) and waiting for
@@ -725,7 +729,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					for (String dev : devices)
 						core.waitForDevice(dev);
 
-				// TODO: This is probably wrong.
 				synchronized (core) {
 					core.waitForImageSynchro();
 					core.snapImage();

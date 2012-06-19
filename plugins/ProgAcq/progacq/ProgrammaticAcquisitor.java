@@ -677,8 +677,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *            Number of acquisition sequences to run.
 	 * @param timestep
 	 *            Delay in milliseconds between the beginning of each
-	 *            acquisition. Arbitrary if only a single acquisition. Also
-	 *            lying right now; for the moment, it's a delay.
+	 *            acquisition. Arbitrary if only a single acquisition.
 	 * @throws Exception
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
@@ -693,6 +692,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ImageStack img = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
+
+		long beginAll = (long) (System.nanoTime() / 1e6);
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			int step = 0;
@@ -741,7 +742,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				++step;
 			}
 
-			core.sleep(timestep);
+			double wait = (timestep * (seq + 1))
+					- (System.nanoTime() / 1e6 - beginAll);
+			if (wait < 0D)
+				wait = 0D;
+
+			core.sleep(wait);
 		}
 
 		return new ImagePlus("ProgAcqd", img);

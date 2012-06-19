@@ -1,0 +1,7 @@
+<html>
+Enter any combination of MATLAB-style ranges -- (min : max : step) --<br/>
+and/or arrays of values -- [a, b, c] -- into each box. Make sure that<br/>
+the number of generated values is as expected (data outside the above<br/>
+formats is discarded silently!) and is equal for each device. Note<br/>
+that unlike elsewhere, these rows don't cascade.
+</html>

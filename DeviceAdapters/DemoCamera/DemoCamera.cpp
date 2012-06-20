@@ -1664,12 +1664,26 @@ const static unsigned char numbers[NUM_DOTS][4][3] = {
 	},
 };
 
+const static float colors[NUM_DOTS][3] = {
+	{ 1.0f, 0.0f, 0.0f },
+	{ 1.0f, 1.0f, 0.0f },
+	{ 0.0f, 1.0f, 0.0f },
+	{ 0.0f, 1.0f, 1.0f },
+	{ 0.0f, 0.0f, 1.0f },
+	{ 1.0f, 0.0f, 1.0f },
+	{ 0.5f, 0.5f, 0.5f },
+	{ 1.0f, 1.0f, 1.0f }
+};
+
 /**
 * Purpose: Be cooler than the function below here.
 */
 void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 {
 	MMThreadGuard g(imgPixelsLock_);
+
+	char buf[MM::MaxStrLength];
+	GetProperty(MM::g_Keyword_PixelType, buf);
 
 	double stageX = 0, stageY = 0, stageZ = 0, stageT = 0;
 	double zn = 1, zf = 1000;
@@ -1743,7 +1757,7 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 				if(ix < 0 || ix >= (int)img.Width())
 					continue;
 
-				if(ix-(x-r) < 3 && iy-(y-r) < 4)
+				if(ix-(x-r) < 3 && iy-(y-r) < 4 && strcmp(buf, g_PixelType_8bit) == 0)
 					pBuf[iy*img.Width()+ix] = numbers[i][(int)(iy-(y-r))][(int)(ix-(x-r))];
 
 				double dist = sqrt((ix-x)*(ix-x) + (iy-y)*(iy-y));
@@ -1751,11 +1765,39 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 				if(dist > r)
 					continue;
 				
-				unsigned int sum = pBuf[iy*img.Width()+ix] + (unsigned char)(255*(1-dist/r));
-				if(sum > 255)
-					sum = 255;
+				if(strcmp(buf, g_PixelType_8bit) == 0) {
+					unsigned int sum = pBuf[iy*img.Width()+ix] + (unsigned char)(255*(1-dist/r));
+					if(sum > 255)
+						sum = 255;
 
-				pBuf[iy*img.Width()+ix] = (unsigned char)sum;
+					pBuf[iy*img.Width()+ix] = (unsigned char)sum;
+				} else if(strcmp(buf, g_PixelType_16bit) == 0) {
+					unsigned short *buf = reinterpret_cast<unsigned short*>(pBuf);
+
+					unsigned int sum = buf[iy*img.Width()+ix] + (unsigned short)(65535*(1-dist/r));
+					if(sum > 65535)
+						sum = 65535;
+
+					buf[iy*img.Width()+ix] = (unsigned short)sum;
+				} else if(strcmp(buf, g_PixelType_32bit) == 0) {
+					float *buf = reinterpret_cast<float*>(pBuf);
+					buf[iy*img.Width()+ix] = (float)(1-dist/r);
+				} else if(strcmp(buf, g_PixelType_32bitRGB) == 0) {
+					unsigned int *buf = reinterpret_cast<unsigned int*>(pBuf);
+
+					float I = (float)(255*(1-dist/r));
+
+					unsigned int A = 0;
+					unsigned int R = (unsigned int)(colors[i][0]*I);
+					unsigned int G = (unsigned int)(colors[i][1]*I);
+					unsigned int B = (unsigned int)(colors[i][2]*I);
+
+					if(R > 255) R = 255;
+					if(G > 255) G = 255;
+					if(B > 255) B = 255;
+
+					buf[iy*img.Width()+ix] = (A << 24) | (R << 16) | (G << 8) | B;
+				};
 			};
 		};
 	};

@@ -827,13 +827,81 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		if (b.length % 4 != 0)
 			throw new Exception("4-byte length mismatch!");
 
-		int[] r = new int[b.length / 4];
+		int[] i = new int[b.length / 4];
 
-		for (int bi = 0; bi < r.length; ++bi)
-			r[bi] = (b[bi * 4 + 0] << 24) | (b[bi * 4 + 1] << 16)
-					| (b[bi * 4 + 2] << 8) | (b[bi * 4 + 3]);
+		for (int bi = 0; bi < i.length; ++bi) {
+			// These might not actually be ARGB. All 32-bit pixel formats are
+			// passed through this function.
+			int alpha = b[bi * 4 + 3] & 0xFF;
+			int red = b[bi * 4 + 2] & 0xFF;
+			int green = b[bi * 4 + 1] & 0xFF;
+			int blue = b[bi * 4 + 0] & 0xFF;
 
-		return r;
+			i[bi] = (alpha << 24) | (red << 16) | (green << 8) | blue;
+		}
+
+		return i;
+	}
+
+	/**
+	 * Like above, but reinterprets as an array of floats.
+	 * 
+	 * @param b
+	 *            Array of bytes (image data).
+	 * @return Array of floats b represents.
+	 * @throws Exception
+	 *             If b has an impossible length.
+	 */
+	private static float[] bToF(byte[] b) throws Exception {
+		if (b.length % 4 != 0)
+			throw new Exception("4-byte float length mismatch!");
+
+		float[] f = new float[b.length / 4];
+
+		for (int bi = 0; bi < f.length; ++bi) {
+			int hh = b[bi * 4 + 3] & 0xFF;
+			int hl = b[bi * 4 + 2] & 0xFF;
+			int lh = b[bi * 4 + 1] & 0xFF;
+			int ll = b[bi * 4 + 0] & 0xFF;
+
+			f[bi] = Float.intBitsToFloat((hh << 24) | (hl << 16) | (lh << 8)
+					| ll);
+		}
+
+		return f;
+	}
+
+	/**
+	 * Just like above, but as doubles.
+	 * 
+	 * @param b
+	 *            Array of bytes (64-bit floating point image data).
+	 * @return Array of doubles represented by b.
+	 * @throws Exception
+	 *             If b has an impossible length.
+	 */
+	private static double[] bToD(byte[] b) throws Exception {
+		if (b.length % 8 != 0)
+			throw new Exception("8-byte length mismatch!");
+
+		double[] d = new double[b.length / 8];
+
+		for (int bi = 0; bi < d.length; ++bi) {
+			int hhh = b[bi * 8 + 7] & 0xFF;
+			int hhl = b[bi * 8 + 6] & 0xFF;
+			int hlh = b[bi * 8 + 5] & 0xFF;
+			int hll = b[bi * 8 + 4] & 0xFF;
+			int lhh = b[bi * 8 + 3] & 0xFF;
+			int lhl = b[bi * 8 + 2] & 0xFF;
+			int llh = b[bi * 8 + 1] & 0xFF;
+			int lll = b[bi * 8 + 0] & 0xFF;
+
+			d[bi] = Double.longBitsToDouble((hhh << 56) | (hhl << 48)
+					| (hlh << 40) | (hll << 32) | (lhh << 24) | (lhl << 16)
+					| (llh << 8) | (lll << 0));
+		}
+
+		return d;
 	}
 
 	/**
@@ -862,14 +930,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						bToI((byte[]) core.getImage()));
 			} else {
 				return new FloatProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(), (float[]) core.getImage());
+						(int) core.getImageHeight(),
+						bToF((byte[]) core.getImage()));
 			}
 		} else if (core.getBytesPerPixel() == 8) {
 			if (core.getNumberOfComponents() > 1) {
 				throw new Exception("No support for 64-bit color!");
 			} else {
 				return new FloatProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(), (double[]) core.getImage());
+						(int) core.getImageHeight(),
+						bToD((byte[]) core.getImage()));
 			}
 		} else {
 			// TODO: Expand support to include all modes...

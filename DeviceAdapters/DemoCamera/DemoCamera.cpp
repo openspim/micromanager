@@ -1798,48 +1798,12 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 
 	double q = zf/(zf-zn);
 	double cfo2 = 1/tan(fov*3.14159/360);
-/*
+
 	double composite[4][4] = {
-		{  (w2*cfo2*cos(stageT)),       0, stageX*cos(stageT) + stageZ*sin(stageT) + sin(stageT)*q, (w2*cfo2*cos(stageT)) - zn*sin(stageT)*q},
-		{                      0, h2*cfo2,                                                  stageY,                                  h2*cfo2},
-		{ -(w2*cfo2*sin(stageT)),       0, stageZ*cos(stageT) - stageX*sin(stageT) + cos(stageT)*q,  -zn*cos(stageT)*q - w2*cfo2*sin(stageT)},
-		{                      0,       0,                                                       1,                                        0}
-	};
-
-	// Non-transposed projection matrix...
-	double composite[4][4] = {
-		{  w2*cfo2*cos(stageT),       0, sin(stageT)*q - zn*(stageX*cos(stageT) + stageZ*sin(stageT))*q, sin(stageT) + w2*cfo2*cos(stageT)},
-		{                    0, h2*cfo2,                                                   -stageY*zn*q,                           h2*cfo2},
-		{ -w2*cfo2*sin(stageT),       0, cos(stageT)*q - zn*(stageZ*cos(stageT) - stageX*sin(stageT))*q, cos(stageT) - w2*cfo2*sin(stageT)},
-		{                    0,       0,                                                          -zn*q,                                 0}
-	};
-*/
-	double rotate[4][4] = {
-		{ cos(stageT), 0, -sin(stageT), 0 },
-		{ 0,		   1,			 0, 0 },
-		{ sin(stageT), 0,  cos(stageT), 0 },
-		{ 0,		   0,			 0, 1 }
-	};
-
-	double translate[4][4] = {
-		{ 1, 0, 0, stageX },
-		{ 0, 1, 0, stageY },
-		{ 0, 0, 1, stageZ },
-		{ 0, 0, 0,      1 }
-	};
-
-	double project[4][4] = {
-		{ cfo2,    0,     0,  0 },
-		{ 0,    cfo2,     0,  0 },
-		{ 0,       0,     q, -1 },
-		{ 0,       0,  zn*q,  0 }
-	};
-
-	double window[4][4] = {
-		{ w2,  0, 0, w2 },
-		{  0, h2, 0, h2 },
-		{  0,  0, 1,  0 },
-		{  0,  0, 0,  1 }
+		{ w2*cfo2*cos(stageT) + w2*q*zn*sin(stageT),       0, w2*q*zn*cos(stageT) - w2*cfo2*sin(stageT), stageX*w2*cfo2 + stageZ*w2*q*zn },
+		{                       h2*q*zn*sin(stageT), h2*cfo2,                       h2*q*zn*cos(stageT), stageY*h2*cfo2 + stageZ*h2*q*zn },
+		{                             q*sin(stageT),       0,                             q*cos(stageT),                    stageZ*q - 1 },
+		{                          q*zn*sin(stageT),       0,                          q*zn*cos(stageT),                     stageZ*q*zn }
 	};
 
 	img.ResetPixels();
@@ -1847,7 +1811,7 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 	
 	for(int i=0; i < NUM_DOTS; ++i)
 	{
-/*		double w = composite[3][0]*dots[i][0] +
+		double w = composite[3][0]*dots[i][0] +
 					composite[3][1]*dots[i][1] +
 					composite[3][2]*dots[i][2] +
 					composite[3][3]*dots[i][3];
@@ -1866,86 +1830,6 @@ void CDemoCamera::GenerateSyntheticImage3D(ImgBuffer& img)
 					composite[2][1]*dots[i][1] +
 					composite[2][2]*dots[i][2] +
 					composite[2][3]*dots[i][3];
-*/
-		double x = rotate[0][0]*dots[i][0] +
-				   rotate[0][1]*dots[i][1] +
-				   rotate[0][2]*dots[i][2] +
-				   rotate[0][3]*dots[i][3];
-
-		double y = rotate[1][0]*dots[i][0] +
-			       rotate[1][1]*dots[i][1] +
-				   rotate[1][2]*dots[i][2] +
-				   rotate[1][3]*dots[i][3];
-
-		double z = rotate[2][0]*dots[i][0] +
-			       rotate[2][1]*dots[i][1] +
-				   rotate[2][2]*dots[i][2] +
-				   rotate[2][3]*dots[i][3];
-
-		double w = rotate[3][0]*dots[i][0] +
-			       rotate[3][1]*dots[i][1] +
-				   rotate[3][2]*dots[i][2] +
-				   rotate[3][3]*dots[i][3];
-
-		x = translate[0][0]*x +
-			translate[0][1]*y +
-			translate[0][2]*z +
-			translate[0][3]*w;
-
-		y = translate[1][0]*x +
-			translate[1][1]*y +
-			translate[1][2]*z +
-			translate[1][3]*w;
-
-		z = translate[2][0]*x +
-			translate[2][1]*y +
-			translate[2][2]*z +
-			translate[2][3]*w;
-
-		w = translate[3][0]*x +
-			translate[3][1]*y +
-			translate[3][2]*z +
-			translate[3][3]*w;
-
-		x = project[0][0]*x +
-			project[0][1]*y +
-			project[0][2]*z +
-			project[0][3]*w;
-
-		y = project[1][0]*x +
-			project[1][1]*y +
-			project[1][2]*z +
-			project[1][3]*w;
-
-		z = project[2][0]*x +
-			project[2][1]*y +
-			project[2][2]*z +
-			project[2][3]*w;
-
-		w = project[3][0]*x +
-			project[3][1]*y +
-			project[3][2]*z +
-			project[3][3]*w;
-
-		x = window[0][0]*x +
-			window[0][1]*y +
-			window[0][2]*z +
-			window[0][3]*w;
-
-		y = window[1][0]*x +
-			window[1][1]*y +
-			window[1][2]*z +
-			window[1][3]*w;
-
-		z = window[2][0]*x +
-			window[2][1]*y +
-			window[2][2]*z +
-			window[2][3]*w;
-
-		w = window[3][0]*x +
-			window[3][1]*y +
-			window[3][2]*z +
-			window[3][3]*w;
 
 		if(z < zn || z > zf)
 			continue;

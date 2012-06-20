@@ -655,19 +655,15 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		Vector<String[]> finalRows = new Vector<String[]>();
 
 		for (List<Double> row : getRows(values)) {
-			if (xyStages.size() > 0) {
-				Vector<String> finalRow = new Vector<String>();
+			Vector<String> finalRow = new Vector<String>();
 
-				for (int i = 0; i < row.size(); ++i)
-					if (xyStages.contains(i))
-						finalRow.add(row.get(i) + ", " + row.get(++i));
-					else
-						finalRow.add("" + row.get(i));
+			for (int i = 0; i < row.size(); ++i)
+				if (xyStages.contains(i))
+					finalRow.add(row.get(i) + ", " + row.get(++i));
+				else
+					finalRow.add("" + row.get(i));
 
-				finalRows.add(finalRow.toArray(new String[finalRow.size()]));
-			} else {
-				finalRows.add(row.toArray(new String[row.size()]));
-			}
+			finalRows.add(finalRow.toArray(new String[finalRow.size()]));
 		}
 
 		return finalRows;
@@ -1004,7 +1000,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		String[] stages = core.getLoadedDevicesOfType(DeviceType.StageDevice)
 				.toArray();
 
-		List<String> all = Arrays.asList(xyStages);
+		Vector<String> all = new Vector<String>(xyStages.length + stages.length);
+		all.addAll(Arrays.asList(xyStages));
 		all.addAll(Arrays.asList(stages));
 
 		for (int i = 0; i < stepsTbl.getModel().getColumnCount(); ++i)

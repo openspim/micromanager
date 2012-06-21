@@ -351,7 +351,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JButton addRanges = new JButton(BTN_INS_RANGES);
 		addRanges.addActionListener(this);
 
-		// TODO: Add discrete row support.
 		JButton addDisc = new JButton(BTN_INS_DISCRETES);
 		addDisc.addActionListener(this);
 
@@ -705,6 +704,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * @param timestep
 	 *            Delay in milliseconds between the beginning of each
 	 *            acquisition. Arbitrary if only a single acquisition.
+	 * @return An ImageJ ImagePlus of the stack of acquired images.
 	 * @throws Exception
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
@@ -717,6 +717,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
 
+		// TODO: Output a hyperstacked image.
 		ImageStack img = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
 
@@ -778,47 +779,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		}
 
 		return new ImagePlus("ProgAcqd", img);
-	}
-
-	/**
-	 * Creates a new thread to run the acquisition on, with the intent to show
-	 * the generated ImagePlus object via ImageJ. The thread is started and then
-	 * returned.
-	 * 
-	 * @param core
-	 *            The Micro-Manager core in use.
-	 * @param devs
-	 *            The list of devices each column of each row specifies
-	 * @param rows
-	 *            The list of rows (steps) which are run through.
-	 * @param wait
-	 *            Whether to wait for each device individually, or set them all
-	 *            moving at once and wait at the end.
-	 * @param timeseqs
-	 *            How many times to repeat the acquisition with delays.
-	 * @param timestep
-	 *            Delay between each acquisition sequence.
-	 * @return A thread running the acquisition.
-	 */
-	public static Thread performAndShowAcq(final CMMCore core,
-			final String[] devs, final List<String[]> rows, final boolean wait,
-			final int timeseqs, final double timestep) {
-		Thread ret = new Thread() {
-			@Override
-			public void run() {
-				try {
-					performAcquisition(core, devs, rows, wait, timeseqs,
-							timestep).show();
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null,
-							"Error acquiring: " + e.getMessage());
-					throw new Error("Error acquiring!", e);
-				}
-			}
-		};
-		ret.start();
-
-		return ret;
 	}
 
 	/**
@@ -1021,6 +981,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return Double.parseDouble(pair.substring(pair.indexOf(' ') + 1));
 	}
 
+	/**
+	 * Called by the ProgAcq UI to start acquisition. This is vaguely what the
+	 * function might look like in another plugin using performAcquisition to
+	 * acquire images.
+	 * 
+	 * @param devs
+	 *            List of devices described by 'rows'.
+	 * @param rows
+	 *            List of steps for each device.
+	 */
 	private void startLocalAcq(final String[] devs, final List<String[]> rows) {
 		// Okay, we've been asked to run the acquisition sequence(s). Check
 		// the timing options first.

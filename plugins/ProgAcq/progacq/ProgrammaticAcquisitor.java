@@ -462,9 +462,14 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 								StepTableModel mdl = (StepTableModel) stepsTbl
 										.getModel();
 
+								List<double[]> ranges = ((AddStepsDialog) e
+										.getSource()).getResults();
+
+								if (ranges == null)
+									return;
+
 								List<String[]> data = generateRowsFromRanges(
-										AddStepsDialog.getResults(),
-										mdl.getColumnNames());
+										ranges, mdl.getColumnNames());
 
 								for (String[] row : data)
 									mdl.insertRow(row);
@@ -483,6 +488,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 										.getComponent();
 
 								List<String[]> rows = d.getRows();
+
+								if (rows == null)
+									return;
 
 								StepTableModel mdl = (StepTableModel) stepsTbl
 										.getModel();

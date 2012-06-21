@@ -27,12 +27,12 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 
 	// The outer dimension here is unused for everything but XYStage devs.
 	// XYStageDevs have a second min/step/max (obviously; for X/Y).
-	private static Vector<double[]> results;
+	private Vector<double[]> results;
 
 	/**
 	 * Generates an instance of this class and displays it. The window listener
 	 * will be alerted when the popup is closed.
-	 *
+	 * 
 	 * @param parent
 	 *            Passed to the super constructor (required by JDialog).
 	 * @param core
@@ -157,7 +157,7 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 		return box;
 	}
 
-	public static Vector<double[]> getResults() {
+	public List<double[]> getResults() {
 		return results;
 	}
 
@@ -171,6 +171,7 @@ public class AddStepsDialog extends JDialog implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// Find and extract all the information. Bleh.
 		if ("Cancel".equals(e.getActionCommand())) {
+			results = null;
 			this.dispose();
 			return;
 		}

@@ -39,10 +39,12 @@ public class DiscreteValuesDialog extends JDialog implements ActionListener,
 	private static String ML = "\\(\\s*" + FP + FC + FP + FC + FP + "\\s*\\)";
 	// Discrete array elements -- [a, b, c, d]
 	private static String AE = "\\[((?:" + FP + "\\s*,?\\s*)+)\\]";
+	// Repetition braces -- {value, count}
+	private static String RB = "\\{" + FP + "\\s*,\\s*" + FP + "\\}";
 
 	private static Pattern FPP = Pattern.compile(FP);
 	private static Pattern discChunk = Pattern.compile("(?:" + ML + "|" + AE
-			+ ")");
+			+ "|" + RB + ")");
 
 	private CMMCore core;
 	private List<JTextField> fields;
@@ -218,12 +220,14 @@ public class DiscreteValuesDialog extends JDialog implements ActionListener,
 					throw new Exception("Invalid MATLAB range \"" + m.group()
 							+ "\"");
 				double min = Double.parseDouble(numbers.group());
+
 				if (!numbers.find())
 					throw new Exception("Invalid MATLAB range \"" + m.group()
 							+ "\"");
 				double step = Double.parseDouble(numbers.group());
 				if (step == 0)
 					throw new Exception("Step size 0!");
+
 				if (!numbers.find())
 					throw new Exception("Invalid MATLAB range \"" + m.group()
 							+ "\"");
@@ -234,6 +238,24 @@ public class DiscreteValuesDialog extends JDialog implements ActionListener,
 					discs[i] = min + step * i;
 
 				allVals.addAll(Arrays.asList(discs));
+				break;
+			}
+			case '{': {
+				Matcher numbers = FPP.matcher(m.group());
+
+				if (!numbers.find())
+					throw new Exception("Invalid reptition brace \""
+							+ m.group() + "\"");
+				double val = Double.parseDouble(numbers.group());
+
+				if (!numbers.find())
+					throw new Exception("Invalid repetition brace \""
+							+ m.group() + "\"");
+				int count = Integer.parseInt(numbers.group());
+
+				for (int i = 0; i < count; ++i)
+					allVals.add(val);
+
 				break;
 			}
 			default:

@@ -717,10 +717,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
 
-		// TODO: Output a hyperstacked image.
 		ImageStack img = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
-
+		
 		long beginAll = (long) (System.nanoTime() / 1e6);
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
@@ -778,7 +777,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			core.sleep(wait);
 		}
 
-		return new ImagePlus("ProgAcqd", img);
+		ImagePlus finalImage = new ImagePlus("ProgAcqd", img);
+		finalImage.setDimensions(1, img.getSize() / timeseqs, timeseqs);
+		finalImage.setOpenAsHyperStack(true);
+		
+		return finalImage;
 	}
 
 	/**

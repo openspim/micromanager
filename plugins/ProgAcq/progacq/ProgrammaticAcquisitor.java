@@ -695,10 +695,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *            should be ordered pairs. For stage devices, elements should be
 	 *            doubles as strings. No other devices are yet supported (state
 	 *            based devices will hopefully be added soon!).
-	 * @param waitEach
-	 *            If true, waits for each device in turn rather than moving them
-	 *            simultaneously; if false, it still waits at the end of issuing
-	 *            all movements for each device to be finished before acquiring.
 	 * @param timeseqs
 	 *            Number of acquisition sequences to run.
 	 * @param timestep
@@ -710,7 +706,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
 	public static ImagePlus performAcquisition(CMMCore core, String[] devices,
-			List<String[]> rows, boolean waitEach, int timeseqs, double timestep)
+			List<String[]> rows, int timeseqs, double timestep)
 			throws Exception {
 
 		core.removeImageSynchroAll();
@@ -719,7 +715,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ImageStack img = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
-		
+
 		long beginAll = (long) (System.nanoTime() / 1e6);
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
@@ -743,14 +739,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 								+ "\" for device \"" + dev + "\", row " + step,
 								e);
 					}
-
-					if (waitEach)
-						core.waitForDevice(dev);
 				}
-
-				if (!waitEach)
-					for (String dev : devices)
-						core.waitForDevice(dev);
 
 				synchronized (core) {
 					core.waitForImageSynchro();
@@ -771,16 +760,17 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 			double wait = (timestep * (seq + 1))
 					- (System.nanoTime() / 1e6 - beginAll);
-			if (wait < 0D)
-				wait = 0D;
-
-			core.sleep(wait);
+			if (wait > 0D)
+				core.sleep(wait);
+			else
+				core.logMessage("Behind schedule! (next seq in "
+						+ Double.toString(wait) + "ms)");
 		}
 
 		ImagePlus finalImage = new ImagePlus("ProgAcqd", img);
 		finalImage.setDimensions(1, img.getSize() / timeseqs, timeseqs);
 		finalImage.setOpenAsHyperStack(true);
-		
+
 		return finalImage;
 	}
 
@@ -1025,8 +1015,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			@Override
 			public void run() {
 				try {
-					performAcquisition(core, devs, rows, false, timeSeqs,
-							timeStep).show();
+					performAcquisition(core, devs, rows, timeSeqs, timeStep)
+							.show();
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(frame, "Error acquiring: "
 							+ e.getMessage());

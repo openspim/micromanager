@@ -48,7 +48,7 @@ $(srcdir)/MMCoreJ.jar:  MMCoreJ_wrap.cxx \
 all:
 	make $(srcdir)/MMCoreJ_wrap.cxx
 	make $(srcdir)/MMCoreJ.jar
-	cp MMCoreJ.jar ../bin
+	cp MMCoreJ.jar ../dist/jars/
 
 macinstall:
 	cp .libs/libMMCoreJ_wrap.so $(top_srcdir)/MacInstaller/Package_contents/libMMCoreJ_wrap$(JAVASO)

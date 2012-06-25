@@ -69,6 +69,7 @@ public class LiveModeTimer {
    
    public LiveModeTimer() {
       gui_ = MMStudioMainFrame.getInstance();
+      delay_ = delay;
       core_ = gui_.getCore();
       format_ = NumberFormat.getInstance();
       format_.setMaximumFractionDigits(0x1);
@@ -90,7 +91,7 @@ public class LiveModeTimer {
     * As a side effect, also sets variable fpsInterval_
     */
    private long getInterval() {
-      double interval = 20;
+      double interval = delay_;
       try {
          interval = Math.max(core_.getExposure(), interval);
       } catch (Exception e) {

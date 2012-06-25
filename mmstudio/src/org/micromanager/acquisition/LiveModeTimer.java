@@ -60,15 +60,16 @@ public class LiveModeTimer {
    public LiveModeTimer(int delay) {
       delay_ = delay;
       gui_ = MMStudioMainFrame.getInstance();
+      delay_ = delay;
       core_ = gui_.getCore();
       format_ = NumberFormat.getInstance();
       format_.setMaximumFractionDigits(0x1);
    }
 
    private void setInterval() {
-      double interval = 33;
+      double interval = delay_;
       try {
-         interval = Math.max(core_.getExposure(), 33);
+         interval = Math.max(core_.getExposure(), interval);
       } catch (Exception e) {
          ReportingUtils.logError("Unable to get exposure from core");
       }

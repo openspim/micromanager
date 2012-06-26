@@ -148,13 +148,25 @@ public:
 	double GetStepSizeXUm();
 	double GetStepSizeYUm();
 	int IsXYStageSequenceable(bool& isSequenceable) const;
+
+protected:
+	// This is how it SHOULD have been done. Why, why why why!? WHY
+	// WOULD YOU MAKE THIS PRIVATE!?
+	virtual void GetOrientation(bool& mirrorX, bool& mirrorY);
+
 private:
 	int OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct);
 	int OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnMinX(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnMaxX(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnMinY(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnMaxY(MM::PropertyBase* pProp, MM::ActionType eAct);
 
 	int serialX_, serialY_;
 	int velocityX_, velocityY_;
 	void *handleX_, *handleY_;
+	int minX_, maxX_;
+	int minY_, maxY_;
 };
 
 #endif //_OPENSPIM_H_

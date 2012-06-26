@@ -395,6 +395,7 @@ int QICamera::Initialize()
     char	               cameraStr[CAMERA_STRING_LENGTH];
     char						cameraName[CAMERA_STRING_LENGTH];
     unsigned short	   major, minor, build;
+    unsigned long          fwVer, fwBuild;
     char	               qcamVersionStr[256];
     char	               cameraIDStr[256];
     unsigned long	      ccdType;
@@ -444,7 +445,19 @@ int QICamera::Initialize()
             throw DEVICE_ERR;
         }
 
-        sprintf(qcamVersionStr, "QCam %u.%u.%u", major, minor, build);
+	err = QCam_GetInfo(m_camera, qinfFirmwareVersion, &fwVer);
+	if (err != qerrSuccess) {
+		REPORT_QERR(err);
+		throw DEVICE_ERR;
+	}
+
+	err = QCam_GetInfo(m_camera, qinfFirmwareBuild, &fwBuild);
+	if (err != qerrSuccess) {
+		REPORT_QERR(err);
+		throw DEVICE_ERR;
+	}
+
+        sprintf(qcamVersionStr, "QCam %u.%u.%u (%u.%u)", major, minor, build, fwVer, fwBuild);
         m_nDriverBuild = major * 100 + minor * 10 + build;
 
         nRet = CreateProperty(MM::g_Keyword_Description, qcamVersionStr, MM::String, true);

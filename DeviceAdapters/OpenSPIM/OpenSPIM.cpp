@@ -36,6 +36,10 @@ const char* g_XYStageDeviceName = "Picard XY Stage";
 const char* g_Keyword_SerialNumber = "Serial Number";
 const char* g_Keyword_SerialNumberX = "Serial Number (X)";
 const char* g_Keyword_SerialNumberY = "Serial Number (Y)";
+const char* g_Keyword_MinX = "X-Min";
+const char* g_Keyword_MaxX = "X-Max";
+const char* g_Keyword_MinY = "Y-Min";
+const char* g_Keyword_MaxY = "Y-Max";
 const char* g_Keyword_Velocity = "Velocity";
 
 // windows DLL entry code
@@ -497,10 +501,19 @@ CSIABXYStage::CSIABXYStage()
 {
 	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
-	CreateProperty(g_Keyword_SerialNumberX, "105", MM::Integer, false, pActX, true);
-	CreateProperty(g_Keyword_SerialNumberY, "106", MM::Integer, false, pActY, true);
+	CreateProperty(g_Keyword_SerialNumberX, "106", MM::Integer, false, pActX, true);
+	CreateProperty(g_Keyword_SerialNumberY, "105", MM::Integer, false, pActY, true);
 	SetErrorText(1, "Could not initialize motor (X stage)");
 	SetErrorText(2, "Could not initialize motor (Y stage)");
+
+	CPropertyAction* pActMinX = new CPropertyAction(this, &CSIABXYStage::OnMinX);
+	CPropertyAction* pActMaxX = new CPropertyAction(this, &CSIABXYStage::OnMaxX);
+	CPropertyAction* pActMinY = new CPropertyAction(this, &CSIABXYStage::OnMinY);
+	CPropertyAction* pActMaxY = new CPropertyAction(this, &CSIABXYStage::OnMaxY);
+	CreateProperty(g_Keyword_MinX, "1", MM::Integer, false, pActMinX, true);
+	CreateProperty(g_Keyword_MaxX, "8000", MM::Integer, false, pActMaxX, true);
+	CreateProperty(g_Keyword_MinY, "1", MM::Integer, false, pActMinY, true);
+	CreateProperty(g_Keyword_MaxY, "8000", MM::Integer, false, pActMaxY, true);
 }
 
 CSIABXYStage::~CSIABXYStage()
@@ -537,6 +550,46 @@ int CSIABXYStage::OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct)
       serialY_ = (int)serial;
    }
    return DEVICE_OK;
+}
+
+int CSIABXYStage::OnMinX(MM::PropertyBase *pProp, MM::ActionType eAct)
+{
+	if (eAct == MM::BeforeGet)
+		pProp->Set((long)minX_);
+	else if (eAct == MM::AfterSet)
+		pProp->Get((long&)minX_);
+
+	return DEVICE_OK;
+}
+
+int CSIABXYStage::OnMaxX(MM::PropertyBase *pProp, MM::ActionType eAct)
+{
+	if (eAct == MM::BeforeGet)
+		pProp->Set((long)maxX_);
+	else if (eAct == MM::AfterSet)
+		pProp->Get((long&)maxX_);
+
+	return DEVICE_OK;
+}
+
+int CSIABXYStage::OnMinY(MM::PropertyBase *pProp, MM::ActionType eAct)
+{
+	if (eAct == MM::BeforeGet)
+		pProp->Set((long)minY_);
+	else if (eAct == MM::AfterSet)
+		pProp->Get((long&)minY_);
+
+	return DEVICE_OK;
+}
+
+int CSIABXYStage::OnMaxY(MM::PropertyBase *pProp, MM::ActionType eAct)
+{
+	if (eAct == MM::BeforeGet)
+		pProp->Set((long)maxY_);
+	else if (eAct == MM::AfterSet)
+		pProp->Get((long&)maxY_);
+
+	return DEVICE_OK;
 }
 
 bool CSIABXYStage::Busy()
@@ -603,8 +656,29 @@ void CSIABXYStage::GetName(char* name) const
 	CDeviceUtils::CopyLimitedString(name, g_XYStageDeviceName);
 }
 
+void CSIABXYStage::GetOrientation(bool& mirrorX, bool& mirrorY)
+{
+	long x, y;
+	assert(GetProperty(MM::g_Keyword_Transpose_MirrorX, x) == DEVICE_OK);
+	assert(GetProperty(MM::g_Keyword_Transpose_MirrorY, y) == DEVICE_OK);
+
+	mirrorX = x == 0;
+	mirrorY = y == 0;
+}
+
 int CSIABXYStage::SetPositionUm(double x, double y)
 {
+	bool flipX, flipY;
+	GetOrientation(flipX, flipY);
+
+	x = flipX ? (maxX_ - x) + minX_ : x;
+	y = flipY ? (maxY_ - y) + minY_ : y;
+
+	if(x < minX_ || x > maxX_)
+		return 1;
+	if(y < minY_ || y > maxY_)
+		return 2;
+
 	return piRunMotorToPosition((int)x, velocityX_, handleX_) ||
 		piRunMotorToPosition((int)y, velocityY_, handleY_);
 }
@@ -626,19 +700,27 @@ int CSIABXYStage::SetAdapterOriginUm(double x, double y)
 
 int CSIABXYStage::GetPositionUm(double& x, double& y)
 {
+	bool flipX, flipY;
+	GetOrientation(flipX, flipY);
+
 	int positionX, positionY;
 	if (piGetMotorPosition(&positionX, handleX_) ||
 			piGetMotorPosition(&positionY, handleY_))
 		return DEVICE_ERR;
-	x = positionX;
-	y = positionY;
+
+	x = flipX ? (maxX_ - positionX) + minX_ : positionX;
+	y = flipY ? (maxY_ - positionY) + minY_ : positionY;
+
 	return DEVICE_OK;
 }
 
 int CSIABXYStage::GetLimitsUm(double& xMin, double& xMax, double& yMin, double& yMax)
 {
-	xMin = yMin = 1;
-	xMin = yMin = 2000;
+	xMin = minX_;
+	xMax = maxX_;
+	yMin = minY_;
+	yMax = maxY_;
+
 	return 0;
 }
 

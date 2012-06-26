@@ -398,7 +398,12 @@ int CSIABStage::SetPositionUm(double pos)
 
 int CSIABStage::SetRelativePositionUm(double d)
 {
-	return 0;
+	double position;
+	int err = GetPositionUm(position);
+	if(err != DEVICE_OK)
+		return err;
+
+	return SetPositionUm(position + d);
 }
 
 int CSIABStage::Move(double velocity)
@@ -606,7 +611,12 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 int CSIABXYStage::SetRelativePositionUm(double dx, double dy)
 {
-	return 0;
+	double positionX, positionY;
+	int err = GetPositionUm(positionX, positionY);
+	if(err != DEVICE_OK)
+		return err;
+
+	return SetPositionUm(positionX + dx, positionY + dy);
 }
 
 int CSIABXYStage::SetAdapterOriginUm(double x, double y)

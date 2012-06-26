@@ -387,19 +387,20 @@ void QICamera::GetName(char* name) const
 */
 int QICamera::Initialize()
 {
-    const unsigned short		CAMERA_STRING_LENGTH = 256;
+	const unsigned short		CAMERA_STRING_LENGTH = 256;
 
-    QCam_Err					err;
-    QCam_CamListItem			cameraList[1];
-    unsigned long				numOfCameras;
-    char						cameraStr[CAMERA_STRING_LENGTH];
-    char						cameraName[CAMERA_STRING_LENGTH];
-    unsigned short				major, minor, build;
-    char						qcamVersionStr[256];
-    char						cameraIDStr[256];
-    unsigned long				ccdType;
-    unsigned long				cameraType;
-    int                         nRet;
+	QCam_Err					err;
+	QCam_CamListItem			cameraList[1];
+	unsigned long				numOfCameras;
+	char						cameraStr[CAMERA_STRING_LENGTH];
+	char						cameraName[CAMERA_STRING_LENGTH];
+	unsigned short				major, minor, build;
+	unsigned long				fwVer, fwBuild;
+	char						qcamVersionStr[256];
+	char						cameraIDStr[256];
+	unsigned long				ccdType;
+	unsigned long				cameraType;
+	int							nRet;
 
     START_METHOD("QICamera::Initialize");
 
@@ -446,7 +447,19 @@ int QICamera::Initialize()
             throw DEVICE_ERR;
         }
 
-        sprintf(qcamVersionStr, "QCam %u.%u.%u", major, minor, build);
+		err = QCam_GetInfo(m_camera, qinfFirmwareVersion, &fwVer);
+		if (err != qerrSuccess) {
+			REPORT_QERR(err);
+			throw DEVICE_ERR;
+		}
+
+		err = QCam_GetInfo(m_camera, qinfFirmwareBuild, &fwBuild);
+		if (err != qerrSuccess) {
+			REPORT_QERR(err);
+			throw DEVICE_ERR;
+		}
+
+        sprintf(qcamVersionStr, "QCam %u.%u.%u (%u.%u)", major, minor, build, fwVer, fwBuild);
         m_nDriverBuild = major * 100 + minor * 10 + build;
 
         nRet = CreateProperty(MM::g_Keyword_Description, qcamVersionStr, MM::String, true);

@@ -879,7 +879,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			throws Exception {
 		if (core.getBytesPerPixel() == 1) {
 			return new ByteProcessor((int) core.getImageWidth(),
-					(int) core.getImageHeight(), (byte[]) core.getImage());
+					(int) core.getImageHeight(), (byte[]) core.getImage(),
+					null);
 		} else if (core.getBytesPerPixel() == 2) {
 			return new ShortProcessor((int) core.getImageWidth(),
 					(int) core.getImageHeight(), (short[]) core.getImage(),

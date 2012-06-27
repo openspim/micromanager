@@ -198,11 +198,6 @@ int CSIABTwister::SetPositionUm(double pos)
 	return piRunTwisterToPosition((int)pos, velocity_, handle_);
 }
 
-int CSIABTwister::SetRelativePositionUm(double d)
-{
-	return DEVICE_ERR;
-}
-
 int CSIABTwister::Move(double velocity)
 {
 	velocity_ = (int)velocity;

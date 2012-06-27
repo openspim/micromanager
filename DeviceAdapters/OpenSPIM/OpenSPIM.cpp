@@ -497,7 +497,8 @@ bool CSIABStage::IsContinuousFocusDrive() const
 // The XY Stage
 
 CSIABXYStage::CSIABXYStage()
-: serialX_(105), serialY_(106), handleX_(NULL), handleY_(NULL)
+: serialX_(105), serialY_(106), handleX_(NULL), handleY_(NULL), minX_(1),
+  minY_(1), maxX_(8000), maxY_(8000)
 {
 	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);

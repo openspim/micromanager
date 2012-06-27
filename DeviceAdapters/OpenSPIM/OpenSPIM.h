@@ -45,7 +45,6 @@ public:
 	void GetName(char* name) const;
 
 	int SetPositionUm(double pos);
-	int SetRelativePositionUm(double d);
 	int Move(double velocity);
 	int SetAdapterOriginUm(double d);
 	int GetPositionUm(double& pos);

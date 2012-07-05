@@ -257,7 +257,7 @@ public class BleachControlDlg extends JDialog {
 
    public void displayImage(Object img) {
       //ImagePlus implus = WindowManager.getImage(MMStudioMainFrame.LIVE_WINDOW_TITLE);
-      ImagePlus implus = MMStudioMainFrame.getLiveWin().getImagePlus();
+      ImagePlus implus = MMStudioMainFrame.getInstance().getImageWin().getImagePlus();
       if (implus == null) {
          return;
       }

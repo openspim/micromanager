@@ -14,9 +14,9 @@ import mmcorej.CMMCore;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.micromanager.metadata.ImageKey;
-import org.micromanager.metadata.ImagePropertyKeys;
-import org.micromanager.metadata.SummaryKeys;
+//import org.micromanager.metadata.ImageKey;
+//import org.micromanager.metadata.ImagePropertyKeys;
+//import org.micromanager.metadata.SummaryKeys;
 
 
 public class BleachThread extends Thread {
@@ -132,7 +132,7 @@ public class BleachThread extends Thread {
             error = !saveImageFile(outDirName_ + "/" + fileName, img, width, height);                  
             imageCount++;
 
-            JSONObject jsonData = new JSONObject();
+/*            JSONObject jsonData = new JSONObject();
             jsonData.put(ImagePropertyKeys.FILE, fileName);
             jsonData.put(ImagePropertyKeys.FRAME, imageCount-1);
             jsonData.put(ImagePropertyKeys.CHANNEL, "FRAP");
@@ -141,7 +141,7 @@ public class BleachThread extends Thread {
             jsonData.put(ImagePropertyKeys.EXPOSURE_MS, bleachSection ? bleachDurationMs_ : exposureMs_);
             // insert the metadata for the current image
             metadata.put(ImageKey.generateFrameKey(imageCount-1, 0, 0), jsonData);
-
+*/
             // end frame
 
             // wait until the frame interval expires
@@ -163,7 +163,7 @@ public class BleachThread extends Thread {
          gui_.displayMessage(e.getMessage());
       }
 
-      try {
+/*      try {
          // insert summary data
          // i5dData.put(SummaryKeys.GUID, guidgen_.genNewGuid());
          i5dData.put(SummaryKeys.METADATA_VERSION, SummaryKeys.VERSION);
@@ -186,9 +186,9 @@ public class BleachThread extends Thread {
          // TODO Auto-generated catch block
          e1.printStackTrace();
       }
-
+*/
       // write metadata
-      try {
+/*      try {
          FileWriter metaWriter = new FileWriter(new File(outDirName_ + "/" + ImageKey.METADATA_FILE_NAME));
          metaWriter.write(metadata.toString());
          metaWriter.close();
@@ -196,7 +196,7 @@ public class BleachThread extends Thread {
          // TODO Auto-generated catch block
          e.printStackTrace();
       };
-   }
+*/   }
 
    private boolean saveImageFile(String fname, Object img, int width, int height) {
       ImageProcessor ip;

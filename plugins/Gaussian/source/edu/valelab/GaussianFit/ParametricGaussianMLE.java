@@ -1,13 +1,12 @@
 package edu.valelab.GaussianFit;
 
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.optimization.fitting.ParametricRealFunction;
+import org.apache.commons.math.analysis.ParametricUnivariateRealFunction;
 
 /**
  *
  * @author nico
  */
-public class ParametricGaussianMLE implements ParametricRealFunction{
+public class ParametricGaussianMLE implements ParametricUnivariateRealFunction{
    private int width_;
    private int height_;
    private int mode_;
@@ -18,7 +17,7 @@ public class ParametricGaussianMLE implements ParametricRealFunction{
       mode_ = mode;
    }
 
-   public double value(double d, double[] doubles) throws FunctionEvaluationException {
+   public double value(double d, double[] doubles) {
       double value = 0;
       if (mode_ == 1)
          value =  GaussianUtils.gaussian(doubles, ((int) d) % width_, ((int) d) / width_);
@@ -29,7 +28,7 @@ public class ParametricGaussianMLE implements ParametricRealFunction{
       return value;
    }
 
-   public double[] gradient(double d, double[] doubles) throws FunctionEvaluationException {
+   public double[] gradient(double d, double[] doubles) {
       double[] value = {0.0};
       if (mode_ == 1)
          value =  GaussianUtils.gaussianJ(doubles, ((int) d) % width_, ((int) d) / width_);

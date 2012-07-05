@@ -9,7 +9,6 @@
 package edu.valelab.GaussianFit;
 
 
-import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.*;
 
 /**
@@ -81,7 +80,7 @@ public class MultiVariateGaussianMLE implements DifferentiableMultivariateRealFu
       
       MultivariateVectorialFunction mVF = new MultivariateVectorialFunction() {
          
-         public double[] value(double[] params) throws FunctionEvaluationException, IllegalArgumentException {
+         public double[] value(double[] params) throws IllegalArgumentException {
             double[] mleGradient = new double[params.length];
             for (int i = 0; i < nx_; i++) {
                for (int j = 0; j < ny_; j++) {

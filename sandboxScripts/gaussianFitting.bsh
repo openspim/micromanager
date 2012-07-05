@@ -1,5 +1,5 @@
 import org.apache.commons.math.analysis.*;
-import org.apache.commons.math.optimization.direct.NelderMead;
+import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
 import org.apache.commons.math.optimization.direct.MultiDirectional;
 import org.apache.commons.math.optimization;
 import org.apache.commons.math.optimization.GoalType;
@@ -74,7 +74,7 @@ class GaussianResidual implements MultivariateRealFunction {
 unset("gs");
 GaussianResidual gs = new GaussianResidual();
 unset("nm");
-NelderMead nm = new NelderMead();
+NelderMeadSimplex nm = new NelderMeadSimplex(1);
 SimpleScalarValueChecker convergedChecker = new SimpleScalarValueChecker(1e-6,-1);
 
 ImagePlus siPlus = IJ.getImage();

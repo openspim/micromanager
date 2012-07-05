@@ -6,8 +6,7 @@ import ij.plugin.*;
 import ij.plugin.frame.*;
 
 import org.apache.commons.math.analysis.*;
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.optimization.direct.NelderMead;
+import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
 import org.apache.commons.math.optimization.direct.MultiDirectional;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.GoalType;
@@ -26,7 +25,7 @@ public class GaussianFit_ implements PlugIn {
 	String [] paramNames_ = {"A", "x_c", "y_c", "sigma", "b"};
 
    GaussianResidual gs_;
-	NelderMead nm_;
+	NelderMeadSimplex nm_;
 	SimpleScalarValueChecker convergedChecker_;
 
 	private void print(String myText) {
@@ -158,7 +157,7 @@ public class GaussianFit_ implements PlugIn {
 		long startTime = System.currentTimeMillis();
 
 		gs_ = new GaussianResidual();
-		nm_ = new NelderMead();
+		nm_ = new NelderMeadSimplex(1);
 		convergedChecker_ = new SimpleScalarValueChecker(1e-6,-1);
 
 		ImagePlus siPlus = IJ.getImage();

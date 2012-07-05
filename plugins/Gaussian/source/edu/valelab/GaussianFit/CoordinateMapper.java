@@ -43,6 +43,8 @@ import org.apache.commons.math.linear.DecompositionSolver;
 import org.apache.commons.math.linear.LUDecompositionImpl;
 import org.apache.commons.math.linear.QRDecompositionImpl;
 import org.apache.commons.math.linear.RealMatrix;
+import org.apache.commons.math.linear.RealVector;
+import org.apache.commons.math.linear.ArrayRealVector;
 
 
 
@@ -163,16 +165,16 @@ public class CoordinateMapper {
          matrix.setRow(i, powerTerms(srcPoints.get(i).x, srcPoints.get(i).y, exponentPairs));
       }
       final DecompositionSolver solver = new LUDecompositionImpl(matrix).getSolver();
-      final double [] destX = new double[srcPoints.size()];
-      final double [] destY = new double[srcPoints.size()];
+      final RealVector destX = new ArrayRealVector(srcPoints.size());
+      final RealVector destY = new ArrayRealVector(srcPoints.size());
       for (int i=0; i<srcPoints.size(); ++i) {
          final Point2D.Double destPoint = pointPairs.get(srcPoints.get(i));
-         destX[i] = destPoint.x;
-         destY[i] = destPoint.y;
+         destX.setEntry(i, destPoint.x);
+         destY.setEntry(i, destPoint.y);
       }
       final PolynomialCoefficients polys = new PolynomialCoefficients();
-      polys.polyX = solver.solve(destX);
-      polys.polyY = solver.solve(destY);
+      polys.polyX = solver.solve(destX).toArray();
+      polys.polyY = solver.solve(destY).toArray();
       return polys;
    }
 

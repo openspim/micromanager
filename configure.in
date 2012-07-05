@@ -71,24 +71,24 @@ if test "$IMAGEJDIR" != "no" ; then
    fi
    
    #----------------------------------------------------------------
-   # Find commons-math-2.0.jar in ImageJ plugins directory
+   # Find commons-math.jar in ImageJ plugins directory
    #----------------------------------------------------------------
 
    AC_MSG_CHECKING(for apache commons math jar file)
-   if test -r "$CLASSEXT/commons-math-2.0.jar" ; then
-      COMMONSMATHJARPATH="$CLASSEXT/plugins/commons-math-2.0.jar"
+   if test -r "$CLASSEXT/commons-math.jar" ; then
+      COMMONSMATHJARPATH="$CLASSEXT/plugins/commons-math.jar"
       AC_MSG_RESULT($COMMONSMATHJARPATH)
    fi
-   if test -r "/usr/share/java/commons-math-2.0.jar" ; then
-      COMMONSMATHJARPATH="/usr/share/java/commons-math-2.0.jar"
+   if test -r "/usr/share/java/commons-math.jar" ; then
+      COMMONSMATHJARPATH="/usr/share/java/commons-math.jar"
       AC_MSG_RESULT($COMMONSMATHJARPATH)
    fi
-   if test -r $CLASSEXT"/commons-math-2.0.jar" ; then
-      COMMONSMATHJARPATH=$CLASSEXT"/commons-math-2.0.jar"
+   if test -r $CLASSEXT"/commons-math.jar" ; then
+      COMMONSMATHJARPATH=$CLASSEXT"/commons-math.jar"
       AC_MSG_RESULT($COMMONSMATHJARPATH)
    fi
    if test "$COMMONSMATHJARPATH" = "" ; then
-      AC_MSG_ERROR([commons-math-2.0.jar not found. It should be in the classext directory.])
+      AC_MSG_ERROR([commons-math.jar not found. It should be in the classext directory.])
    fi
 
    #----------------------------------------------------------------

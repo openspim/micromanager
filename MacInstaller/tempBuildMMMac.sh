@@ -53,7 +53,7 @@ cp $CLASSEXT/bsh-2.0b4.jar $TARGET/plugins/
 cp $CLASSEXT/clojure.jar $TARGET/plugins/
 cp $CLASSEXT/swingx-0.9.5.jar $TARGET/plugins/
 cp $CLASSEXT/swing-layout-1.0.4.jar $TARGET/plugins/
-cp $CLASSEXT/commons-math-2.0.jar $TARGET/plugins/
+cp $CLASSEXT/commons-math.jar $TARGET/plugins/
 cp -r $TARGET $PPC
 cp -r $TARGET $I386
 cp -r $TARGET $X86_64

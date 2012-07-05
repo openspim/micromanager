@@ -8,9 +8,9 @@ package edu.valelab.GaussianFit;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.optimization.OptimizationException;
-import org.apache.commons.math.optimization.direct.NelderMead;
+import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
+import org.apache.commons.math.optimization.direct.SimplexOptimizer;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.SimpleScalarValueChecker;
 import org.apache.commons.math.optimization.GoalType;
@@ -49,7 +49,7 @@ public class GaussianFit {
    int mode_ = 1;
    int fitMode_ = 1;
 
-   NelderMead nm_;
+   NelderMeadSimplex nm_;
    SimpleScalarValueChecker convergedChecker_;
    MultiVariateGaussianFunction mGF_;
    MultiVariateGaussianMLE mGFMLE_;
@@ -83,7 +83,7 @@ public class GaussianFit {
       steps_ = new double[mode_ + 4];
 
       if (fitMode_ == 1) {
-         nm_ = new NelderMead();
+//         nm_ = new NelderMeadSimplex(1);
          convergedChecker_ = new SimpleScalarValueChecker(1e-6,-1);
          mGF_ = new MultiVariateGaussianFunction(mode_);
       }
@@ -131,12 +131,16 @@ public class GaussianFit {
       double[] paramsOut = {0.0};
 
       if (fitMode_ == 1) {
-         nm_.setStartConfiguration(steps_);
-         nm_.setConvergenceChecker(convergedChecker_);
-         nm_.setMaxIterations(maxIterations);
+      	 nm_ = new NelderMeadSimplex(steps_);
+//         nm_.setStartConfiguration(steps_);
+//         nm_.setConvergenceChecker(convergedChecker_);
+//         nm_.setMaxIterations(maxIterations);
+	 SimplexOptimizer opt = new SimplexOptimizer(convergedChecker_);
+	 opt.setSimplex(nm_);
          mGF_.setImage((short[]) siProc.getPixels(), siProc.getWidth(), siProc.getHeight());
          try {
-            RealPointValuePair result = nm_.optimize(mGF_, GoalType.MINIMIZE, params0_);
+//            RealPointValuePair result = nm_.optimize(mGF_, GoalType.MINIMIZE, params0_);
+	      RealPointValuePair result = opt.optimize(maxIterations, mGF_, GoalType.MINIMIZE, params0_);
             paramsOut = result.getPoint();
          } catch (java.lang.OutOfMemoryError e) {
             throw(e);
@@ -163,12 +167,12 @@ public class GaussianFit {
             }
          }
          try {
-            paramsOut = cF.fit(new ParametricGaussianFunction( mode_, siProc.getWidth(), siProc.getHeight() ),
+            paramsOut = cF.fit(maxIterations, new ParametricGaussianFunction( mode_, siProc.getWidth(), siProc.getHeight() ),
                     params0_);
-         } catch (FunctionEvaluationException ex) {
-            Logger.getLogger(GaussianFit.class.getName()).log(Level.SEVERE, null, ex);
-         } catch (OptimizationException ex) {
-            // Logger.getLogger(GaussianFit.class.getName()).log(Level.SEVERE, null, ex);
+//         } catch (FunctionEvaluationException ex) {
+//            Logger.getLogger(GaussianFit.class.getName()).log(Level.SEVERE, null, ex);
+//         } catch (OptimizationException ex) {
+//            Logger.getLogger(GaussianFit.class.getName()).log(Level.SEVERE, null, ex);
          } catch (IllegalArgumentException ex) {
             Logger.getLogger(GaussianFit.class.getName()).log(Level.SEVERE, null, ex);
          } catch(Exception ex) {

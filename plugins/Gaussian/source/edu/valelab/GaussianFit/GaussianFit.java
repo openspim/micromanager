@@ -8,9 +8,8 @@ package edu.valelab.GaussianFit;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.optimization.OptimizationException;
-import org.apache.commons.math.optimization.direct.NelderMead;
+import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.SimpleScalarValueChecker;
 import org.apache.commons.math.optimization.GoalType;
@@ -46,7 +45,7 @@ public class GaussianFit {
    int mode_ = 1;
    int fitMode_ = 1;
 
-   NelderMead nm_;
+   NelderMeadSimplex nm_;
    SimpleScalarValueChecker convergedChecker_;
    MultiVariateGaussianFunction mGF_;
 
@@ -78,7 +77,7 @@ public class GaussianFit {
       steps_ = new double[mode_ + 4];
 
       if (fitMode_ == 1) {
-         nm_ = new NelderMead();
+         nm_ = new NelderMeadSimplex(1);
          convergedChecker_ = new SimpleScalarValueChecker(1e-6,-1);
          mGF_ = new MultiVariateGaussianFunction(mode_);
       }

@@ -16,7 +16,7 @@
         <property name="IJ" value="${classext}/ij.jar"/>
         <property name="beanshell" value="${classext}/bsh-2.0b4.jar"/>
         <property name="swinglayout" value="${classext}/swing-layout-1.0.4.jar"/>
-        <property name="commonsmath" value="${classext}/commons-math-2.0.jar"/>
+        <property name="commonsmath" value="${classext}/commons-math.jar"/>
         <property name="swingx" value="${classext}/swingx-0.9.5.jar"/>
 
 	<path id="project.MMPlugins.path">

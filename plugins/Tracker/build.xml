@@ -8,7 +8,7 @@
 
 	<!-- Do not modify from this point on -->
 	<property name="MMPluginDir" value="../../mmstudio"/>
-	<property name="MMCoreJ" value="../../bin_Win32/MMCoreJ.jar"/>
+	<property name="MMCoreJ" value="../../bin_Win32/plugins/MMCoreJ.jar"/>
 	<property name="MMPluginsDir-inst" value="${InstallRoot}/mmplugins"/>
 	<property name="BinRoot" value="../../bin_Win32"/>
         <property name="classext" value="../../../3rdpartypublic/classext"/>

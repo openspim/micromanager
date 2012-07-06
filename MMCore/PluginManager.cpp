@@ -86,7 +86,7 @@ void CPluginManager::AddSearchPath(string path)
       buffer[0] = buffer[len + 1] = ';';
 	  buffer[len + 2] = '\0';
 	  if (!strstr(buffer, (string(";") + path + ";").c_str())) {
-         strcpy(buffer + len + 2, path.c_str());
+		 strcpy(buffer + len + 2, path.c_str());
 		 SetEnvironmentVariable("PATH", buffer + 1);
 	  }
    }

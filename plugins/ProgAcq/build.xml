@@ -1,0 +1,32 @@
+<!-- Ant makefile for the Micro-Manager ProgAcq plugin  -->
+<!-- This file assumes Micro-Manager project tree structure -->
+
+<project name="ProgAcq" default="build">
+	<target name="compile" description="Compile ProgAcq plugin.">
+		<mkdir dir="build" />
+		<javac srcdir="." destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
+			<classpath>
+				<fileset dir="../../bin_Win32/jars/" >
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="../../bin_Win32/plugins/" >
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="../../../3rdpartypublic/classext/" >
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="build" depends="compile" description="Build ProgAcq.jar">
+		<jar jarfile="ProgAcq.jar" basedir="build" />
+		<copy file="ProgAcq.jar" todir="..\..\bin_Win32\mmplugins\" />
+	</target>
+	
+	<target name="clean" description="Delete the ProgAcq build files.">
+		<delete dir="build" />
+		<delete file="ProgAcq.jar" />
+	</target>
+	
+</project>

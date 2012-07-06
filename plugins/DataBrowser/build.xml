@@ -1,0 +1,63 @@
+<!-- Ant makefile for the Micro-Manager DataBrowser plugin  -->
+<!-- This file assumes Micro-Manager project tree structure -->
+
+<project name="DataBrowser" default="build">
+
+	<!-- Specify the system path to the ImageJ root directory -->
+	<property name="InstallRoot" value="../../Install_AllPlatforms/micro-manager"/>
+
+	<!-- Do not modify from this point on -->
+        <property name="classext" value="../../../3rdpartypublic/classext"/>
+	<property name="MMPluginDir" value="../../mmstudio"/>
+	<property name="MMPluginsDir-inst" value="${InstallRoot}/mmplugins"/>
+	<property name="BinRoot" value="../../bin_Win32"/>
+
+	<property name="MMCoreJ" value="../../bin_Win32/plugins/MMCoreJ.jar"/>
+	<property name="MMAcqEngine" value="../../acqEngine/MMAcqEngine.jar"/>
+
+        <property name="ij" value="${classext}/ij.jar"/>
+	<property name="clojure" value="${classext}/clojure.jar"/>
+        <property name="beanshell" value="${classext}/bsh-2.0b4.jar"/>
+	<property name="mmj" value="${MMPluginDir}/MMJ_.jar"/>
+	<property name="json" value="${classext}/data.json.jar"/>
+
+	<path id="project.MMPlugins.path">
+		<pathelement location="${MMPluginDir}"/>
+	</path>
+
+	<path id="project.class.path">
+		<pathelement location="${clojure}" />
+		<pathelement location="${json}" />
+		<pathelement location="${ij}" />
+		<pathelement location="${beanshell}" />
+		<pathelement location="${mmj}" />
+		<pathelement location="${MMCoreJ}" />
+		<pathelement location="${MMAcqEngine}" />
+	</path>
+
+	<target name="compile" description="Compile DataBrowser plugin.">
+		<mkdir dir="classes" />
+		<java classname="clojure.lang.Compile" fork="true" failonerror="true">
+			<classpath refid="project.class.path"/>
+			<classpath>
+				<pathelement location="src"/>
+				<pathelement location="classes"/>
+			</classpath>
+			<jvmarg value="-server"/>
+			<jvmarg line="-Dclojure.compile.path=classes"/>
+			<jvmarg line="-Djava.library.path=../../bin_Win32"/>
+			<arg line="org.micromanager.browser.plugin"/>
+		</java>
+	</target>
+
+	<target name="build" description="Build DataBrowser.jar">
+		<jar jarfile="DataBrowser.jar" basedir="classes" />
+		<copy file="DataBrowser.jar" todir="${MMPluginsDir-inst}" />
+	</target>
+	
+	<target name="clean" description="Delete the DataBrowser build files.">
+		<delete dir="classes" />
+		<delete file="DataBrowser.jar" />
+	</target>
+	
+</project>

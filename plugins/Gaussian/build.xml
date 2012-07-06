@@ -1,0 +1,31 @@
+<!-- Ant makefile for the Micro-Manager Gaussian plugin  -->
+<!-- This file assumes Micro-Manager project tree structure -->
+
+<project name="Gaussian" default="build">
+	<target name="compile" description="Compile Gaussian plugin.">
+		<mkdir dir="build" />
+		<javac srcdir="./source" destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
+			<classpath>
+				<pathelement path="../../mmstudio/MMJ_.jar"/>
+				<pathelement path="../../bin_Win32/plugins/MMCoreJ.jar"/>
+				<fileset dir="../../../3rdpartypublic/classext/" >
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		<copy todir="./build/">
+			<fileset dir="./source/" includes="**/*.form" />
+		</copy>
+	</target>
+
+	<target name="build" description="Build Gaussian.jar">
+		<jar jarfile="Gaussian.jar" basedir="build" />
+		<copy file="Gaussian.jar" todir="..\..\Install_AllPlatforms\micro-manager\mmplugins\" />
+	</target>
+	
+	<target name="clean" description="Delete the Gaussian build files.">
+		<delete dir="build" />
+		<delete file="Gaussian.jar" />
+	</target>
+	
+</project>

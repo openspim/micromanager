@@ -8,7 +8,7 @@
 
 	<!-- Do not modify from this point on -->
 	<property name="MMPluginDir" value="../../mmstudio"/>
-	<property name="MMCoreJ" value="../../bin_Win32/MMCoreJ.jar"/>
+	<property name="MMCoreJ" value="../../bin_Win32/plugins/MMCoreJ.jar"/>
 	<property name="MMPluginsDir-inst" value="${InstallRoot}/mmplugins"/>
 	<property name="BinRoot" value="../../bin_Win32"/>
         <property name="classext" value="../../../3rdpartypublic/classext"/>
@@ -16,7 +16,7 @@
 	<property name="IJ" value="${classext}/ij.jar"/>
 	<property name="beanshell" value="${classext}/bsh-2.0b4.jar"/>
 	<property name="swinglayout" value="${classext}/swing-layout-1.0.4.jar"/>
-	<property name="commonsmath" value="${classext}/commons-math-2.0.jar"/>
+	<property name="commonsmath" value="${classext}/commons-math.jar"/>
 	<property name="swingx" value="${classext}/swingx-0.9.5.jar"/>
 
 
@@ -44,7 +44,7 @@
 		<copy file="./src/org/micromanager/pixelcalibrator/PixelCalibratorDialog.form" todir="./build/org/micromanager/pixelcalibrator/" />
 	</target>
 
-	<target name="build" description="Build PixelCalibrator.jar">
+	<target name="build" description="Build PixelCalibrator.jar" depends="compile">
 		<jar jarfile="PixelCalibrator.jar" basedir="build" />
 		<copy file="PixelCalibrator.jar" todir="${MMPluginsDir-inst}" />
 	</target>

@@ -45,7 +45,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build Recall.jar">
+	<target name="build" depends="compile" description="Build Recall.jar">
 		<jar jarfile="Recall.jar" basedir="build" />
 		<copy file="Recall.jar" todir="${MMPluginsDir-inst}" />
 	</target>

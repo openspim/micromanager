@@ -18,9 +18,10 @@ import org.apache.commons.math.optimization.fitting.CurveFitter;
 
 import ij.process.ImageProcessor;
 import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
+import org.micromanager.utils.ReportingUtils;
 
 /**
- *
+ * 
  * @author nico
  */
 public class GaussianFit {

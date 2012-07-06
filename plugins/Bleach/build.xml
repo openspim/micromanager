@@ -45,7 +45,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build Bleach.jar">
+	<target name="build" depends="compile" description="Build Bleach.jar">
 		<jar jarfile="Bleach.jar" basedir="build" />
 		<copy file="Bleach.jar" todir="${MMPluginsDir-inst}" />
 	</target>

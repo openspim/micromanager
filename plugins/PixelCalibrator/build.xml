@@ -50,6 +50,7 @@
 					<include name="*.jar"/>
 				</fileset>
 			</classpath>
+			<classpath refid="project.class.path" />
 		</javac>
 		<copy file="./src/org/micromanager/pixelcalibrator/PixelCalibratorDialog.form" todir="./build/org/micromanager/pixelcalibrator/" />
 	</target>

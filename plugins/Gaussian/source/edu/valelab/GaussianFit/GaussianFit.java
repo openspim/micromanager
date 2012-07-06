@@ -20,7 +20,7 @@ import ij.process.ImageProcessor;
 import org.apache.commons.math.optimization.VectorialConvergenceChecker;
 import org.apache.commons.math.optimization.VectorialPointValuePair;
 import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
-import org.apache.commons.math.optimization.general.NonLinearConjugateGradientOptimizer;
+import org.micromanager.utils.ReportingUtils;
 
 /**
  *

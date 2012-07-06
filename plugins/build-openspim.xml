@@ -1,0 +1,26 @@
+<project name="Micro-Manager Plugins" default="build">
+	<target name="clean" description="Clean all MM plugins.">
+		<subant target="clean">
+			<fileset dir=".">
+				<include name="**/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+	</target>
+	<target name="compile" description="Compile all MM plugins.">
+		<subant target="compile">
+			<fileset dir=".">
+				<include name="**/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+	</target>
+	<target name="build" description="Build all MM plugins.">
+		<subant target="build">
+			<fileset dir=".">
+				<include name="**/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+	</target>
+</project>

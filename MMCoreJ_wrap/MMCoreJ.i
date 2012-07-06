@@ -625,8 +625,8 @@
     if (platform.startsWith("linux"))
         searchPaths.add(new File(MMCoreJConstants.DEVICEADAPTERPATH));
     
-	try {
-	    loadLibrary(searchPaths, "MMCoreJ_wrap");
+    try {
+        loadLibrary(searchPaths, "MMCoreJ_wrap");
         for (File path : searchPaths) {
           System.out.println(path.getAbsolutePath());
           CMMCore.addSearchPath(path.getAbsolutePath());

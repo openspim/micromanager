@@ -170,7 +170,7 @@ public class OughtaFocus extends AutofocusBase implements org.micromanager.api.A
       double z = core.getPosition(core.getFocusDevice());
       startZUm_ = z;
       getCurrentFocusScore();
-      double zResult = brentOptimizer.optimize(400000000, scoreFun, GoalType.MAXIMIZE, z - searchRange / 2, z + searchRange / 2);
+      double zResult = brentOptimizer.optimize(400000000, scoreFun, GoalType.MAXIMIZE, z - searchRange / 2, z + searchRange / 2).getValue();
       ReportingUtils.logMessage("OughtaFocus Iterations: " + brentOptimizer.getEvaluations() +
             ", z=" + TextUtils.FMT2.format(zResult) +
             ", dz=" + TextUtils.FMT2.format(zResult - startZUm_) +

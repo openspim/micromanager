@@ -55,9 +55,9 @@ import mmcorej.MMCoreJ;
 
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
-import org.micromanager.metadata.AcquisitionData;
-import org.micromanager.metadata.MMAcqDataException;
-import org.micromanager.utils.Annotator;
+//import org.micromanager.metadata.AcquisitionData;
+//import org.micromanager.metadata.MMAcqDataException;
+//import org.micromanager.utils.Annotator;
 import org.micromanager.utils.MMFrame;
 import org.micromanager.utils.TextUtils;
 
@@ -86,7 +86,7 @@ public class TrackerControl extends MMFrame implements MMPlugin {
    private boolean rotate_ = false;
    private Preferences prefs_;
    private MMRect limits_;
-   private AcquisitionData acq_;
+//   private AcquisitionData acq_;
    private int imageCounter_;
 
    private static final String RESOLUTION_PIX = "resolution_pix";
@@ -386,7 +386,7 @@ public class TrackerControl extends MMFrame implements MMPlugin {
       distUm_ = 0.0;
       //roiStart_ = roi_.getBoundingRect();
       IJ.write("Tracking started at " + GregorianCalendar.getInstance().getTime());
-      if (image5dRadioButton_.isSelected()) {
+/*      if (image5dRadioButton_.isSelected()) {
          acq_ = new AcquisitionData();
          try {
             acq_.createNew(nameField_.getText(), rootField_.getText(), true);
@@ -400,14 +400,14 @@ public class TrackerControl extends MMFrame implements MMPlugin {
       } else {
          acq_ = null;
       }
-      timer_.start();
+*/      timer_.start();
    }
    public void stopTracking() {
 
       //roiStart_ = roi_.getBoundingRect();
       IJ.write("Tracking stopped at " + GregorianCalendar.getInstance().getTime());
       timer_.stop();
-      if (acq_ == null)
+//      if (acq_ == null)
          createStack();
    }
 
@@ -436,15 +436,16 @@ public class TrackerControl extends MMFrame implements MMPlugin {
          ImageWindow iwnd = implus.getWindow();
          iwnd.getCanvas().paint(iwnd.getCanvas().getGraphics());
          ipCurrent_ = implus.getProcessor();
-         if (acq_ == null && stack_ == null)
+//         if (acq_ == null && stack_ == null)
+         if(stack_ == null)
             stack_ = new ImageStack(implus.getProcessor().getWidth(), implus.getHeight());
-         if (acq_ != null) {
+/*         if (acq_ != null) {
             IJ.write("Frame: " + imageCounter_);
             acq_.insertImage(img, imageCounter_, 0, 0);
             Configuration cfg = app_.getMMCore().getSystemStateCache();
             Annotator.setStateMetadata(acq_, imageCounter_, 0, 0, cfg);
          } else
-            stack_.addSlice(Integer.toString(stack_.getSize()+1), implus.getProcessor());
+*/            stack_.addSlice(Integer.toString(stack_.getSize()+1), implus.getProcessor());
       } catch (Exception e) {
          IJ.error(e.getMessage());
          timer_.stop();
@@ -522,7 +523,7 @@ public class TrackerControl extends MMFrame implements MMPlugin {
             double[] xCur = new double[1];
             double[] yCur = new double[1];            
             app_.getMMCore().getXYPosition(stage_, xCur, yCur);
-            if (acq_ != null) {
+/*            if (acq_ != null) {
                acq_.setImageValue(imageCounter_, 0, 0, TRACK_X, xCur[0]);
                acq_.setImageValue(imageCounter_, 0, 0, TRACK_Y, yCur[0]);
                acq_.setImageValue(imageCounter_, 0, 0, TRACK_DX, lMax);
@@ -532,7 +533,7 @@ public class TrackerControl extends MMFrame implements MMPlugin {
                acq_.setImageValue(imageCounter_, 0, 0, RECT_W, r.width);
                acq_.setImageValue(imageCounter_, 0, 0, RECT_H, r.height);
             }
-
+*/
             // apply image transposition
             if (mirrorX_)
                x = -x;
@@ -573,7 +574,7 @@ public class TrackerControl extends MMFrame implements MMPlugin {
       double v = d / intervalMs_ * 1000.0;
       speedLabel_.setText("n=" + imageCounter_ + ", t=" + TextUtils.FMT2.format(((double)imageCounter_ * intervalMs_)/1000.0) +
             " s, d=" + TextUtils.FMT2.format(d) + " um, l=" + TextUtils.FMT2.format(distUm_) + " um, v=" + TextUtils.FMT2.format(v) + " um/s");
-      if (acq_ != null) {
+/*      if (acq_ != null) {
          try {
             acq_.setImageValue(imageCounter_, 0, 0, D, d);
             acq_.setImageValue(imageCounter_, 0, 0, V, v);
@@ -583,7 +584,7 @@ public class TrackerControl extends MMFrame implements MMPlugin {
             timer_.stop();
          }
       }
-      imageCounter_++;
+*/      imageCounter_++;
    }
 
    public void setApp(ScriptInterface app) {

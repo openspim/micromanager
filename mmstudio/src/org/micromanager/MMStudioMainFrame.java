@@ -3077,7 +3077,7 @@ public class MMStudioMainFrame extends JFrame implements ScriptInterface, Device
          core_.snapImage();
          long c = core_.getNumberOfCameraChannels();
          for (int i = 0; i < c; ++i) {
-            displayImage(core_.getTaggedImage(i), (i == c - 1), i);
+            displayImage(core_.getNBeforeLastTaggedImage(i), (i == c - 1), i);
          }
          simpleDisplay_.getImagePlus().getWindow().toFront();
          

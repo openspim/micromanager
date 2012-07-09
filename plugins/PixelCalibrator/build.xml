@@ -44,7 +44,7 @@
 		<copy file="./src/org/micromanager/pixelcalibrator/PixelCalibratorDialog.form" todir="./build/org/micromanager/pixelcalibrator/" />
 	</target>
 
-	<target name="build" description="Build PixelCalibrator.jar">
+	<target name="build" description="Build PixelCalibrator.jar" depends="compile">
 		<jar jarfile="PixelCalibrator.jar" basedir="build" />
 		<copy file="PixelCalibrator.jar" todir="${MMPluginsDir-inst}" />
 	</target>

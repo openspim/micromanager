@@ -1,0 +1,31 @@
+<!-- Ant makefile for the Micro-Manager ImageFlipper plugin  -->
+<!-- This file assumes Micro-Manager project tree structure -->
+
+<project name="ImageFlipper" default="build">
+	<target name="compile" description="Compile ImageFlipper plugin.">
+		<mkdir dir="build" />
+		<javac srcdir="./src" destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
+			<classpath>
+				<pathelement path="../../mmstudio/MMJ_.jar"/>
+				<pathelement path="../../bin_Win32/plugins/MMCoreJ.jar"/>
+				<fileset dir="../../../3rdpartypublic/classext/" >
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		<copy todir="./build/">
+			<fileset dir="./src/" includes="**/*.form" />
+		</copy>
+	</target>
+
+	<target name="build" description="Build ImageFlipper.jar">
+		<jar jarfile="ImageFlipper.jar" basedir="build" />
+		<copy file="ImageFlipper.jar" todir="..\..\Install_AllPlatforms\micro-manager\mmplugins\" />
+	</target>
+	
+	<target name="clean" description="Delete the ImageFlipper build files.">
+		<delete dir="build" />
+		<delete file="ImageFlipper.jar" />
+	</target>
+	
+</project>

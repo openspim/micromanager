@@ -1,13 +1,14 @@
 package edu.valelab.GaussianFit;
 
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.optimization.fitting.CurveFitter;
+//import org.apache.commons.math.FunctionEvaluationException;
+//import org.apache.commons.math.optimization.fitting.CurveFitter;
+import org.apache.commons.math.analysis.ParametricUnivariateRealFunction;
 
 /**
  *
  * @author nico
  */
-public class ParametricGaussianFunction extends CurveFitter{
+public class ParametricGaussianFunction implements ParametricUnivariateRealFunction {
    private int width_;
    private int height_;
    private int mode_;

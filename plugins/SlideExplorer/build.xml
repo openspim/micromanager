@@ -39,6 +39,7 @@
 	</path>
 
 	<target name="compile" description="Compile SlideExplorer plugin.">
+		<ant antfile="../PixelCalibrator/build.xml" target="build" dir="../PixelCalibrator"/>
 		<mkdir dir="build" />
 		<javac srcdir="./src" destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
 			<classpath refid="project.class.path" />
@@ -48,7 +49,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build SlideExplorer.jar">
+	<target name="build" description="Build SlideExplorer.jar" depends="compile">
 		<jar jarfile="SlideExplorer.jar" basedir="build" />
 		<copy file="SlideExplorer.jar" todir="${MMPluginsDir-inst}" />
 	</target>

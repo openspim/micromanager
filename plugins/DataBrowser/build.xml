@@ -12,7 +12,7 @@
 	<property name="MMPluginsDir-inst" value="${InstallRoot}/mmplugins"/>
 	<property name="BinRoot" value="../../bin_Win32"/>
 
-	<property name="MMCoreJ" value="../../bin_Win32/MMCoreJ.jar"/>
+	<property name="MMCoreJ" value="../../bin_Win32/plugins/MMCoreJ.jar"/>
 	<property name="MMAcqEngine" value="../../acqEngine/MMAcqEngine.jar"/>
 
         <property name="ij" value="${classext}/ij.jar"/>

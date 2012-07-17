@@ -813,11 +813,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * @throws Exception
 	 *             If b has an impossible length.
 	 */
-	private static float[] bToF(byte[] b) throws Exception {
+	private static double[] bToF(byte[] b) throws Exception {
 		if (b.length % 4 != 0)
 			throw new Exception("4-byte float length mismatch!");
 
-		float[] f = new float[b.length / 4];
+		double[] f = new double[b.length / 4];
 
 		for (int bi = 0; bi < f.length; ++bi) {
 			int hh = b[bi * 4 + 3] & 0xFF;
@@ -825,7 +825,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			int lh = b[bi * 4 + 1] & 0xFF;
 			int ll = b[bi * 4 + 0] & 0xFF;
 
-			f[bi] = Float.intBitsToFloat((hh << 24) | (hl << 16) | (lh << 8)
+			f[bi] = (double)Float.intBitsToFloat((hh << 24) | (hl << 16) | (lh << 8)
 					| ll);
 		}
 

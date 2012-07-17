@@ -46,13 +46,9 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
 import java.util.List;
-<<<<<<< HEAD
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-=======
-import java.util.HashMap;
->>>>>>> 496fa67... Finished 'porting' plugins and associated to Commons Math 3.0
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;

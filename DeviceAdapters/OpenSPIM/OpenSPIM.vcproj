@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -183,7 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -404,10 +404,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\MMDevice\Property.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\OpenSPIM.cpp"
 				>
 				<FileConfiguration
@@ -426,6 +422,10 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\MMDevice\Property.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -446,15 +446,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OpenSPIM.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\3rdpartypublic\picard\PiUsb.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\MMDevice\Property.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OpenSPIM.h"
 				>
 			</File>
 		</Filter>

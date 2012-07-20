@@ -680,12 +680,12 @@ void CSIABXYStage::GetName(char* name) const
 
 void CSIABXYStage::GetOrientation(bool& mirrorX, bool& mirrorY)
 {
-	long x, y;
+	long x = 0, y = 0;
 	assert(GetProperty(MM::g_Keyword_Transpose_MirrorX, x) == DEVICE_OK);
 	assert(GetProperty(MM::g_Keyword_Transpose_MirrorY, y) == DEVICE_OK);
 
-	mirrorX = x == 0;
-	mirrorY = y == 0;
+	mirrorX = (x != 1);
+	mirrorY = (y != 1);
 }
 
 int CSIABXYStage::SetPositionUm(double x, double y)

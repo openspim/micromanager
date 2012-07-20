@@ -702,7 +702,7 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 		return 2;
 
 	return piRunMotorToPosition((int)x, velocityX_, handleX_) ||
-		piRunMotorToPosition((int)y, velocityY_, handleY_);
+		(piRunMotorToPosition((int)y, velocityY_, handleY_) << 1);
 }
 
 int CSIABXYStage::SetRelativePositionUm(double dx, double dy)

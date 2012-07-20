@@ -117,10 +117,10 @@ MODULE_API void DeleteDevice(MM::Device* pDevice)
 // The twister
 
 CSIABTwister::CSIABTwister()
-: serial_(20), handle_(NULL)
+: serial_(35), handle_(NULL)
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABTwister::OnSerialNumber);
-	CreateProperty(g_Keyword_SerialNumber, "101", MM::String, false, pAct, true);
+	CreateProperty(g_Keyword_SerialNumber, "35", MM::String, false, pAct, true);
 	SetErrorText(1, "Could not initialize twister");
 }
 
@@ -140,6 +140,8 @@ int CSIABTwister::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
       long serial;
       pProp->Get(serial);
       serial_ = (int)serial;
+
+	  return Initialize();
    }
    return DEVICE_OK;
 }
@@ -286,10 +288,10 @@ bool CSIABTwister::IsContinuousFocusDrive() const
 // The Stage
 
 CSIABStage::CSIABStage()
-: serial_(107), handle_(NULL)
+: serial_(126), handle_(NULL)
 {
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
-	CreateProperty(g_Keyword_SerialNumber, "107", MM::Integer, false, pAct, true);
+	CreateProperty(g_Keyword_SerialNumber, "126", MM::Integer, false, pAct, true);
 
 	pAct = new CPropertyAction (this, &CSIABStage::OnVelocity);
 	CreateProperty(g_Keyword_Velocity, "10", MM::Integer, false, pAct);
@@ -320,6 +322,8 @@ int CSIABStage::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
       long serial;
       pProp->Get(serial);
       serial_ = (int)serial;
+
+	  return Initialize();
    }
    return DEVICE_OK;
 }
@@ -492,13 +496,13 @@ bool CSIABStage::IsContinuousFocusDrive() const
 // The XY Stage
 
 CSIABXYStage::CSIABXYStage()
-: serialX_(105), serialY_(106), handleX_(NULL), handleY_(NULL), minX_(1),
+: serialX_(125), serialY_(124), handleX_(NULL), handleY_(NULL), minX_(1),
   minY_(1), maxX_(8000), maxY_(8000)
 {
 	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
-	CreateProperty(g_Keyword_SerialNumberX, "106", MM::Integer, false, pActX, true);
-	CreateProperty(g_Keyword_SerialNumberY, "105", MM::Integer, false, pActY, true);
+	CreateProperty(g_Keyword_SerialNumberX, "125", MM::Integer, false, pActX, true);
+	CreateProperty(g_Keyword_SerialNumberY, "124", MM::Integer, false, pActY, true);
 	SetErrorText(1, "Could not initialize motor (X stage)");
 	SetErrorText(2, "Could not initialize motor (Y stage)");
 
@@ -528,6 +532,17 @@ int CSIABXYStage::OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct)
       long serial;
       pProp->Get(serial);
       serialX_ = (int)serial;
+
+		int errorX = -1;
+		handleX_ = piConnectMotor(&errorX, serialX_);
+		if (handleX_)
+			piGetMotorVelocity(&velocityX_, handleX_);
+		else {
+			std::ostringstream buffer;
+			buffer << "Could not initialize X motor " << serialX_ << " (error code " << errorX << ")";
+			LogMessage(buffer.str().c_str(), false);
+			return 1;
+		}
    }
    return DEVICE_OK;
 }
@@ -544,6 +559,17 @@ int CSIABXYStage::OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct)
       long serial;
       pProp->Get(serial);
       serialY_ = (int)serial;
+
+		int errorY = -1;
+		handleY_ = piConnectMotor(&errorY, serialY_);
+		if (handleY_)
+			piGetMotorVelocity(&velocityY_, handleY_);
+		else {
+			std::ostringstream buffer;
+			buffer << "Could not initialize Y motor " << serialY_ << " (error code " << errorY << ")";
+			LogMessage(buffer.str().c_str(), false);
+			return 2;
+		}
    }
    return DEVICE_OK;
 }

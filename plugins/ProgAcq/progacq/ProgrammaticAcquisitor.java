@@ -79,6 +79,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 	private Thread acqThread;
 	private JButton goBtn;
+	private JCheckBox timeoutCB;
+	private JTextField timeoutValBox;
 
 	@Override
 	public void dispose() {
@@ -401,6 +403,23 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		bottom.add(timeBox);
 
+		JPanel timeoutBox = new JPanel();
+		timeoutBox.setLayout(new BoxLayout(timeoutBox, BoxLayout.LINE_AXIS));
+		timeoutBox
+				.setBorder(BorderFactory.createTitledBorder("Device Timeout"));
+
+		timeoutCB = new JCheckBox("Override Timeout:");
+		timeoutCB.setHorizontalTextPosition(JCheckBox.RIGHT);
+		timeoutCB.addChangeListener(this);
+
+		timeoutValBox = new JTextField(8);
+		timeoutValBox.setEnabled(false);
+
+		timeoutBox.add(timeoutCB);
+		timeoutBox.add(timeoutValBox);
+
+		bottom.add(timeoutBox);
+
 		bottom.add(Box.createGlue());
 
 		JPanel btnsPanel = new JPanel();
@@ -538,6 +557,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				rows = ((StepTableModel) stepsTbl.getModel()).getRows();
 			}
 
+			if (timeoutCB.isSelected())
+				core.setTimeoutMs(Integer.parseInt(timeoutValBox.getText()));
+
 			startLocalAcq(devs, rows);
 		} else if (BTN_STOP.equals(e.getActionCommand())) {
 			try {
@@ -576,6 +598,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		} else if (e.getSource().equals(timeCB)) {
 			countBox.setEnabled(timeCB.isSelected());
 			stepBox.setEnabled(timeCB.isSelected());
+		} else if (e.getSource().equals(timeoutCB)) {
+			timeoutValBox.setEnabled(timeoutCB.isSelected());
+			timeoutValBox.setText("" + core.getTimeoutMs());
 		}
 	}
 
@@ -825,8 +850,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			int lh = b[bi * 4 + 1] & 0xFF;
 			int ll = b[bi * 4 + 0] & 0xFF;
 
-			f[bi] = (double)Float.intBitsToFloat((hh << 24) | (hl << 16) | (lh << 8)
-					| ll);
+			f[bi] = (double) Float.intBitsToFloat((hh << 24) | (hl << 16)
+					| (lh << 8) | ll);
 		}
 
 		return f;
@@ -879,8 +904,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			throws Exception {
 		if (core.getBytesPerPixel() == 1) {
 			return new ByteProcessor((int) core.getImageWidth(),
-					(int) core.getImageHeight(), (byte[]) core.getImage(),
-					null);
+					(int) core.getImageHeight(), (byte[]) core.getImage(), null);
 		} else if (core.getBytesPerPixel() == 2) {
 			return new ShortProcessor((int) core.getImageWidth(),
 					(int) core.getImageHeight(), (short[]) core.getImage(),

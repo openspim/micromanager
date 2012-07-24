@@ -487,7 +487,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									return;
 
 								List<String[]> data = generateRowsFromRanges(
-										ranges, mdl.getColumnNames());
+										core, ranges, mdl.getColumnNames());
 
 								for (String[] row : data)
 									mdl.insertRow(row);
@@ -546,11 +546,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 				devs = devsL.toArray(new String[devsL.size()]);
 
-				rows = generateRowsFromRanges(ranges, devs);
+				rows = generateRowsFromRanges(core, ranges, devs);
 			} else if (TAB_NDIM.equals(tabs.getSelectedComponent().getName())) {
 				// Get ranges from the 'ranges' object, generate rows.
 				devs = getUsedDevs().toArray(new String[0]);
-				rows = generateRowsFromRanges(nDimRanges.getRanges(), devs);
+				rows = generateRowsFromRanges(core, nDimRanges.getRanges(),
+						devs);
 			} else if (TAB_TABLE.equals(tabs.getSelectedComponent().getName())) {
 				// Tabular. This one's easy; just fetch the rows.
 				devs = ((StepTableModel) stepsTbl.getModel()).getColumnNames();
@@ -612,7 +613,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *            A list of lists of discrete values used to make up rows.
 	 * @return A list of every possible combination of the input.
 	 */
-	private Vector<Vector<Double>> getRows(List<double[]> steps) {
+	private static Vector<Vector<Double>> getRows(List<double[]> steps) {
 		double[] first = (double[]) steps.get(0);
 		Vector<Vector<Double>> rows = new Vector<Vector<Double>>();
 
@@ -650,8 +651,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *         'row'. Can be passed directly into the 'rows' parameter of the
 	 *         performAcquisition method.
 	 */
-	public List<String[]> generateRowsFromRanges(List<double[]> ranges,
-			String[] devs) {
+	public static List<String[]> generateRowsFromRanges(CMMCore corei,
+			List<double[]> ranges, String[] devs) {
 		// Each element of range is a triplet of min/step/max.
 		// This function determines the discrete values of each range, then
 		// works out all possible values and adds them as rows to the table.
@@ -673,8 +674,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		Vector<Integer> xyStages = new Vector<Integer>(devs.length);
 		for (int i = 0; i < devs.length; ++i) {
 			try {
-				if (core.getDeviceType(devs[i])
-						.equals(DeviceType.XYStageDevice))
+				if (corei.getDeviceType(devs[i]).equals(
+						DeviceType.XYStageDevice))
 					xyStages.add(i);
 			} catch (Exception e) {
 				// I can't think of a more graceless way to resolve this issue.

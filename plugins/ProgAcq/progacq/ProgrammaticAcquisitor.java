@@ -702,6 +702,27 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return finalRows;
 	}
 
+	private static void runDevicesAtRow(CMMCore core, String[] devices,
+			String[] positions, int step) throws Exception {
+		for (int i = 0; i < devices.length; ++i) {
+			String dev = devices[i];
+			String pos = positions[i];
+			try {
+				if (core.getDeviceType(dev).equals(DeviceType.StageDevice))
+					core.setPosition(dev, Double.parseDouble(pos));
+				else if (core.getDeviceType(dev).equals(
+						DeviceType.XYStageDevice))
+					core.setXYPosition(dev, parseX(pos), parseY(pos));
+				else
+					throw new Exception("Unknown device type for \"" + dev
+							+ "\"");
+			} catch (NumberFormatException e) {
+				throw new Exception("Malformed number \"" + pos
+						+ "\" for device \"" + dev + "\", row " + step, e);
+			}
+		}
+	}
+
 	/**
 	 * This function runs a generalized acquisition sequence. It's a mixture of
 	 * Micro-Manager's built in sequencing support (confusing) and waiting for
@@ -726,62 +747,96 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * @param timestep
 	 *            Delay in milliseconds between the beginning of each
 	 *            acquisition. Arbitrary if only a single acquisition.
+	 * @param continuous
+	 *            If true, uses a separate thread without synchronizing for
+	 *            acquisition. The net effect is a 'video' as the devices move
+	 *            through the paces.
 	 * @return An ImageJ ImagePlus of the stack of acquired images.
 	 * @throws Exception
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
-	public static ImagePlus performAcquisition(CMMCore core, String[] devices,
-			List<String[]> rows, int timeseqs, double timestep)
-			throws Exception {
+	public static ImagePlus performAcquisition(final CMMCore core,
+			final String[] devices, List<String[]> rows, int timeseqs,
+			double timestep, boolean continuous) throws Exception {
+
+		core.logMessage("Snapping " + rows.size() + " images.");
 
 		core.removeImageSynchroAll();
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
 
-		ImageStack img = new ImageStack((int) core.getImageWidth(),
+		// Reset the devices and wait on them. Prevents a bad first frame.
+		runDevicesAtRow(core, devices, rows.get(0), -1);
+		core.waitForImageSynchro();
+
+		final ImageStack img = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
 
-		long beginAll = (long) (System.nanoTime() / 1e6);
+		final long beginAll = (long) (System.nanoTime() / 1e6);
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
+			Thread continuousThread = null;
+			if (continuous) {
+				continuousThread = new Thread() {
+					private Exception lastExc;
+
+					@Override
+					public void run() {
+						try {
+							core.clearCircularBuffer();
+							core.startContinuousSequenceAcquisition(0);
+
+							while (!Thread.interrupted()) {
+								if (core.getRemainingImageCount() == 0)
+									continue;
+
+								try {
+									snapSlice(core, devices, beginAll, img);
+								} catch (Exception e) {
+									lastExc = e;
+									break;
+							}
+
+							core.stopSequenceAcquisition();
+						} catch (Throwable e) {
+							lastExc = e;
+						}
+					}
+
+					@Override
+					public String toString() {
+						if (lastExc == null)
+							return super.toString();
+						else
+							return lastExc.getMessage();
+					}
+				};
+
+				continuousThread.start();
+			}
+
 			int step = 0;
 			for (String[] positions : rows) {
-				for (int i = 0; i < devices.length; ++i) {
-					String dev = devices[i];
-					String pos = positions[i];
-					try {
-						if (core.getDeviceType(dev).equals(
-								DeviceType.StageDevice))
-							core.setPosition(dev, Double.parseDouble(pos));
-						else if (core.getDeviceType(dev).equals(
-								DeviceType.XYStageDevice))
-							core.setXYPosition(dev, parseX(pos), parseY(pos));
-						else
-							throw new Exception("Unknown device type for \""
-									+ dev + "\"");
-					} catch (NumberFormatException e) {
-						throw new Exception("Malformed number \"" + pos
-								+ "\" for device \"" + dev + "\", row " + step,
-								e);
-					}
-				}
+				runDevicesAtRow(core, devices, positions, step);
 
-				synchronized (core) {
-					core.waitForImageSynchro();
-					core.snapImage();
-				}
+				core.waitForImageSynchro();
 
-				String meta = generateMeta(System.nanoTime() / 1e6 - beginAll,
-						core, devices);
-				ImageProcessor ip = newImageProcessor(core);
-
-				img.addSlice(meta, ip);
+				if (!continuous)
+					snapSlice(core, devices, beginAll, img);
 
 				if (Thread.interrupted())
 					return new ImagePlus("ProgAcqd", img);
 
 				++step;
+			}
+
+			if (continuous) {
+				if (continuousThread.isAlive() == false)
+					throw new Exception(continuousThread.toString());
+
+				continuousThread.interrupt();
+				continuousThread.join();
 			}
 
 			double wait = (timestep * (seq + 1))
@@ -798,6 +853,19 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		finalImage.setOpenAsHyperStack(true);
 
 		return finalImage;
+	}
+
+	private static void snapSlice(CMMCore core, String[] devices, long start,
+			ImageStack img) throws Exception {
+		synchronized (core) {
+			core.snapImage();
+		}
+
+		String meta = generateMeta(System.nanoTime() / 1e6 - start, core,
+				devices);
+		ImageProcessor ip = newImageProcessor(core);
+
+		img.addSlice(meta, ip);
 	}
 
 	/**
@@ -905,7 +973,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			throws Exception {
 		if (core.getBytesPerPixel() == 1) {
 			return new ByteProcessor((int) core.getImageWidth(),
-					(int) core.getImageHeight(), (byte[]) core.getImage(), null);
+					(int) core.getImageHeight(), (byte[]) core.getImage(),
+					null);
 		} else if (core.getBytesPerPixel() == 2) {
 			return new ShortProcessor((int) core.getImageWidth(),
 					(int) core.getImageHeight(), (short[]) core.getImage(),
@@ -1040,8 +1109,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			@Override
 			public void run() {
 				try {
-					performAcquisition(core, devs, rows, timeSeqs, timeStep)
-							.show();
+					performAcquisition(core, devs, rows, timeSeqs, timeStep,
+							false).show();
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(frame, "Error acquiring: "
 							+ e.getMessage());

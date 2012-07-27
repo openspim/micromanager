@@ -1,0 +1,115 @@
+import fiji.SimpleExecuter;
+
+import ij.IJ;
+
+import java.io.File;
+
+discoverVLC() {
+	if (System.getProperty("os.name").startsWith("Windows")) {
+		vlc = "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe";
+		if (new File(vlc).exists())
+			return vlc;
+		vlc = "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe";
+		if (new File(vlc).exists())
+			return vlc;
+	}
+	else
+		for (String dir : System.getenv("PATH").split(":")) {
+			file = new File(dir, "vlc");
+			if (file.exists())
+				return file.getAbsolutePath();
+		}
+	if (System.getProperty("os.name").startsWith("Mac")) {
+		file = new File("/Applications/VLC.app/Contents/MacOS/", "VLC");
+		if (file.exists())
+			return file.getAbsolutePath();
+	}
+	return null;
+}
+
+getInputDirectory() {
+	if (IJ.getInstance() != null)
+		return IJ.getDirectory("Input directory");
+	else if (bsh.args.length > 0)
+		return bsh.args[0];
+	return null;
+}
+
+getOutputDirectory() {
+	if (IJ.getInstance() != null)
+		return IJ.getDirectory("Output directory");
+	else if (bsh.args.length > 1)
+		return bsh.args[1];
+	return null;
+}
+
+convertMovies(vlc, inputDirectory, outputDirectory) {
+	File input = new File(inputDirectory);
+	if (!input.isDirectory()) {
+		IJ.error("Not a directory: " + input);
+		return;
+	}
+	if (!new File(outputDirectory).isDirectory()) {
+		IJ.error("Not a directory: " + outputDirectory);
+		return;
+	}
+	for (File file : input.listFiles())
+		convertMovie(vlc, inputDirectory, file.getName(), outputDirectory);
+}
+
+convertMovie(vlc, inputDirectory, fileName, outputDirectory) {
+	if (fileName.startsWith("."))
+		return; // ignore hidden files
+	dot = fileName.lastIndexOf('.');
+	if (dot < 0 || dot < fileName.length() - 5 || dot == fileName.length() - 1) {
+		IJ.log("Skipping " + fileName);
+		return;
+	}
+	outputFileName = fileName.substring(0, dot) + ".ogv";
+	outputFile = new File(outputDirectory, outputFileName);
+	if (outputFile.exists() && outputFile.length() != 0 &&
+			!IJ.showMessageWithCancel("Overwrite?", "The file '" + fileName + "' appears to be already converted. Overwrite?"))
+		return;
+	outputPath = outputFile.getAbsolutePath();
+	inputPath = new File(inputDirectory, fileName).getAbsolutePath();
+	IJ.log("\nConverting '" + fileName + "'");
+	SimpleExecuter.exec(new File(inputDirectory), new String[] {
+		vlc,
+		"-I", "dummy",
+		//"-vvv",
+		inputPath,
+		"--sout=#transcode{"
+			+ "vcodec=theo,"
+			+ "vb=800,"
+			+ "width=640,"
+			+ "deinterlace=0,"
+			+ "acodec=vorb,"
+			+ "ab=128,"
+			+ "channels=2,"
+			+ "samplerate=22050"
+		+ "}:standard{"
+			+ "access=file,"
+			+ "mux=ogg,"
+			+ "dst='" + outputPath + "'"
+		+ "}",
+		"vlc://quit"
+	});
+}
+
+run() {
+	vlc = discoverVLC();
+	if (vlc == null) {
+		IJ.error("Could not find VLC, please install");
+		IJ.runPlugIn("ij.plugin.BrowserLauncher", "http://www.videolan.org/index.html");
+		return;
+	}
+	inputDirectory = getInputDirectory();
+	if (inputDirectory == null)
+		return; // canceled
+	outputDirectory = getOutputDirectory();
+	if (outputDirectory == null)
+		return; //canceled
+	convertMovies(vlc, inputDirectory, outputDirectory);
+}
+
+run();

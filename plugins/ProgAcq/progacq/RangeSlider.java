@@ -3,6 +3,8 @@ package progacq;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -15,6 +17,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.PanelUI;
 
+import org.micromanager.utils.ReportingUtils;
+
 public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	private static final long serialVersionUID = -4704266057756694946L;
 
@@ -25,17 +29,14 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	public RangeSlider(Double minv, Double maxv) {
 		triggering = true;
 
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-
-		JPanel left = new JPanel();
-		left.setLayout(new BoxLayout(left, BoxLayout.PAGE_AXIS));
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
 		JPanel top = new JPanel();
 		top.setLayout(new BoxLayout(top, BoxLayout.LINE_AXIS));
 
-		JLabel minLbl = new JLabel("Min:");
-		JLabel maxLbl = new JLabel("Max:");
-		JLabel stpLbl = new JLabel("Step:");
+		final JLabel minLbl = new JLabel("Min:");
+		final JLabel maxLbl = new JLabel("Max:");
+		final JLabel stpLbl = new JLabel("Step:");
 
 		min = new JTextField(minv.toString(), 8);
 		min.setMaximumSize(min.getPreferredSize());
@@ -61,7 +62,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		top.add(maxLbl);
 		top.add(max);
 
-		left.add(top);
+		add(top);
 
 		JPanel bot = new JPanel();
 		bot.setLayout(new BoxLayout(bot, BoxLayout.LINE_AXIS));
@@ -81,29 +82,36 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		bot.add(sliderMin);
 		bot.add(sliderMax);
 
-		left.add(bot);
+		add(bot);
 
-		this.add(left);
+		JPanel stepBox = new JPanel();
+		stepBox.setLayout(new BoxLayout(stepBox, BoxLayout.LINE_AXIS));
 
-		sliderStep = new JSlider(JSlider.VERTICAL);
+		sliderStep = new JSlider();
 		sliderStep.setPaintLabels(true);
 		sliderStep.setPaintTicks(true);
 		sliderStep.addChangeListener(this);
 
 		setMinMax(minv, maxv);
 
-		this.add(sliderStep);
+		stepBox.add(new JLabel("Step size:"));
+		stepBox.add(sliderStep);
+
+		add(stepBox);
 
 		this.setUI(new PanelUI() {
 			@Override
 			public Dimension getPreferredSize(JComponent c) {
-				int width = min.getPreferredSize().width
+				int width = minLbl.getPreferredSize().width
+						+ min.getPreferredSize().width
+						+ stpLbl.getPreferredSize().width
 						+ step.getPreferredSize().width
-						+ max.getPreferredSize().width
-						+ sliderStep.getPreferredSize().width;
+						+ maxLbl.getPreferredSize().width
+						+ max.getPreferredSize().width;
 
 				int height = min.getPreferredSize().height
-						+ sliderMin.getPreferredSize().height;
+						+ sliderMin.getPreferredSize().height
+						+ sliderStep.getPreferredSize().height;
 
 				return new Dimension(width, height);
 			}
@@ -118,24 +126,65 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 				Double.parseDouble(max.getText()) };
 	}
 
+	private static Dictionary<Integer, JLabel> makeLabelTable(int min, int max,
+			int step, int round, int align) {
+		if (Math.abs(step) < 1)
+			step = 1;
+
+		int count = (max - min) / step;
+
+		Hashtable<Integer, JLabel> table = new Hashtable<Integer, JLabel>();
+
+		table.put(min, new JLabel("" + min));
+		table.put(max, new JLabel("" + max));
+
+		float start = min;
+
+		if (align == 0) {
+			float offset = ((max - min) % step) / 2;
+
+			start = min + (int) offset;
+		} else if (align > 0) {
+			start = max;
+			step = -step;
+		}
+
+		for (int lbl = 1; lbl < count; ++lbl) {
+			float nearPos = start + step * lbl;
+
+			if (round > 0)
+				nearPos = Math.round(nearPos / round) * round;
+
+			ReportingUtils.logMessage("" + lbl + ": Putting " + (int) nearPos
+					+ " (" + nearPos + ")");
+			table.put((int) nearPos, new JLabel("" + (int) nearPos));
+		}
+
+		return table;
+	}
+
 	public void setMinMax(Double min, Double max) {
-		int estStep = (int) ((max - min) / 2);
+		int estStep = (int) Math.round((max - min) / 2);
+		int estStepFlr = (int) ((max - min) / 2);
 
 		sliderMin.setMinimum(min.intValue());
-		sliderMin.setMinorTickSpacing(estStep / 2);
-		sliderMin.setMajorTickSpacing(estStep);
-		sliderMin.setLabelTable(sliderMin.createStandardLabels(estStep));
+		sliderMin.setLabelTable(makeLabelTable(min.intValue(), max.intValue(),
+				estStepFlr / 2, estStep / 2, 0));
+		sliderMin.setMinorTickSpacing(estStepFlr / 2);
+		sliderMin.setMajorTickSpacing(estStepFlr);
 
 		sliderMax.setMaximum(max.intValue());
-		sliderMax.setMinorTickSpacing(estStep / 2);
-		sliderMax.setMajorTickSpacing(estStep);
-		sliderMax.setLabelTable(sliderMax.createStandardLabels(estStep));
+		sliderMax.setLabelTable(makeLabelTable(min.intValue(), max.intValue(),
+				estStepFlr / 2, estStep / 2, 0));
+		sliderMax.setMinorTickSpacing(estStepFlr / 2);
+		sliderMax.setMajorTickSpacing(estStepFlr);
 
 		sliderStep.setMaximum(estStep * 2);
 		sliderStep.setValue(estStep);
-		sliderStep.setMinorTickSpacing(estStep / 2);
-		sliderStep.setMajorTickSpacing(estStep);
-		sliderStep.setLabelTable(sliderStep.createStandardLabels(estStep));
+		sliderStep.setLabelTable(makeLabelTable(0, estStep * 2, estStep / 2,
+				estStep / 2, 0));
+		sliderStep.setMinorTickSpacing(estStepFlr / 2);
+		sliderStep.setMajorTickSpacing(estStepFlr);
 
 		step.setText("" + estStep);
 	}
@@ -162,12 +211,13 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			// Note that the value of the text box should never be clamped.
 			if (val <= 0)
 				val = 1;
+
+			sliderMin.setLabelTable(sliderMin.createStandardLabels(val * 2));
+			sliderMax.setLabelTable(sliderMax.createStandardLabels(val * 2));
 			sliderMin.setMajorTickSpacing(val * 2);
 			sliderMax.setMajorTickSpacing(val * 2);
 			sliderMin.setMinorTickSpacing(val);
 			sliderMax.setMinorTickSpacing(val);
-			sliderMin.setLabelTable(sliderMin.createStandardLabels(val * 2));
-			sliderMax.setLabelTable(sliderMax.createStandardLabels(val * 2));
 		}
 
 		triggering = false;

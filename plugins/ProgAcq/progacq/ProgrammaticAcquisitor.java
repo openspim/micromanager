@@ -793,25 +793,28 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			Thread continuousThread = null;
 			if (continuous) {
-				core.clearCircularBuffer();
-				core.startContinuousSequenceAcquisition(0);
-
 				continuousThread = new Thread() {
 					private Throwable lastExc;
 
 					@Override
 					public void run() {
-						while (!Thread.interrupted()) {
-							if (core.getRemainingImageCount() == 0)
-								continue;
+						try {
+							core.clearCircularBuffer();
+							core.startContinuousSequenceAcquisition(0);
 
-							try {
+							while (!Thread.interrupted()) {
+								if (core.getRemainingImageCount() == 0) {
+									Thread.yield();
+									continue;
+								};
+	
 								snapSlice(core, metaDevices, beginAll,
-										core.getLastTaggedImage(), img);
-							} catch (Throwable e) {
-								lastExc = e;
-								break;
+										core.popNextTaggedImage(), img);
 							}
+
+							core.stopSequenceAcquisition();
+						} catch (Throwable e) {
+							lastExc = e;
 						}
 					}
 
@@ -861,8 +864,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			if (continuous) {
 				continuousThread.interrupt();
 				continuousThread.join();
-
-				core.stopSequenceAcquisition();
 			}
 
 			double wait = (timestep * (seq + 1))

@@ -43,6 +43,7 @@ import mmcorej.TaggedImage;
 
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
+import org.micromanager.utils.ReportingUtils;
 
 public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		ChangeListener {
@@ -796,7 +797,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				core.startContinuousSequenceAcquisition(0);
 
 				continuousThread = new Thread() {
-					private Exception lastExc;
+					private Throwable lastExc;
 
 					@Override
 					public void run() {
@@ -807,7 +808,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 							try {
 								snapSlice(core, metaDevices, beginAll,
 										core.getLastTaggedImage(), img);
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								lastExc = e;
 								break;
 							}
@@ -835,10 +836,15 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 					snapSlice(core, metaDevices, beginAll,
 							core.getTaggedImage(), img);
+				} else {
+					core.waitForImageSynchro();
 				}
 
 				if (Thread.interrupted())
 					return new ImagePlus("ProgAcqd", img);
+
+				if (continuous && continuousThread.isAlive() == false)
+					throw new Exception(continuousThread.toString());
 
 				final Double progress = (double) (rowcnt * seq + step)
 						/ (rowcnt * timeseqs);
@@ -853,9 +859,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			}
 
 			if (continuous) {
-				if (continuousThread.isAlive() == false)
-					throw new Exception(continuousThread.toString());
-
 				continuousThread.interrupt();
 				continuousThread.join();
 

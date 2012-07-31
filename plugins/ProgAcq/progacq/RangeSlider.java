@@ -38,7 +38,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		final JLabel maxLbl = new JLabel("Max:");
 		final JLabel stpLbl = new JLabel("Step:");
 
-		min = new JTextField(minv.toString(), 8);
+		min = new JTextField(8);
 		min.setMaximumSize(min.getPreferredSize());
 		min.setAlignmentX(LEFT_ALIGNMENT);
 		min.addKeyListener(this);
@@ -48,7 +48,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		step.setAlignmentX(CENTER_ALIGNMENT);
 		step.addKeyListener(this);
 
-		max = new JTextField(maxv.toString(), 8);
+		max = new JTextField(8);
 		max.setMaximumSize(max.getPreferredSize());
 		max.setAlignmentX(RIGHT_ALIGNMENT);
 		max.addKeyListener(this);
@@ -163,19 +163,19 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		return table;
 	}
 
-	public void setMinMax(Double min, Double max) {
-		int estStep = (int) Math.round((max - min) / 2);
-		int estStepFlr = (int) ((max - min) / 2);
+	public void setMinMax(Double imin, Double imax) {
+		int estStep = (int) Math.round((imax - imin) / 2);
+		int estStepFlr = (int) ((imax - imin) / 2);
 
-		sliderMin.setMinimum(min.intValue());
-		sliderMin.setLabelTable(makeLabelTable(min.intValue(), max.intValue(),
-				estStepFlr / 2, estStep / 2, 0));
+		sliderMin.setMinimum(imin.intValue());
+		sliderMin.setLabelTable(makeLabelTable(imin.intValue(),
+				imax.intValue(), estStepFlr / 2, estStep / 2, 0));
 		sliderMin.setMinorTickSpacing(estStepFlr / 2);
 		sliderMin.setMajorTickSpacing(estStepFlr);
 
-		sliderMax.setMaximum(max.intValue());
-		sliderMax.setLabelTable(makeLabelTable(min.intValue(), max.intValue(),
-				estStepFlr / 2, estStep / 2, 0));
+		sliderMax.setMaximum(imax.intValue());
+		sliderMax.setLabelTable(makeLabelTable(imin.intValue(),
+				imax.intValue(), estStepFlr / 2, estStep / 2, 0));
 		sliderMax.setMinorTickSpacing(estStepFlr / 2);
 		sliderMax.setMajorTickSpacing(estStepFlr);
 
@@ -186,7 +186,9 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		sliderStep.setMinorTickSpacing(estStepFlr / 2);
 		sliderStep.setMajorTickSpacing(estStepFlr);
 
+		min.setText("" + imin.intValue());
 		step.setText("" + estStep);
+		max.setText("" + imax.intValue());
 	}
 
 	@Override

@@ -33,11 +33,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import mmcorej.CMMCore;
 import mmcorej.DeviceType;
+import mmcorej.TaggedImage;
 
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
@@ -756,11 +758,22 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
-	public static ImagePlus performAcquisition(final CMMCore core,
-			final String[] devices, List<String[]> rows, int timeseqs,
-			double timestep, boolean continuous) throws Exception {
+	public static ImagePlus performAcquisition(AcqParams params)
+			throws Exception {
 
-		core.logMessage("Snapping " + rows.size() + " images.");
+		final CMMCore core = params.getCore();
+		final String[] devices = params.getStepDevices();
+		final String[] metaDevices = params.getMetaDevices();
+
+		List<String[]> rows = params.getSteps();
+		final int rowcnt = rows.size();
+
+		boolean continuous = params.isContinuous();
+
+		int timeseqs = params.getTimeSeqCount();
+		double timestep = params.getTimeStepSeconds();
+
+		final ChangeListener listener = params.getProgressListener();
 
 		core.removeImageSynchroAll();
 		for (String dev : devices)
@@ -769,6 +782,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		// Reset the devices and wait on them. Prevents a bad first frame.
 		runDevicesAtRow(core, devices, rows.get(0), -1);
 		core.waitForImageSynchro();
+		core.snapImage(); // Take up a bad image...
 
 		final ImageStack img = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
@@ -792,10 +806,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									continue;
 
 								try {
-									snapSlice(core, devices, beginAll, img);
+									snapSlice(core, metaDevices, beginAll,
+										core.getTaggedImage(), img);
 								} catch (Exception e) {
 									lastExc = e;
 									break;
+								}
 							}
 
 							core.stopSequenceAcquisition();
@@ -820,13 +836,24 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			for (String[] positions : rows) {
 				runDevicesAtRow(core, devices, positions, step);
 
-				core.waitForImageSynchro();
+				if (!continuous) {
+					core.snapImage();
 
-				if (!continuous)
-					snapSlice(core, devices, beginAll, img);
+					snapSlice(core, metaDevices, beginAll,
+							core.getTaggedImage(), img);
+				}
 
 				if (Thread.interrupted())
 					return new ImagePlus("ProgAcqd", img);
+
+				final Double progress = (double) (rowcnt * seq + step)
+						/ (rowcnt * timeseqs);
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						listener.stateChanged(new ChangeEvent(progress));
+					}
+				});
 
 				++step;
 			}
@@ -856,17 +883,15 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	}
 
 	private static void snapSlice(CMMCore core, String[] devices, long start,
-			ImageStack img) throws Exception {
-		synchronized (core) {
-			core.snapImage();
-		}
+			TaggedImage slice, ImageStack img) throws Exception {
 
-		String meta = generateMeta(System.nanoTime() / 1e6 - start, core,
-				devices);
-		ImageProcessor ip = newImageProcessor(core);
+		String meta = slice.tags.toString() + "\n"
+				+ generateMeta(System.nanoTime() / 1e6 - start, core, devices);
+
+		ImageProcessor ip = newImageProcessor(core, slice.pix);
 
 		img.addSlice(meta, ip);
-	}
+	};
 
 	/**
 	 * Utility function to convert an array of bytes into an array of integers.
@@ -969,33 +994,28 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * @throws Exception
 	 *             On unsupported image modes.
 	 */
-	private static ImageProcessor newImageProcessor(CMMCore core)
+	private static ImageProcessor newImageProcessor(CMMCore core, Object image)
 			throws Exception {
 		if (core.getBytesPerPixel() == 1) {
 			return new ByteProcessor((int) core.getImageWidth(),
-					(int) core.getImageHeight(), (byte[]) core.getImage(),
-					null);
+					(int) core.getImageHeight(), (byte[]) image, null);
 		} else if (core.getBytesPerPixel() == 2) {
 			return new ShortProcessor((int) core.getImageWidth(),
-					(int) core.getImageHeight(), (short[]) core.getImage(),
-					null);
+					(int) core.getImageHeight(), (short[]) image, null);
 		} else if (core.getBytesPerPixel() == 4) {
 			if (core.getNumberOfComponents() > 1) {
 				return new ColorProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(),
-						bToI((byte[]) core.getImage()));
+						(int) core.getImageHeight(), bToI((byte[]) image));
 			} else {
 				return new FloatProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(),
-						bToF((byte[]) core.getImage()));
+						(int) core.getImageHeight(), bToF((byte[]) image));
 			}
 		} else if (core.getBytesPerPixel() == 8) {
 			if (core.getNumberOfComponents() > 1) {
 				throw new Exception("No support for 64-bit color!");
 			} else {
 				return new FloatProcessor((int) core.getImageWidth(),
-						(int) core.getImageHeight(),
-						bToD((byte[]) core.getImage()));
+						(int) core.getImageHeight(), bToD((byte[]) image));
 			}
 		} else {
 			// TODO: Expand support to include all modes...
@@ -1109,8 +1129,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			@Override
 			public void run() {
 				try {
-					performAcquisition(core, devs, rows, timeSeqs, timeStep,
-							false).show();
+					performAcquisition(
+							new AcqParams(core, devs, rows, timeStep, timeSeqs))
+							.show();
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(frame, "Error acquiring: "
 							+ e.getMessage());

@@ -198,7 +198,26 @@ void CSIABTwister::GetName(char* name) const
 
 int CSIABTwister::SetPositionUm(double pos)
 {
-	return piRunTwisterToPosition((int)pos, velocity_, handle_);
+	int moveret = piRunTwisterToPosition((int)pos, velocity_, handle_);
+
+	double at = 0;
+	if(GetPositionUm(at))
+		return DEVICE_ERR;
+
+	if((int)at != (int)pos) {
+		int temp = 0;
+		while(!Busy() && (int)at != (int)pos && temp++ < 1e3) {
+			if(GetPositionUm(at) != DEVICE_OK)
+				return DEVICE_ERR;
+
+			Sleep(0);
+		};
+
+		if(temp >= 5e2)
+			LogMessage("Long wait (twister)...");
+	};
+
+	return moveret;
 }
 
 int CSIABTwister::Move(double velocity)
@@ -396,7 +415,28 @@ void CSIABStage::GetName(char* name) const
 
 int CSIABStage::SetPositionUm(double pos)
 {
-	return piRunMotorToPosition((int)pos, velocity_, handle_);
+	int moveret = piRunMotorToPosition((int)pos, velocity_, handle_);
+
+	double at = 0;
+	if(GetPositionUm(at) != DEVICE_OK)
+		return DEVICE_ERR;
+
+	// WORKAROUND: piRunMotorToPosition doesn't wait for the motor to get
+	// underway. Wait a bit here.
+	if((int)at != (int)pos) {
+		int temp = 0;
+		while(!Busy() && (int)at != (int)pos && temp++ < 1e3) {
+			if(GetPositionUm(at) != DEVICE_OK)
+				return DEVICE_ERR;
+
+			Sleep(0);
+		};
+
+		if(temp >= 5e2)
+			LogMessage("Long wait...");
+	};
+
+	return moveret;
 }
 
 int CSIABStage::SetRelativePositionUm(double d)
@@ -693,16 +733,37 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	bool flipX, flipY;
 	GetOrientation(flipX, flipY);
 
-	x = flipX ? (maxX_ - x) + minX_ : x;
-	y = flipY ? (maxY_ - y) + minY_ : y;
+	double toX = flipX ? (maxX_ - x) + minX_ : x;
+	double toY = flipY ? (maxY_ - y) + minY_ : y;
 
-	if(x < minX_ || x > maxX_)
+	if(toX < minX_ || toX > maxX_)
 		return 1;
-	if(y < minY_ || y > maxY_)
+	if(toY < minY_ || toY > maxY_)
 		return 2;
 
-	return piRunMotorToPosition((int)x, velocityX_, handleX_) ||
-		(piRunMotorToPosition((int)y, velocityY_, handleY_) << 1);
+	int moveX = piRunMotorToPosition((int)toX, velocityX_, handleX_);
+	int moveY = piRunMotorToPosition((int)toY, velocityY_, handleY_) << 1;
+	Sleep(1);
+
+	double atX, atY;
+
+	if(int ret = GetPositionUm(atX, atY))
+		return ret;
+
+	if((int)atX != (int)x || (int)atY != (int)y) {
+		int temp = 0;
+		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && temp++ < 1e3) {
+			if(GetPositionUm(atX, atY) != DEVICE_OK)
+				return DEVICE_ERR;
+
+			Sleep(0);
+		};
+
+		if(temp >= 5e2)
+			LogMessage("Long wait (X/Y)...");
+	};
+
+	return moveX | moveY;
 }
 
 int CSIABXYStage::SetRelativePositionUm(double dx, double dy)

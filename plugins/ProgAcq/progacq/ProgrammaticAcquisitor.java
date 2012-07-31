@@ -14,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
@@ -793,16 +792,21 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			Thread continuousThread = null;
 			if (continuous) {
+				core.clearCircularBuffer();
+				core.startContinuousSequenceAcquisition(0);
+
 				continuousThread = new Thread() {
 					private Exception lastExc;
 
 					@Override
 					public void run() {
 						while (!Thread.interrupted()) {
+							if (core.getRemainingImageCount() == 0)
+								continue;
+
 							try {
-								core.snapImage();
 								snapSlice(core, metaDevices, beginAll,
-										core.getTaggedImage(), img);
+										core.getLastTaggedImage(), img);
 							} catch (Exception e) {
 								lastExc = e;
 								break;
@@ -854,6 +858,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 				continuousThread.interrupt();
 				continuousThread.join();
+
+				core.stopSequenceAcquisition();
 			}
 
 			double wait = (timestep * (seq + 1))

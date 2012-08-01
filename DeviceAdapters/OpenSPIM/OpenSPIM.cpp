@@ -206,9 +206,14 @@ int CSIABTwister::SetPositionUm(double pos)
 
 	if((int)at != (int)pos) {
 		int temp = 0;
-		while(!Busy() && ++temp < 1e2) Sleep(0);
+		while(!Busy() && (int)at != (int)pos && temp++ < 1e3) {
+			if(GetPositionUm(at) != DEVICE_OK)
+				return DEVICE_ERR;
 
-		if(temp >= 5e1)
+			Sleep(0);
+		};
+
+		if(temp >= 5e2)
 			LogMessage("Long wait (twister)...");
 	};
 
@@ -413,16 +418,21 @@ int CSIABStage::SetPositionUm(double pos)
 	int moveret = piRunMotorToPosition((int)pos, velocity_, handle_);
 
 	double at = 0;
-	if(GetPositionUm(at))
+	if(GetPositionUm(at) != DEVICE_OK)
 		return DEVICE_ERR;
 
 	// WORKAROUND: piRunMotorToPosition doesn't wait for the motor to get
 	// underway. Wait a bit here.
 	if((int)at != (int)pos) {
 		int temp = 0;
-		while(!Busy() && temp++ < 1e2) Sleep(0);
+		while(!Busy() && (int)at != (int)pos && temp++ < 1e3) {
+			if(GetPositionUm(at) != DEVICE_OK)
+				return DEVICE_ERR;
 
-		if(temp >= 5e1)
+			Sleep(0);
+		};
+
+		if(temp >= 5e2)
 			LogMessage("Long wait...");
 	};
 
@@ -733,6 +743,7 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 	int moveX = piRunMotorToPosition((int)toX, velocityX_, handleX_);
 	int moveY = piRunMotorToPosition((int)toY, velocityY_, handleY_) << 1;
+	Sleep(1);
 
 	double atX, atY;
 
@@ -741,9 +752,14 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 	if((int)atX != (int)x || (int)atY != (int)y) {
 		int temp = 0;
-		while(!Busy() && ++temp < 1e2) Sleep(0);
+		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && temp++ < 1e3) {
+			if(GetPositionUm(atX, atY) != DEVICE_OK)
+				return DEVICE_ERR;
 
-		if(temp >= 5e1)
+			Sleep(0);
+		};
+
+		if(temp >= 5e2)
 			LogMessage("Long wait (X/Y)...");
 	};
 

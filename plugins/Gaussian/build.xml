@@ -21,6 +21,7 @@
 	<target name="build" description="Build Gaussian.jar">
 		<jar jarfile="Gaussian.jar" basedir="build" />
 		<copy file="Gaussian.jar" todir="..\..\Install_AllPlatforms\micro-manager\mmplugins\" />
+		<copy file="Gaussian.jar" todir="..\..\bin_Win32\mmplugins\"/>
 	</target>
 	
 	<target name="clean" description="Delete the Gaussian build files.">

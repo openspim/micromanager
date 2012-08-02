@@ -733,17 +733,16 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	bool flipX, flipY;
 	GetOrientation(flipX, flipY);
 
-	double toX = flipX ? (maxX_ - x) + minX_ : x;
-	double toY = flipY ? (maxY_ - y) + minY_ : y;
+	int toX = flipX ? (maxX_ - (int)x) + minX_ : (int)x;
+	int toY = flipY ? (maxY_ - (int)y) + minY_ : (int)y;
 
 	if(toX < minX_ || toX > maxX_)
 		return 1;
 	if(toY < minY_ || toY > maxY_)
 		return 2;
 
-	int moveX = piRunMotorToPosition((int)toX, velocityX_, handleX_);
-	int moveY = piRunMotorToPosition((int)toY, velocityY_, handleY_) << 1;
-	Sleep(1);
+	int moveX = piRunMotorToPosition(toX, velocityX_, handleX_);
+	int moveY = piRunMotorToPosition(toY, velocityY_, handleY_) << 1;
 
 	double atX, atY;
 

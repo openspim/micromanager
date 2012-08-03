@@ -2,13 +2,23 @@ import fiji.SimpleExecuter;
 
 import ij.IJ;
 
+import java.io.File;
+
 discoverVLC() {
-	vlc = "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe";
-	if (new File(vlc).exists())
-		return vlc;
-	vlc = "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe";
-	if (new File(vlc).exists())
-		return vlc;
+	if (System.getProperty("os.name").startsWith("Windows")) {
+		vlc = "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe";
+		if (new File(vlc).exists())
+			return vlc;
+		vlc = "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe";
+		if (new File(vlc).exists())
+			return vlc;
+	}
+	else
+		for (String dir : System.getenv("PATH").split(":")) {
+			file = new File(dir, "vlc");
+			if (file.exists())
+				return file.getAbsolutePath();
+		}
 	return null;
 }
 

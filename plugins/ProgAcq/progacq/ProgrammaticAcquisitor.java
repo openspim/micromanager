@@ -1,7 +1,9 @@
 package progacq;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.io.FileInfo;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
@@ -14,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
@@ -41,9 +44,9 @@ import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 import mmcorej.TaggedImage;
 
+import org.json.JSONObject;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
-import org.micromanager.utils.ReportingUtils;
 
 public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		ChangeListener {
@@ -770,6 +773,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		final int rowcnt = rows.size();
 
 		boolean continuous = params.isContinuous();
+		
+		final boolean saveIndividually = params.isSaveIndividual();
+		final File saveDir = params.getOutputDirectory();
 
 		int timeseqs = params.getTimeSeqCount();
 		double timestep = params.getTimeStepSeconds();
@@ -785,8 +791,13 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		core.waitForImageSynchro();
 		core.snapImage(); // Take up a bad image...
 
-		final ImageStack img = new ImageStack((int) core.getImageWidth(),
-				(int) core.getImageHeight());
+		final ImageStack img;
+		
+		if(!saveIndividually)
+			img = new ImageStack((int) core.getImageWidth(),
+					(int) core.getImageHeight());
+		else
+			img = null;
 
 		final long beginAll = (long) (System.nanoTime() / 1e6);
 
@@ -807,8 +818,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									continue;
 
 								try {
-									snapSlice(core, metaDevices, beginAll,
-										core.getTaggedImage(), img);
+									if(!saveIndividually)
+										snapSlice(core, metaDevices, beginAll,
+												core.getTaggedImage(), img);
+									else
+										snapAndWrite(core, metaDevices, beginAll,
+												core.getTaggedImage(), saveDir);
 								} catch (Throwable e) {
 									lastExc = e;
 									break;
@@ -840,8 +855,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				if (!continuous) {
 					core.snapImage();
 
-					snapSlice(core, metaDevices, beginAll,
-							core.getTaggedImage(), img);
+					if(!saveIndividually)
+						snapSlice(core, metaDevices, beginAll,
+								core.getTaggedImage(), img);
+					else
+						snapAndWrite(core, metaDevices, beginAll,
+								core.getTaggedImage(), saveDir);
 				} else {
 					core.waitForImageSynchro();
 				}
@@ -878,22 +897,61 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						+ Double.toString(wait) + "ms)");
 		}
 
-		ImagePlus finalImage = new ImagePlus("ProgAcqd", img);
-		finalImage.setDimensions(1, img.getSize() / timeseqs, timeseqs);
-		finalImage.setOpenAsHyperStack(true);
+		ImagePlus finalImage = null;
+		
+		if(!saveIndividually) {
+			finalImage = new ImagePlus("ProgAcqd", img);
+			finalImage.setDimensions(1, img.getSize() / timeseqs, timeseqs);
+			finalImage.setOpenAsHyperStack(true);
+		};
 
 		return finalImage;
 	}
 
-	private static void snapSlice(CMMCore core, String[] devices, long start,
+	private static void snapAndWrite(CMMCore core, String[] metaDevices,
+			long beginAll, TaggedImage image, File saveDir) throws Exception {
+		ImageStack stack = new ImageStack((int) core.getImageWidth(),
+				(int) core.getImageHeight());
+
+		JSONObject meta = snapSlice(core, metaDevices, beginAll, image, stack);
+		
+		String fileName = "pa-";
+		for(String dev : metaDevices)
+			fileName += dev + "=" + meta.getString(dev) + "-";
+		
+		fileName = fileName.substring(0, fileName.length() - 1) + ".tif";
+		
+		ImagePlus img = new ImagePlus(fileName, stack);
+		
+		img.setProperty("Info", meta);
+		
+		IJ.save(img, new File(saveDir, fileName).getPath());
+	}
+
+	private static JSONObject snapSlice(CMMCore core, String[] devices, long start,
 			TaggedImage slice, ImageStack img) throws Exception {
 
-		String meta = slice.tags.toString() + "\n"
-				+ generateMeta(System.nanoTime() / 1e6 - start, core, devices);
-
+		slice.tags.put("t", System.nanoTime() / 1e6 - start);
+		
+		for(String dev : devices) {
+			try {
+				if(core.getDeviceType(dev) == DeviceType.StageDevice) {
+					slice.tags.put(dev, core.getPosition(dev));
+				} else if(core.getDeviceType(dev) == DeviceType.XYStageDevice) {
+					slice.tags.put(dev, core.getXPosition(dev) + "x" + core.getYPosition(dev));
+				} else {
+					slice.tags.put(dev, "<unknown device type>");
+				}
+			} catch(Throwable t) {
+				slice.tags.put(dev, "<<<Exception: " + t.getMessage() + ">>>");
+			}
+		}
+		
 		ImageProcessor ip = newImageProcessor(core, slice.pix);
 
-		img.addSlice(meta, ip);
+		img.addSlice("t=" + (slice.tags.getString("t")), ip);
+		
+		return slice.tags;
 	};
 
 	/**
@@ -1026,44 +1084,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					+ core.getBytesPerPixel() + " bytes/pixel)");
 		}
 	}
-
-	/**
-	 * Generates a string of metadata for an image, based on a list of devices
-	 * (reports their values).
-	 * 
-	 * @param t
-	 *            The time this image is at, relative to the start of
-	 *            acquisition, in milliseconds.
-	 * @param core
-	 *            The Micro-Manager core with the list of devices.
-	 * @param devs
-	 *            List of devices with positions to report in the metadata.
-	 * @return A combined string containing the time and device informations.
-	 */
-	private static String generateMeta(double t, CMMCore core, String[] devs) {
-		String out = String.format("t=%.4fms; ", t);
-
-		for (String dev : devs) {
-			try {
-				out += dev + "=";
-				if (core.getDeviceType(dev).equals(DeviceType.XYStageDevice)) {
-					out += String.format("%.4fum, %.4fum",
-							core.getXPosition(dev), core.getYPosition(dev));
-				} else if (core.getDeviceType(dev).equals(
-						DeviceType.StageDevice)) {
-					out += String.format("%.4f", core.getPosition(dev));
-				} else {
-					out += "<unknown>";
-				}
-				out += "; ";
-			} catch (Exception e) {
-				e.printStackTrace();
-				return "<<<EXCEPTION: " + e.getMessage() + ">>>";
-			}
-		}
-
-		return out;
-	};
 
 	/**
 	 * Simple function to pull the X coordinate out of an ordered pair string.

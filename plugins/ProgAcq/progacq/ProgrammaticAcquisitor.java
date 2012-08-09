@@ -1083,44 +1083,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	}
 
 	/**
-	 * Generates a string of metadata for an image, based on a list of devices
-	 * (reports their values).
-	 * 
-	 * @param t
-	 *            The time this image is at, relative to the start of
-	 *            acquisition, in milliseconds.
-	 * @param core
-	 *            The Micro-Manager core with the list of devices.
-	 * @param devs
-	 *            List of devices with positions to report in the metadata.
-	 * @return A combined string containing the time and device informations.
-	 */
-	private static String generateMeta(double t, CMMCore core, String[] devs) {
-		String out = String.format("t=%.4fms; ", t);
-
-		for (String dev : devs) {
-			try {
-				out += dev + "=";
-				if (core.getDeviceType(dev).equals(DeviceType.XYStageDevice)) {
-					out += String.format("%.4fum, %.4fum",
-							core.getXPosition(dev), core.getYPosition(dev));
-				} else if (core.getDeviceType(dev).equals(
-						DeviceType.StageDevice)) {
-					out += String.format("%.4f", core.getPosition(dev));
-				} else {
-					out += "<unknown>";
-				}
-				out += "; ";
-			} catch (Exception e) {
-				e.printStackTrace();
-				return "<<<EXCEPTION: " + e.getMessage() + ">>>";
-			}
-		}
-
-		return out;
-	};
-
-	/**
 	 * Simple function to pull the X coordinate out of an ordered pair string.
 	 * This function doesn't care at all if the string you pass it is wrong, so
 	 * don't pass it a wrong string. :)

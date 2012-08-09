@@ -534,6 +534,10 @@ bool CSIABStage::IsContinuousFocusDrive() const
 }
 
 // The XY Stage
+#define XYERR_INIT_X 1
+#define XYERR_INIT_Y 2
+#define XYERR_MOVE_X 3
+#define XYERR_MOVE_Y 5
 
 CSIABXYStage::CSIABXYStage()
 : serialX_(125), serialY_(124), handleX_(NULL), handleY_(NULL), minX_(1),
@@ -543,8 +547,10 @@ CSIABXYStage::CSIABXYStage()
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
 	CreateProperty(g_Keyword_SerialNumberX, "125", MM::Integer, false, pActX, true);
 	CreateProperty(g_Keyword_SerialNumberY, "124", MM::Integer, false, pActY, true);
-	SetErrorText(1, "Could not initialize motor (X stage)");
-	SetErrorText(2, "Could not initialize motor (Y stage)");
+	SetErrorText(XYERR_INIT_X, "Could not initialize motor (X stage)");
+	SetErrorText(XYERR_INIT_Y, "Could not initialize motor (Y stage)");
+	SetErrorText(XYERR_MOVE_X, "X stage out of range.");
+	SetErrorText(XYERR_MOVE_Y, "Y stage out of range.");
 
 	CPropertyAction* pActMinX = new CPropertyAction(this, &CSIABXYStage::OnMinX);
 	CPropertyAction* pActMaxX = new CPropertyAction(this, &CSIABXYStage::OnMaxX);
@@ -581,7 +587,7 @@ int CSIABXYStage::OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct)
 			std::ostringstream buffer;
 			buffer << "Could not initialize X motor " << serialX_ << " (error code " << errorX << ")";
 			LogMessage(buffer.str().c_str(), false);
-			return 1;
+			return XYERR_INIT_X;
 		}
    }
    return DEVICE_OK;
@@ -608,7 +614,7 @@ int CSIABXYStage::OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct)
 			std::ostringstream buffer;
 			buffer << "Could not initialize Y motor " << serialY_ << " (error code " << errorY << ")";
 			LogMessage(buffer.str().c_str(), false);
-			return 2;
+			return XYERR_INIT_Y;
 		}
    }
    return DEVICE_OK;
@@ -724,9 +730,13 @@ void CSIABXYStage::GetOrientation(bool& mirrorX, bool& mirrorY)
 	assert(GetProperty(MM::g_Keyword_Transpose_MirrorX, x) == DEVICE_OK);
 	assert(GetProperty(MM::g_Keyword_Transpose_MirrorY, y) == DEVICE_OK);
 
-	mirrorX = (x != 1);
-	mirrorY = (y != 1);
+//	mirrorX = (x != 1);
+//	mirrorY = (y != 1);
+	mirrorX = false;
+	mirrorY = false;
 }
+
+#define XYSTAGE_DBG_ON 1
 
 int CSIABXYStage::SetPositionUm(double x, double y)
 {
@@ -735,11 +745,20 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 	int toX = flipX ? (maxX_ - (int)x) + minX_ : (int)x;
 	int toY = flipY ? (maxY_ - (int)y) + minY_ : (int)y;
-
+#ifdef XYSTAGE_DBG_ON
+	std::ostringstream str;
+	str << "SetPositionUm(" << x << ", " << y << "): ";
+	str << "sn X/Y={" << serialX_ << ", " << serialY_ << "}, ";
+	str << "flip X/Y={" << (flipX ? "true" : "false") << ", " << (flipY ? "true" : "false") << "}, ";
+	str << "min/max X=[" << minX_ << ", " << maxX_ << "], ";
+	str << "min/max Y=[" << minY_ << ", " << maxY_ << "], ";
+	str << "to X/Y={" << toX << ", " << toY << "}";
+	LogMessage(str.str().c_str());
+#endif
 	if(toX < minX_ || toX > maxX_)
-		return 1;
+		return XYERR_MOVE_X;
 	if(toY < minY_ || toY > maxY_)
-		return 2;
+		return XYERR_MOVE_Y;
 
 	int moveX = piRunMotorToPosition(toX, velocityX_, handleX_);
 	int moveY = piRunMotorToPosition(toY, velocityY_, handleY_) << 1;

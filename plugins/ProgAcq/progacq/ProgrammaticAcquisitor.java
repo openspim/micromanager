@@ -799,7 +799,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		else
 			img = null;
 
-		final long beginAll = (long) (System.nanoTime() / 1e6);
+		final long beginAll = (long) (System.nanoTime() / 1e9);
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			Thread continuousThread = null;
@@ -868,7 +868,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				if (continuous && continuousThread.isAlive() == false)
 					throw new Exception(continuousThread.toString());
 
-				final Double progress = (double) (rowcnt * seq + step)
+				final Double progress = (double) (rowcnt * seq + step + 1)
 						/ (rowcnt * timeseqs);
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
@@ -886,9 +886,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			}
 
 			double wait = (timestep * (seq + 1))
-					- (System.nanoTime() / 1e6 - beginAll);
+					- (System.nanoTime() / 1e9 - beginAll);
 			if (wait > 0D)
-				core.sleep(wait);
+				core.sleep(wait * 1e3);
 			else
 				core.logMessage("Behind schedule! (next seq in "
 						+ Double.toString(wait) + "ms)");
@@ -912,7 +912,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		JSONObject meta = snapSlice(core, metaDevices, beginAll, image, stack);
 		
-		String fileName = "pa-";
+		String fileName = String.format("pa-t=%.4f-", meta.getDouble("t"));
 		for(String dev : metaDevices)
 			fileName += dev + "=" + meta.getString(dev) + "-";
 		
@@ -928,7 +928,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	private static JSONObject snapSlice(CMMCore core, String[] devices, long start,
 			TaggedImage slice, ImageStack img) throws Exception {
 
-		slice.tags.put("t", System.nanoTime() / 1e6 - start);
+		slice.tags.put("t", System.nanoTime() / 1e9 - start);
 		
 		for(String dev : devices) {
 			try {

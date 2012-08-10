@@ -113,6 +113,10 @@ public class StepTableModel extends AbstractTableModel implements
 	}
 
 	public void insertRow(Object[] values) {
+		insertRow(data.size(), values);
+	}
+	
+	public void insertRow(int index, Object[] values) {
 		// TODO: Handle this more gracefully? Fail silently? Chop?
 		if (values.length != columnNames.length)
 			throw new Error("Wrong colum count, silly!");
@@ -121,7 +125,7 @@ public class StepTableModel extends AbstractTableModel implements
 		for (int i = 0; i < values.length; ++i)
 			fixed[i] = values[i].toString();
 
-		data.add(fixed);
+		data.add(index, fixed);
 
 		this.fireTableDataChanged();
 	}

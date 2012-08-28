@@ -773,7 +773,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		final int rowcnt = rows.size();
 
 		boolean continuous = params.isContinuous();
-		
+
 		final boolean saveIndividually = params.isSaveIndividual();
 		final File saveDir = params.getOutputDirectory();
 
@@ -792,7 +792,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		core.snapImage(); // Take up a bad image...
 
 		final ImageStack img;
-		
+
 		if(!saveIndividually)
 			img = new ImageStack((int) core.getImageWidth(),
 					(int) core.getImageHeight());
@@ -895,7 +895,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		}
 
 		ImagePlus finalImage = null;
-		
+
 		if(!saveIndividually) {
 			finalImage = new ImagePlus("ProgAcqd", img);
 			finalImage.setDimensions(1, img.getSize() / timeseqs, timeseqs);
@@ -911,17 +911,17 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				(int) core.getImageHeight());
 
 		JSONObject meta = snapSlice(core, metaDevices, beginAll, image, stack);
-		
+
 		String fileName = String.format("pa-t=%.4f-", meta.getDouble("t"));
 		for(String dev : metaDevices)
 			fileName += dev + "=" + meta.getString(dev) + "-";
-		
+
 		fileName = fileName.substring(0, fileName.length() - 1) + ".tif";
-		
+
 		ImagePlus img = new ImagePlus(fileName, stack);
-		
-		img.setProperty("Info", meta);
-		
+
+		img.setProperty("Info", meta.toString());
+
 		IJ.save(img, new File(saveDir, fileName).getPath());
 	}
 
@@ -929,7 +929,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			TaggedImage slice, ImageStack img) throws Exception {
 
 		slice.tags.put("t", System.nanoTime() / 1e9 - start);
-		
+
 		for(String dev : devices) {
 			try {
 				if(core.getDeviceType(dev) == DeviceType.StageDevice) {
@@ -943,11 +943,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				slice.tags.put(dev, "<<<Exception: " + t.getMessage() + ">>>");
 			}
 		}
-		
+
 		ImageProcessor ip = newImageProcessor(core, slice.pix);
 
 		img.addSlice("t=" + (slice.tags.getString("t")), ip);
-		
+
 		return slice.tags;
 	};
 

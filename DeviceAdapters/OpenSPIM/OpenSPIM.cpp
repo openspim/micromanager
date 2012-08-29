@@ -812,6 +812,9 @@ int CSIABXYStage::GetPositionUm(double& x, double& y)
 	x = flipX ? (maxX_ - positionX) + minX_ : positionX;
 	y = flipY ? (maxY_ - positionY) + minY_ : positionY;
 
+	x = (x < minX_ ? minX_ : (x > maxX_ ? maxX_ : x));
+	y = (y < minY_ ? minY_ : (y > maxY_ ? maxY_ : y));
+
 	return DEVICE_OK;
 }
 

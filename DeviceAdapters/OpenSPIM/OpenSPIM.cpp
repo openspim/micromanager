@@ -206,14 +206,14 @@ int CSIABTwister::SetPositionUm(double pos)
 
 	if((int)at != (int)pos) {
 		int temp = 0;
-		while(!Busy() && (int)at != (int)pos && temp++ < 1e3) {
+		while(!Busy() && (int)at != (int)pos && temp++ < 1e2) {
 			if(GetPositionUm(at) != DEVICE_OK)
 				return DEVICE_ERR;
 
-			Sleep(0);
+			Sleep(1);
 		};
 
-		if(temp >= 5e2)
+		if(temp >= 5e1)
 			LogMessage("Long wait (twister)...");
 	};
 
@@ -425,14 +425,14 @@ int CSIABStage::SetPositionUm(double pos)
 	// underway. Wait a bit here.
 	if((int)at != (int)pos) {
 		int temp = 0;
-		while(!Busy() && (int)at != (int)pos && temp++ < 1e3) {
+		while(!Busy() && (int)at != (int)pos && temp++ < 1e2) {
 			if(GetPositionUm(at) != DEVICE_OK)
 				return DEVICE_ERR;
 
-			Sleep(0);
+			Sleep(1);
 		};
 
-		if(temp >= 5e2)
+		if(temp >= 5e1)
 			LogMessage("Long wait...");
 	};
 
@@ -770,14 +770,14 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 	if((int)atX != (int)x || (int)atY != (int)y) {
 		int temp = 0;
-		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && temp++ < 1e3) {
+		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && temp++ < 1e2) {
 			if(GetPositionUm(atX, atY) != DEVICE_OK)
 				return DEVICE_ERR;
 
-			Sleep(0);
+			Sleep(1);
 		};
 
-		if(temp >= 5e2)
+		if(temp >= 5e1)
 			LogMessage("Long wait (X/Y)...");
 	};
 

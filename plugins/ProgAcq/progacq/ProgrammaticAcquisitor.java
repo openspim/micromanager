@@ -762,7 +762,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 *             on encountering malformed data or bad device names, or an
 	 *             exception while stepping (i.e. motor malfunction).
 	 */
-	public static ImagePlus performAcquisition(AcqParams params)
+	public static ImagePlus performAcquisition(final AcqParams params)
 			throws Exception {
 
 		final CMMCore core = params.getCore();
@@ -775,7 +775,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		boolean continuous = params.isContinuous();
 
 		final boolean saveIndividually = params.isSaveIndividual();
-		final File saveDir = params.getOutputDirectory();
 
 		int timeseqs = params.getTimeSeqCount();
 		double timestep = params.getTimeStepSeconds();
@@ -823,8 +822,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									snapSlice(core, metaDevices, beginAll,
 											core.popNextTaggedImage(), img);
 								else
-									snapAndWrite(core, metaDevices, beginAll,
-											core.popNextTaggedImage(), saveDir);
+									snapAndWrite(params, beginAll, core.popNextTaggedImage());
 							}
 
 							core.stopSequenceAcquisition();
@@ -856,8 +854,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						snapSlice(core, metaDevices, beginAll,
 								core.getTaggedImage(), img);
 					else
-						snapAndWrite(core, metaDevices, beginAll,
-								core.getTaggedImage(), saveDir);
+						snapAndWrite(params, beginAll, core.getTaggedImage());
 				} else {
 					core.waitForImageSynchro();
 				}
@@ -905,24 +902,25 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return finalImage;
 	}
 
-	private static void snapAndWrite(CMMCore core, String[] metaDevices,
-			long beginAll, TaggedImage image, File saveDir) throws Exception {
+	private static void snapAndWrite(final AcqParams params, long beginAll,
+			TaggedImage image) throws Exception{
+		final CMMCore core = params.getCore();
+
 		ImageStack stack = new ImageStack((int) core.getImageWidth(),
 				(int) core.getImageHeight());
 
-		JSONObject meta = snapSlice(core, metaDevices, beginAll, image, stack);
+		JSONObject meta = snapSlice(core, params.getMetaDevices(),
+				beginAll, image, stack);
 
-		String fileName = String.format("pa-t=%.4f-", meta.getDouble("t"));
-		for(String dev : metaDevices)
-			fileName += dev + "=" + meta.getString(dev) + "-";
+		String fn = params.getNameScheme().replaceAll("%t", meta.getString("t"));
 
-		fileName = fileName.substring(0, fileName.length() - 1) + ".tif";
+		for(int i=0; i < params.getStepDevices().length; ++i)
+			fn.replaceAll("%" + i, meta.getString(params.getStepDevices()[i]));
 
-		ImagePlus img = new ImagePlus(fileName, stack);
-
+		ImagePlus img = new ImagePlus(fn, stack);
 		img.setProperty("Info", meta.toString());
 
-		IJ.save(img, new File(saveDir, fileName).getPath());
+		IJ.save(img, new File(params.getOutputDirectory(), fn).getPath());
 	}
 
 	private static JSONObject snapSlice(CMMCore core, String[] devices, long start,

@@ -3,6 +3,7 @@ package progacq;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.event.ChangeListener;
 
@@ -10,7 +11,7 @@ import mmcorej.CMMCore;
 
 public class AcqParams {
 	private CMMCore			core;
-	private String[]		stepDevices;			
+	private String[]		stepDevices;
 	private List<String[]>	steps;
 
 	private double			timeStepSeconds;
@@ -24,6 +25,8 @@ public class AcqParams {
 	private ChangeListener	progressListener;
 
 	private String[]		metaDevices;
+
+	private String			nameScheme;
 
 	public AcqParams() {
 		this(null, null, null, 0D, 0, false, null, null, false, null);
@@ -61,6 +64,48 @@ public class AcqParams {
 
 		outputDirectory = rootDir;
 
+		generateDefaultNameScheme();
+	}
+
+	private void generateDefaultNameScheme() {
+		nameScheme = "pa-t=%t-";
+
+		for(int i=0; i < stepDevices.length; ++i)
+			nameScheme += stepDevices[i] + "=%" + i + "-";
+	}
+
+	/**
+	 * Creates a nameScheme string from a list of 'short' names. Only applies to
+	 * saveIndividually.
+	 * 
+	 * @param header Prefixed onto the string.
+	 * @param t	whether or not to include time in filename
+	 * @param nameMap map of short names for devices to be in the filename.
+	 * @return the generated scheme (is also saved to this object!)
+	 */
+	public String shortNamesToScheme(String header, boolean t, Map<String, String> nameMap) {
+		nameScheme = header + (t ? "-t=%t" : "-");
+
+		for(int i=0; i < stepDevices.length; ++i)
+			nameScheme += "-" + nameMap.get(stepDevices[i]) + "=%" + i;
+
+		nameScheme += ".tif";
+
+		return nameScheme;
+	}
+
+	/**
+	 * @return the nameScheme
+	 */
+	public String getNameScheme() {
+		return nameScheme;
+	}
+
+	/**
+	 * @param nameScheme the nameScheme to set
+	 */
+	public void setNameScheme(String nameScheme) {
+		this.nameScheme = nameScheme;
 	}
 
 	/**
@@ -202,7 +247,7 @@ public class AcqParams {
 	public void setOutputDirectory(File outputDirectory) {
 		if(outputDirectory != null && !outputDirectory.isDirectory())
 			throw new IllegalArgumentException("Not a directory.");
-		
+
 		this.outputDirectory = outputDirectory;
 	}
 }

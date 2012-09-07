@@ -912,10 +912,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		JSONObject meta = snapSlice(core, params.getMetaDevices(),
 				beginAll, image, stack);
 
-		String fn = params.getNameScheme().replaceAll("%t", meta.getString("t"));
+		String fn = params.getNameScheme().replaceAll("%t", String.format("%.3f", meta.getDouble("t")));
 
 		for(int i=0; i < params.getStepDevices().length; ++i)
-			fn.replaceAll("%" + i, meta.getString(params.getStepDevices()[i]));
+			fn = fn.replaceAll("%" + i, meta.getString(params.getStepDevices()[i]));
 
 		ImagePlus img = new ImagePlus(fn, stack);
 		img.setProperty("Info", meta.toString());

@@ -51,6 +51,9 @@ public class GaussianFit {
 	MultiVariateGaussianFunction mGF_;
 
 	LevenbergMarquardtOptimizer lMO_;
+	
+	boolean estimateByMaximum;
+	boolean hardCodedSteps;
 
 	/**
 	 * Gaussian fit can be run by estimating parameter c (width of Gaussian) as
@@ -61,7 +64,7 @@ public class GaussianFit {
 	 * @param fitmode
 	 *            - algorithm use: NelderMead (1), or Levenberg Marquard (2)
 	 */
-	public GaussianFit(int mode, int fitMode) {
+	public GaussianFit(int mode, int fitMode, boolean estByMax, boolean hardCodeStp) {
 		super();
 		fitMode_ = fitMode;
 		if (mode == 1) {
@@ -89,6 +92,13 @@ public class GaussianFit {
 		if (fitMode == 2) {
 			lMO_ = new LevenbergMarquardtOptimizer();
 		}
+
+		estimateByMaximum = estByMax;
+		hardCodedSteps = hardCodeStp;
+	}
+
+	public GaussianFit(int mode, int fitmode) {
+		this(mode, fitmode, false, false);
 	}
 
 	/**
@@ -125,10 +135,6 @@ public class GaussianFit {
 				RealPointValuePair result = opt.optimize(maxIterations, mGF_,
 						GoalType.MINIMIZE, params0_);
 				paramsOut = result.getPoint();
-
-				ReportingUtils.logMessage("!!!--- Evaluations: "
-						+ opt.getEvaluations() + " / "
-						+ opt.getMaxEvaluations() + ".");
 			} catch (java.lang.OutOfMemoryError e) {
 				throw (e);
 			} catch (Exception e) {
@@ -216,22 +222,38 @@ public class GaussianFit {
 			// mx += (imagePixels[i] - params0_[4]) * (i % siProc.getWidth() );
 			// my += (imagePixels[i] - params0_[4]) * (Math.floor (i /
 			// siProc.getWidth()));
-			mt += (int) (imagePixels[i] & 0xffff);
-			mx += ((int) (imagePixels[i] & 0xffff) - bg)
-					* (i % siProc.getWidth());
-			my += ((int) (imagePixels[i] & 0xffff) - bg)
-					* (i / siProc.getWidth());
+			double weight = (imagePixels[i] & 0xffff) - bg;
+
+			if(params0_[INT] < weight) {
+				params0_[INT] = weight;
+				params0_[XC] = i % siProc.getWidth();
+				params0_[YC] = i / siProc.getWidth();
+			}
+
+			if(estimateByMaximum) {
+				mt += (int) weight;
+				mx += (int) weight * (i % siProc.getWidth());
+				my += (int) weight * (i / siProc.getWidth());
+			}
 		}
-		double ti = mt - (bg * siProc.getHeight() * siProc.getWidth());
-		params0_[INT] = ti / (2 * Math.PI * params0_[S] * params0_[S]);
-		params0_[XC] = mx / ti;
-		params0_[YC] = my / ti;
+		if(estimateByMaximum) {
+			params0_[INT] = mt / (2 * Math.PI * params0_[S] * params0_[S]);
+			params0_[XC] = mx / mt;
+			params0_[YC] = my / mt;
+		};
 		// ij.IJ.log("Centroid: " + mx/mt + " " + my/mt);
 		// set step size during estimate
-		for (int i = 0; i < params0_.length; ++i) {
-			steps_[i] = params0_[i] * 0.03;
+		if(hardCodedSteps) {
+			steps_[INT] = 0.5; //params0_[INT]*0.3;
+			steps_[BGR] = params0_[BGR]*0.3;
+			steps_[XC] = 0.1;
+			steps_[YC] = 0.1;
+		}
+		
+		for (int i = (hardCodedSteps ? S : 0); i < params0_.length; ++i) {
+			steps_[i] = params0_[i] * 0.3;
 			if (steps_[i] == 0)
-				steps_[i] = 0.01;
+				steps_[i] = 0.1;
 		}
 	}
 

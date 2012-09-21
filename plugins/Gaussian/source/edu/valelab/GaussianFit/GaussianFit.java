@@ -230,13 +230,13 @@ public class GaussianFit {
 				params0_[YC] = i / siProc.getWidth();
 			}
 
-			if(estimateByMaximum) {
+			if(!estimateByMaximum) {
 				mt += (int) weight;
 				mx += (int) weight * (i % siProc.getWidth());
 				my += (int) weight * (i / siProc.getWidth());
 			}
 		}
-		if(estimateByMaximum) {
+		if(!estimateByMaximum) {
 			params0_[INT] = mt / (2 * Math.PI * params0_[S] * params0_[S]);
 			params0_[XC] = mx / mt;
 			params0_[YC] = my / mt;

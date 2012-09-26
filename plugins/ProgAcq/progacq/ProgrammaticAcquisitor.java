@@ -785,7 +785,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		final long beginAll = (long) (System.nanoTime() / 1e9);
 
-		final AcqOutputHandler handler = params.getOutputHandler();
+		final AcqOutputHandler handler = params.instantiateHandler();
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			Thread continuousThread = null;
@@ -873,7 +873,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						+ Double.toString(wait) + "ms)");
 		}
 		
-		handler.finalize();
+		handler.Finalize();
 		
 		return handler.getImagePlus();
 	}
@@ -899,7 +899,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ImageProcessor ip = newImageProcessor(core, slice.pix);
 
-		handler.processSlice(ip, slice.tags);
+		handler.ProcessSlice(ip, slice.tags);
 	}
 
 	/**

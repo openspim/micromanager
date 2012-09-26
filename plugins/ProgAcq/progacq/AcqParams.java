@@ -18,7 +18,8 @@ public class AcqParams {
 
 	private boolean			continuous;
 
-	private AcqOutputHandler outputHandler;
+	private Class<? extends AcqOutputHandler> outputHandler;
+	private Object[]		handlerParams;
 
 	private ChangeListener	progressListener;
 
@@ -41,29 +42,18 @@ public class AcqParams {
 			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
 			ChangeListener iListener, String[] iMetaDevices, boolean saveIndv,
 			File rootDir) {
-		this(
-			iCore,
-			iDevices,
-			iSteps,
-			iTimeStep,
-			iTimeSeqCnt,
-			iContinuous,
-			iListener,
-			iMetaDevices,
-			(saveIndv ?
-				new IndividualImagesHandler(
-					rootDir,
-					IndividualImagesHandler.shortNamesToScheme("PA", true, iMetaDevices, null)
-				) :
-				new OutputAsStackHandler()
-			)
-		);
+		this(iCore, iDevices, iSteps, iTimeStep, iTimeSeqCnt, iContinuous,
+				iListener, iMetaDevices, (saveIndv ? IndividualImagesHandler.class : OutputAsStackHandler.class),
+				(saveIndv ? new Object[] {
+						rootDir,
+						IndividualImagesHandler.shortNamesToScheme("PA", true, iDevices, null)
+				} : new Object[] {}));
 	}
-
+	
 	public AcqParams(CMMCore iCore, String[] iDevs, List<String[]> iRows,
 			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
 			ChangeListener iListener, String[] iMetaDevices,
-			AcqOutputHandler handler) {
+			Class<? extends AcqOutputHandler> handler, Object[] params) {
 
 		setCore(iCore);
 		setStepDevices(iDevs);
@@ -75,6 +65,7 @@ public class AcqParams {
 		setMetaDevices(iMetaDevices);
 
 		setOutputHandler(handler);
+		setHandlerParams(params);
 	}
 
 	/**
@@ -189,11 +180,51 @@ public class AcqParams {
 		this.metaDevices = metaDevices;
 	}
 
-	public AcqOutputHandler getOutputHandler() {
+	/**
+	 * @return the outputHandler
+	 */
+	public Class<? extends AcqOutputHandler> getOutputHandler() {
 		return outputHandler;
 	}
 
-	public void setOutputHandler(AcqOutputHandler outputHandler) {
+	/**
+	 * @param outputHandler the outputHandler to set
+	 */
+	public void setOutputHandler(Class<? extends AcqOutputHandler> outputHandler) {
 		this.outputHandler = outputHandler;
+	}
+
+	/**
+	 * @return the handlerParams
+	 */
+	public Object[] getHandlerParams() {
+		return handlerParams;
+	}
+
+	/**
+	 * @param handlerParams the handlerParams to set
+	 */
+	public void setHandlerParams(Object[] handlerParams) {
+		Class<?>[] argClasses = new Class[handlerParams.length];
+
+		for(int i=0; i < handlerParams.length; ++i)
+			argClasses[i] = handlerParams[i].getClass();
+
+		try {
+			outputHandler.getConstructor(argClasses);
+		} catch(NoSuchMethodException e) {
+			throw new IllegalArgumentException("No constructor matching parameters: " + Arrays.toString(handlerParams));
+		}
+		
+		this.handlerParams = handlerParams;
+	}
+	
+	public AcqOutputHandler instantiateHandler() throws Exception {
+		Class<?>[] argClasses = new Class[handlerParams.length];
+
+		for(int i=0; i < handlerParams.length; ++i)
+			argClasses[i] = handlerParams[i].getClass();
+
+		return outputHandler.getConstructor(argClasses).newInstance(handlerParams);
 	}
 }

@@ -1,9 +1,9 @@
 package progacq;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.event.ChangeListener;
 
@@ -18,15 +18,13 @@ public class AcqParams {
 	private int				timeSeqCount;
 
 	private boolean			continuous;
-	private boolean			saveIndividual;
 
-	private File			outputDirectory;
+	private Class<? extends AcqOutputHandler> outputHandler;
+	private Object[]		handlerParams;
 
 	private ChangeListener	progressListener;
 
 	private String[]		metaDevices;
-
-	private String			nameScheme;
 
 	public AcqParams() {
 		this(null, null, null, 0D, 0, false, null, null, false, null);
@@ -45,67 +43,30 @@ public class AcqParams {
 			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
 			ChangeListener iListener, String[] iMetaDevices, boolean saveIndv,
 			File rootDir) {
-
-		core = iCore;
-		stepDevices = iDevices;
-		steps = iSteps;
-		timeStepSeconds = iTimeStep;
-		timeSeqCount = iTimeSeqCnt;
-		continuous = iContinuous;
-		progressListener = iListener;
-		metaDevices = iMetaDevices;
-		saveIndividual = saveIndv;
-
-		if(saveIndividual && rootDir == null)
-			throw new IllegalArgumentException("Must specify a directory.");
-
-		if(saveIndividual && !rootDir.isDirectory())
-			throw new IllegalArgumentException(rootDir.getPath() + " is not a directory.");
-
-		outputDirectory = rootDir;
-
-		generateDefaultNameScheme();
+		this(iCore, iDevices, iSteps, iTimeStep, iTimeSeqCnt, iContinuous,
+				iListener, iMetaDevices, (saveIndv ? IndividualImagesHandler.class : OutputAsStackHandler.class),
+				(saveIndv ? new Object[] {
+						rootDir,
+						IndividualImagesHandler.shortNamesToScheme("PA", true, iDevices, null)
+				} : new Object[] {}));
 	}
+	
+	public AcqParams(CMMCore iCore, String[] iDevs, List<String[]> iRows,
+			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
+			ChangeListener iListener, String[] iMetaDevices,
+			Class<? extends AcqOutputHandler> handler, Object[] params) {
 
-	private void generateDefaultNameScheme() {
-		nameScheme = "pa-t=%t-";
+		setCore(iCore);
+		setStepDevices(iDevs);
+		setSteps(iRows);
+		setTimeStepSeconds(iTimeStep);
+		setTimeSeqCount(iTimeSeqCnt);
+		setContinuous(iContinuous);
+		setProgressListener(iListener);
+		setMetaDevices(iMetaDevices);
 
-		for(int i=0; i < stepDevices.length; ++i)
-			nameScheme += stepDevices[i] + "=%" + i + "-";
-	}
-
-	/**
-	 * Creates a nameScheme string from a list of 'short' names. Only applies to
-	 * saveIndividually.
-	 * 
-	 * @param header Prefixed onto the string.
-	 * @param t	whether or not to include time in filename
-	 * @param nameMap map of short names for devices to be in the filename.
-	 * @return the generated scheme (is also saved to this object!)
-	 */
-	public String shortNamesToScheme(String header, boolean t, Map<String, String> nameMap) {
-		nameScheme = header + (t ? "-t=%t" : "-");
-
-		for(int i=0; i < stepDevices.length; ++i)
-			nameScheme += "-" + nameMap.get(stepDevices[i]) + "=%" + i;
-
-		nameScheme += ".tif";
-
-		return nameScheme;
-	}
-
-	/**
-	 * @return the nameScheme
-	 */
-	public String getNameScheme() {
-		return nameScheme;
-	}
-
-	/**
-	 * @param nameScheme the nameScheme to set
-	 */
-	public void setNameScheme(String nameScheme) {
-		this.nameScheme = nameScheme;
+		setOutputHandler(handler);
+		setHandlerParams(params);
 	}
 
 	/**
@@ -221,33 +182,50 @@ public class AcqParams {
 	}
 
 	/**
-	 * @return the saveIndividual
+	 * @return the outputHandler
 	 */
-	public boolean isSaveIndividual() {
-		return saveIndividual;
+	public Class<? extends AcqOutputHandler> getOutputHandler() {
+		return outputHandler;
 	}
 
 	/**
-	 * @param saveIndividual the saveIndividual to set
+	 * @param outputHandler the outputHandler to set
 	 */
-	public void setSaveIndividual(boolean saveIndividual) {
-		this.saveIndividual = saveIndividual;
+	public void setOutputHandler(Class<? extends AcqOutputHandler> outputHandler) {
+		this.outputHandler = outputHandler;
 	}
 
 	/**
-	 * @return the outputDirectory
+	 * @return the handlerParams
 	 */
-	public File getOutputDirectory() {
-		return outputDirectory;
+	public Object[] getHandlerParams() {
+		return handlerParams;
 	}
 
 	/**
-	 * @param outputDirectory the outputDirectory to set
+	 * @param handlerParams the handlerParams to set
 	 */
-	public void setOutputDirectory(File outputDirectory) {
-		if(outputDirectory != null && !outputDirectory.isDirectory())
-			throw new IllegalArgumentException("Not a directory.");
+	public void setHandlerParams(Object[] handlerParams) {
+		Class<?>[] argClasses = new Class[handlerParams.length];
 
-		this.outputDirectory = outputDirectory;
+		for(int i=0; i < handlerParams.length; ++i)
+			argClasses[i] = handlerParams[i].getClass();
+
+		try {
+			outputHandler.getConstructor(argClasses);
+		} catch(NoSuchMethodException e) {
+			throw new IllegalArgumentException("No constructor matching parameters: " + Arrays.toString(handlerParams));
+		}
+		
+		this.handlerParams = handlerParams;
+	}
+	
+	public AcqOutputHandler instantiateHandler() throws Exception {
+		Class<?>[] argClasses = new Class[handlerParams.length];
+
+		for(int i=0; i < handlerParams.length; ++i)
+			argClasses[i] = handlerParams[i].getClass();
+
+		return outputHandler.getConstructor(argClasses).newInstance(handlerParams);
 	}
 }

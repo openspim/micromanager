@@ -1,9 +1,8 @@
 package progacq;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.event.ChangeListener;
 
@@ -18,15 +17,12 @@ public class AcqParams {
 	private int				timeSeqCount;
 
 	private boolean			continuous;
-	private boolean			saveIndividual;
 
-	private File			outputDirectory;
+	private AcqOutputHandler outputHandler;
 
 	private ChangeListener	progressListener;
 
 	private String[]		metaDevices;
-
-	private String			nameScheme;
 
 	public AcqParams() {
 		this(null, null, null, 0D, 0, false, null, null, false, null);
@@ -45,67 +41,40 @@ public class AcqParams {
 			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
 			ChangeListener iListener, String[] iMetaDevices, boolean saveIndv,
 			File rootDir) {
-
-		core = iCore;
-		stepDevices = iDevices;
-		steps = iSteps;
-		timeStepSeconds = iTimeStep;
-		timeSeqCount = iTimeSeqCnt;
-		continuous = iContinuous;
-		progressListener = iListener;
-		metaDevices = iMetaDevices;
-		saveIndividual = saveIndv;
-
-		if(saveIndividual && rootDir == null)
-			throw new IllegalArgumentException("Must specify a directory.");
-
-		if(saveIndividual && !rootDir.isDirectory())
-			throw new IllegalArgumentException(rootDir.getPath() + " is not a directory.");
-
-		outputDirectory = rootDir;
-
-		generateDefaultNameScheme();
+		this(
+			iCore,
+			iDevices,
+			iSteps,
+			iTimeStep,
+			iTimeSeqCnt,
+			iContinuous,
+			iListener,
+			iMetaDevices,
+			(saveIndv ?
+				new IndividualImagesHandler(
+					rootDir,
+					IndividualImagesHandler.shortNamesToScheme("PA", true, iMetaDevices, null)
+				) :
+				new OutputAsStackHandler()
+			)
+		);
 	}
 
-	private void generateDefaultNameScheme() {
-		nameScheme = "pa-t=%t-";
+	public AcqParams(CMMCore iCore, String[] iDevs, List<String[]> iRows,
+			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
+			ChangeListener iListener, String[] iMetaDevices,
+			AcqOutputHandler handler) {
 
-		for(int i=0; i < stepDevices.length; ++i)
-			nameScheme += stepDevices[i] + "=%" + i + "-";
-	}
+		setCore(iCore);
+		setStepDevices(iDevs);
+		setSteps(iRows);
+		setTimeStepSeconds(iTimeStep);
+		setTimeSeqCount(iTimeSeqCnt);
+		setContinuous(iContinuous);
+		setProgressListener(iListener);
+		setMetaDevices(iMetaDevices);
 
-	/**
-	 * Creates a nameScheme string from a list of 'short' names. Only applies to
-	 * saveIndividually.
-	 * 
-	 * @param header Prefixed onto the string.
-	 * @param t	whether or not to include time in filename
-	 * @param nameMap map of short names for devices to be in the filename.
-	 * @return the generated scheme (is also saved to this object!)
-	 */
-	public String shortNamesToScheme(String header, boolean t, Map<String, String> nameMap) {
-		nameScheme = header + (t ? "-t=%t" : "-");
-
-		for(int i=0; i < stepDevices.length; ++i)
-			nameScheme += "-" + nameMap.get(stepDevices[i]) + "=%" + i;
-
-		nameScheme += ".tif";
-
-		return nameScheme;
-	}
-
-	/**
-	 * @return the nameScheme
-	 */
-	public String getNameScheme() {
-		return nameScheme;
-	}
-
-	/**
-	 * @param nameScheme the nameScheme to set
-	 */
-	public void setNameScheme(String nameScheme) {
-		this.nameScheme = nameScheme;
+		setOutputHandler(handler);
 	}
 
 	/**
@@ -220,34 +189,11 @@ public class AcqParams {
 		this.metaDevices = metaDevices;
 	}
 
-	/**
-	 * @return the saveIndividual
-	 */
-	public boolean isSaveIndividual() {
-		return saveIndividual;
+	public AcqOutputHandler getOutputHandler() {
+		return outputHandler;
 	}
 
-	/**
-	 * @param saveIndividual the saveIndividual to set
-	 */
-	public void setSaveIndividual(boolean saveIndividual) {
-		this.saveIndividual = saveIndividual;
-	}
-
-	/**
-	 * @return the outputDirectory
-	 */
-	public File getOutputDirectory() {
-		return outputDirectory;
-	}
-
-	/**
-	 * @param outputDirectory the outputDirectory to set
-	 */
-	public void setOutputDirectory(File outputDirectory) {
-		if(outputDirectory != null && !outputDirectory.isDirectory())
-			throw new IllegalArgumentException("Not a directory.");
-
-		this.outputDirectory = outputDirectory;
+	public void setOutputHandler(AcqOutputHandler outputHandler) {
+		this.outputHandler = outputHandler;
 	}
 }

@@ -1,9 +1,6 @@
 package progacq;
 
-import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.io.FileInfo;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
@@ -16,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
@@ -44,7 +40,6 @@ import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 import mmcorej.TaggedImage;
 
-import org.json.JSONObject;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
 
@@ -774,8 +769,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		boolean continuous = params.isContinuous();
 
-		final boolean saveIndividually = params.isSaveIndividual();
-
 		int timeseqs = params.getTimeSeqCount();
 		double timestep = params.getTimeStepSeconds();
 
@@ -790,15 +783,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		core.waitForImageSynchro();
 		core.snapImage(); // Take up a bad image...
 
-		final ImageStack img;
-
-		if(!saveIndividually)
-			img = new ImageStack((int) core.getImageWidth(),
-					(int) core.getImageHeight());
-		else
-			img = null;
-
 		final long beginAll = (long) (System.nanoTime() / 1e9);
+
+		final AcqOutputHandler handler = params.getOutputHandler();
 
 		for (int seq = 0; seq < timeseqs; ++seq) {
 			Thread continuousThread = null;
@@ -817,11 +804,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 									continue;
 
 								try {
-									if(!saveIndividually)
-										snapSlice(core, metaDevices, beginAll,
-												core.getTaggedImage(), img);
-									else
-										snapAndWrite(params, beginAll, core.getTaggedImage());
+									handleSlice(core, metaDevices, beginAll, core.getTaggedImage(), handler);
 								} catch (Throwable e) {
 									lastExc = e;
 									break;
@@ -853,17 +836,13 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				if (!continuous) {
 					core.snapImage();
 
-					if(!saveIndividually)
-						snapSlice(core, metaDevices, beginAll,
-								core.getTaggedImage(), img);
-					else
-						snapAndWrite(params, beginAll, core.getTaggedImage());
+					handleSlice(core, metaDevices, beginAll, core.getTaggedImage(), handler);
 				} else {
 					core.waitForImageSynchro();
 				}
 
 				if (Thread.interrupted())
-					return new ImagePlus("ProgAcqd", img);
+					return handler.getImagePlus();
 
 				if (continuous && continuousThread.isAlive() == false)
 					throw new Exception(continuousThread.toString());
@@ -893,41 +872,14 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				core.logMessage("Behind schedule! (next seq in "
 						+ Double.toString(wait) + "ms)");
 		}
-
-		ImagePlus finalImage = null;
-
-		if(!saveIndividually) {
-			finalImage = new ImagePlus("ProgAcqd", img);
-			finalImage.setDimensions(1, img.getSize() / timeseqs, timeseqs);
-			finalImage.setOpenAsHyperStack(true);
-		};
-
-		return finalImage;
+		
+		handler.finalize();
+		
+		return handler.getImagePlus();
 	}
 
-	private static void snapAndWrite(final AcqParams params, long beginAll,
-			TaggedImage image) throws Exception{
-		final CMMCore core = params.getCore();
-
-		ImageStack stack = new ImageStack((int) core.getImageWidth(),
-				(int) core.getImageHeight());
-
-		JSONObject meta = snapSlice(core, params.getMetaDevices(),
-				beginAll, image, stack);
-
-		String fn = params.getNameScheme().replaceAll("%t", String.format("%.3f", meta.getDouble("t")));
-
-		for(int i=0; i < params.getStepDevices().length; ++i)
-			fn = fn.replaceAll("%" + i, meta.getString(params.getStepDevices()[i]));
-
-		ImagePlus img = new ImagePlus(fn, stack);
-		img.setProperty("Info", meta.toString());
-
-		IJ.save(img, new File(params.getOutputDirectory(), fn).getPath());
-	}
-
-	private static JSONObject snapSlice(CMMCore core, String[] devices, long start,
-			TaggedImage slice, ImageStack img) throws Exception {
+	private static void handleSlice(CMMCore core, String[] devices, long start,
+			TaggedImage slice, AcqOutputHandler handler) throws Exception {
 
 		slice.tags.put("t", System.nanoTime() / 1e9 - start);
 
@@ -947,10 +899,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ImageProcessor ip = newImageProcessor(core, slice.pix);
 
-		img.addSlice("t=" + (slice.tags.getString("t")), ip);
-
-		return slice.tags;
-	};
+		handler.processSlice(ip, slice.tags);
+	}
 
 	/**
 	 * Utility function to convert an array of bytes into an array of integers.

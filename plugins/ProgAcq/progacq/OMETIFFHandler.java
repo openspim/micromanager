@@ -5,12 +5,13 @@ import java.io.File;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
+import org.apache.commons.math.geometry.euclidean.threed.Vector3D;
 import org.json.JSONObject;
+import org.micromanager.utils.ReportingUtils;
 
 import loci.common.DataTools;
 import loci.common.services.ServiceFactory;
 
-import loci.formats.FormatTools;
 import loci.formats.IFormatWriter;
 import loci.formats.ImageWriter;
 import loci.formats.MetadataTools;
@@ -31,13 +32,18 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	private int imageCounter, sliceCounter;
 	private IFormatWriter writer;
 
+	private Vector3D lastPosition;
+	private double lastTheta;
+
 	private CMMCore core;
-	private int depth, thetas, timesteps;
+	private int stacks, timesteps;
+	private int[] stackDepths;
 	private double deltat;
 
-	public OMETIFFHandler(CMMCore icore, File outFile, String xyDev,
-			String cDev, String zDev, String tDev, int idepth, int ithetas,
-			int itimesteps, double ideltat) {
+	public OMETIFFHandler(CMMCore iCore, File outFile, String xyDev,
+			String cDev, String zDev, String tDev, int[] iStackDepths,
+			int iTimeSteps, double iDeltaT) {
+
 		if(outFile == null)
 			throw new IllegalArgumentException("Null path specified.");
 
@@ -45,14 +51,18 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 		imageCounter = sliceCounter = 0;
 
-		core = icore;
-		depth = idepth;
-		thetas = ithetas;
-		timesteps = itimesteps;
-		deltat = ideltat;
+		stacks = iStackDepths.length;
+		stackDepths = iStackDepths;
+		core = iCore;
+		timesteps = iTimeSteps;
+		deltat = iDeltaT;
 		outputFile = outFile;
 
 		try {
+			meta = new ServiceFactory().getInstance(OMEXMLService.class).createOMEXMLMetadata(null);
+
+			meta.createRoot();
+
 			resetWriter();
 		} catch(Throwable t) {
 			throw new IllegalArgumentException(t);
@@ -60,10 +70,22 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	}
 
 	private void resetWriter() throws Exception {
-		meta = new ServiceFactory().getInstance(OMEXMLService.class).createOMEXMLMetadata(null);
+		defaultMetaData();
 
-		meta.createRoot();
-		meta.setImageID(MetadataTools.createLSID("Image", 0), imageCounter);
+		writer = new ImageWriter().getWriter(outputFile.getAbsolutePath());
+		writer.setWriteSequentially(true);
+		writer.setMetadataRetrieve(meta);
+		writer.setInterleaved(false);
+		writer.setValidBitsPerPixel((int) core.getImageBitDepth());
+		writer.setCompression("Uncompressed");
+		writer.setId(outputFile.getAbsolutePath());
+//		writer.setSeries(imageCounter);
+
+		sliceCounter = 0;
+	}
+
+	private void defaultMetaData() throws Exception {
+		meta.setImageID(MetadataTools.createLSID("Image", imageCounter), imageCounter);
 		meta.setPixelsID(MetadataTools.createLSID("Pixels", 0), imageCounter);
 		meta.setPixelsDimensionOrder(DimensionOrder.XYCZT, imageCounter);
 		meta.setChannelID(MetadataTools.createLSID("Channel", 0), imageCounter, 0);
@@ -73,24 +95,14 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 		meta.setPixelsSizeX(new PositiveInteger((int)core.getImageWidth()), imageCounter);
 		meta.setPixelsSizeY(new PositiveInteger((int)core.getImageHeight()), imageCounter);
-		meta.setPixelsSizeZ(new PositiveInteger(depth), imageCounter);
-		meta.setPixelsSizeC(new PositiveInteger(thetas), imageCounter);
+		meta.setPixelsSizeZ(new PositiveInteger(stackDepths[imageCounter]), imageCounter);
+		meta.setPixelsSizeC(new PositiveInteger(1), imageCounter);
 		meta.setPixelsSizeT(new PositiveInteger(timesteps), imageCounter);
 
 		meta.setPixelsPhysicalSizeX(new PositiveFloat(core.getPixelSizeUm()), imageCounter);
 		meta.setPixelsPhysicalSizeY(new PositiveFloat(core.getPixelSizeUm()), imageCounter);
 		meta.setPixelsPhysicalSizeZ(new PositiveFloat(1d), imageCounter);
 		meta.setPixelsTimeIncrement(new Double(deltat), imageCounter);
-
-		writer = new ImageWriter().getWriter(outputFile.getAbsolutePath());
-		writer.setWriteSequentially(true);
-		writer.setMetadataRetrieve(meta);
-		writer.setInterleaved(false);
-		writer.setValidBitsPerPixel((int) core.getImageBitDepth());
-		writer.setCompression("Uncompressed");
-		writer.setId(outputFile.getAbsolutePath());
-
-		sliceCounter = 0;
 	}
 
 	@Override
@@ -99,21 +111,48 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		return null;
 	}
 
+	private Vector3D getPos(JSONObject metaobj) throws Exception {
+		String xystr = metaobj.getString(xytzDevices[0]);
+		double x = Double.parseDouble(xystr.substring(0, xystr.indexOf("x")));
+		double y = Double.parseDouble(xystr.substring(xystr.indexOf("x") + 1));
+		double z = metaobj.getDouble(xytzDevices[2]);
+
+		return new Vector3D(x, y, z);
+	}
+
 	@Override
 	public void processSlice(ImageProcessor ip, JSONObject metaobj)
 			throws Exception {
 		byte[] data = DataTools.shortsToBytes((short[])ip.getPixels(), true);
 
-		String xystr = metaobj.getString(xytzDevices[0]);
-		double x = Double.parseDouble(xystr.substring(0, xystr.indexOf("x")));
-		double y = Double.parseDouble(xystr.substring(xystr.indexOf("x") + 1));
+		Vector3D pos = getPos(metaobj);
 
-		meta.setPixelsID(MetadataTools.createLSID("Pixels", sliceCounter), imageCounter);
-		meta.setPlanePositionX(x, imageCounter, sliceCounter);
-		meta.setPlanePositionY(y, imageCounter, sliceCounter);
-		meta.setPlanePositionZ(metaobj.getDouble(xytzDevices[2]), imageCounter, sliceCounter);
+		// Determine differences from the last position.
+		if(lastPosition != null) {
+			Vector3D diff = pos.subtract(lastPosition);
+			if(diff.getX() == 0 && diff.getY() == 0 && diff.getZ() != 0 &&
+				metaobj.getDouble(xytzDevices[1]) == lastTheta) {
+				// Should this case get removed?
+			} else {
+				++imageCounter;
+				sliceCounter = 0;
+
+				ReportingUtils.logMessage("X/Y changed! " + pos.toString() + ", " + lastPosition.toString());
+
+				writer.close();
+				resetWriter();
+			}
+		}
+
+		lastPosition = pos;
+		lastTheta = metaobj.getDouble(xytzDevices[1]);
+
+		meta.setPlanePositionX(pos.getX(), imageCounter, sliceCounter);
+		meta.setPlanePositionY(pos.getY(), imageCounter, sliceCounter);
+		meta.setPlanePositionZ(pos.getZ(), imageCounter, sliceCounter);
 		meta.setPlaneDeltaT(metaobj.getDouble(xytzDevices[3]), imageCounter, sliceCounter);
 
+		writer.setSeries(imageCounter);
 		writer.savePlane(sliceCounter, data);
 
 		++sliceCounter;
@@ -123,7 +162,8 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	public void finalize() throws Exception {
 		writer.close();
 
-		++imageCounter;
+		ReportingUtils.logMessage("" + imageCounter + " vs " + stacks);
+		imageCounter = 0;
 
 		resetWriter();
 	}

@@ -1,0 +1,46 @@
+<!-- Ant makefile for the Micro-Manager Acquisition Engine  -->
+<!-- This file assumes Micro-Manager project tree structure -->
+
+<project name="acqEngine" default="build">
+	<!-- Do not modify from this point on -->
+	<property name="MMPluginsDir" value="../bin_Win32/plugins"/>
+        <property name="classext" value="../../3rdpartypublic/classext"/>
+
+        <property name="clojure" value="${classext}/clojure.jar"/>
+        <property name="MMCoreJ" value="${MMPluginsDir}/MMCoreJ.jar"/>
+        <property name="ij" value="${classext}/ij.jar"/>
+        <property name="MMJ_" value="${MMPluginsDir}/MMJ_.jar"/>
+        <property name="bsh" value="${classext}/bsh-2.0b4.jar"/>
+        <property name="src" value="./src"/>
+
+	<path id="project.class.path">
+		<pathelement location="${clojure}" />
+		<pathelement location="${MMCoreJ}" />
+		<pathelement location="${ij}" />
+		<pathelement location="${MMJ_}" />
+		<pathelement location="${bsh}" />
+		<pathelement location="${src}" />
+	</path>
+
+	<target name="compile" description="Compile acqEngine clojure.">
+		<mkdir dir="classes" />
+		<copy todir="./classes/">
+			<fileset dir="./src/" includes="**/*.clj" />
+		</copy>
+		<java classname="clojure.lang.Compile" fork="true" failonerror="true">
+			<classpath refid="project.class.path"/>
+			<jvmarg value="-Dclojure.compile.path=classes"/>
+			<arg value="org.micromanager.acq-engine"/>
+		</java>
+	</target>
+
+	<target name="build" description="Build acqEngine.jar">
+		<jar jarfile="MMAcqEngine.jar" basedir="classes" />
+		<copy file="MMAcqEngine.jar" todir="${MMPluginsDir}" />
+	</target>
+
+	<target name="clean" description="Delete the acqEngine build files.">
+		<delete dir="classes" />
+		<delete file="MMAcqEngine.jar" />
+	</target>
+</project>

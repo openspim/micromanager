@@ -6,8 +6,9 @@
 		<mkdir dir="build" />
 		<javac srcdir="./source" destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
 			<classpath>
-				<pathelement path="../../mmstudio/MMJ_.jar"/>
-				<pathelement path="../../bin_Win32/plugins/MMCoreJ.jar"/>
+				<fileset dir="../../bin_Win32/plugins/" >
+					<include name="*.jar"/>
+				</fileset>
 				<fileset dir="../../../3rdpartypublic/classext/" >
 					<include name="*.jar"/>
 				</fileset>

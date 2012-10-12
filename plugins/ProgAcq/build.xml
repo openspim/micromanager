@@ -6,10 +6,12 @@
 		<mkdir dir="build" />
 		<javac srcdir="." destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
 			<classpath>
-				<pathelement path="../../bin_Win32/ij.jar"/>
-				<pathelement path="../../mmstudio/MMJ_.jar"/>
-				<pathelement path="../../bin_Win32/plugins/MMCoreJ.jar"/>
-				<pathelement path="../../bin_Win32/jars/bio-formats-4.4-SNAPSHOT.jar"/>
+				<fileset dir="../../bin_Win32/jars/" >
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="../../bin_Win32/plugins/" >
+					<include name="*.jar"/>
+				</fileset>
 				<fileset dir="../../../3rdpartypublic/classext/" >
 					<include name="*.jar"/>
 				</fileset>
@@ -17,7 +19,7 @@
 		</javac>
 	</target>
 
-	<target name="build" description="Build ProgAcq.jar">
+	<target name="build" depends="compile" description="Build ProgAcq.jar">
 		<jar jarfile="ProgAcq.jar" basedir="build" />
 		<copy file="ProgAcq.jar" todir="..\..\bin_Win32\mmplugins\" />
 	</target>

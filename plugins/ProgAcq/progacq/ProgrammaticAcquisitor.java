@@ -40,6 +40,7 @@ import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 import mmcorej.TaggedImage;
 
+import org.micromanager.MMStudioMainFrame;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
 
@@ -774,6 +775,11 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		final ChangeListener listener = params.getProgressListener();
 
+		final MMStudioMainFrame main = MMStudioMainFrame.getInstance();
+		final boolean liveModeWasOn = main.isLiveModeOn();
+		if (liveModeWasOn)
+			main.enableLiveMode(false);
+
 		core.removeImageSynchroAll();
 		for (String dev : devices)
 			core.assignImageSynchro(dev);
@@ -873,7 +879,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						+ Double.toString(wait) + "ms)");
 		}
 		
-		handler.Finalize();
+		handler.finalize();
+
+		if (liveModeWasOn)
+			main.enableLiveMode(true);
 		
 		return handler.getImagePlus();
 	}

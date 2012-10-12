@@ -19,7 +19,7 @@
 		</javac>
 	</target>
 
-	<target name="build" description="Build ProgAcq.jar">
+	<target name="build" depends="compile" description="Build ProgAcq.jar">
 		<jar jarfile="ProgAcq.jar" basedir="build" />
 		<copy file="ProgAcq.jar" todir="..\..\bin_Win32\mmplugins\" />
 	</target>

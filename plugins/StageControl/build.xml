@@ -48,7 +48,7 @@
 
 	</target>
 
-	<target name="build" description="Build StageControl.jar">
+	<target name="build" depends="compile" description="Build StageControl.jar">
 		<jar jarfile="StageControl.jar" basedir="build" />
 		<copy file="StageControl.jar" todir="${MMPluginsDir-inst}" />
 	</target>

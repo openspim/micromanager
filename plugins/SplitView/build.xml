@@ -45,7 +45,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build SplitView.jar">
+	<target name="build" depends="compile" description="Build SplitView.jar">
 		<jar jarfile="SplitView.jar" basedir="build" />
 		<copy file="SplitView.jar" todir="${MMPluginsDir-inst}" />
 	</target>

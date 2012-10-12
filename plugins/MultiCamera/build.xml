@@ -45,7 +45,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build MultiCamera.jar">
+	<target name="build" depends="compile" description="Build MultiCamera.jar">
 		<jar jarfile="MultiCamera.jar" basedir="build" />
 		<copy file="MultiCamera.jar" todir="${MMPluginsDir-inst}" />
 	</target>

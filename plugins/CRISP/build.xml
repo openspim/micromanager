@@ -17,7 +17,7 @@
 		</javac>
 	</target>
 
-	<target name="build" description="Build CRISP.jar">
+	<target name="build" depends="compile" description="Build CRISP.jar">
 		<jar jarfile="CRISP.jar" basedir="build" />
 		<copy file="CRISP.jar" todir="..\..\Install_AllPlatforms\micro-manager\mmplugins\" />
 	</target>

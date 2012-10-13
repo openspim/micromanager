@@ -46,7 +46,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build projector.jar">
+	<target name="build" depends="compile" description="Build projector.jar">
 		<jar jarfile="projector.jar" basedir="build" />
 		<copy file="projector.jar" todir="${MMPluginsDir-inst}" />
 	</target>

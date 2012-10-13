@@ -45,7 +45,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build Tracker.jar">
+	<target name="build" depends="compile" description="Build Tracker.jar">
 		<jar jarfile="Tracker.jar" basedir="build" />
 		<copy file="Tracker.jar" todir="${MMPluginsDir-inst}" />
 	</target>

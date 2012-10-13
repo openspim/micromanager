@@ -69,15 +69,21 @@ public class IndividualImagesHandler implements AcqOutputHandler {
 	}
 
 	@Override
-	public void finalize() throws Exception {
+	public void finalizeAcquisition() throws Exception {
 		// Nothing to do.
 	}
-
 
 	@Override
 	public ImagePlus getImagePlus() throws Exception {
 		IJ.run("QuickPALM.Run_MyMacro", "Fast_VirtualStack_Opener.txt"); // TODO: Invoke the Open Virtual Stack process.
 
 		return IJ.getImage();
+	}
+
+
+	@Override
+	public void finalizeStack(int depth) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 }

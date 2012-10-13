@@ -25,12 +25,18 @@ public class OutputAsStackHandler implements AcqOutputHandler {
 	}
 
 	@Override
-	public void finalize() throws Exception {
+	public void finalizeAcquisition() throws Exception {
 		img = new ImagePlus("SimpleOutput", stack);
 	}
 
 	@Override
 	public ImagePlus getImagePlus() throws Exception {
 		return (img != null ? img : new ImagePlus("SimpleOutput", stack));
+	}
+
+	@Override
+	public void finalizeStack(int depth) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 }

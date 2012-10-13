@@ -100,14 +100,18 @@ EOF
 		 git config branch.openspim.rebase interactive)
 	 fi &&
 	 (cd micromanager &&
-	  if ! test -f bin_Win32/ImageJ.exe
+	  if ! test -f bin_Win32/ImageJ-win32.exe
 	  then
 		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
 		(cd /src/fiji/ &&
 		 ./ImageJ.exe --full-classpath \
 			--main-class=fiji.packaging.Packager fiji.tar) &&
 		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xf /src/fiji/fiji.tar)
+		 tar --strip-components=1 -xf /src/fiji/fiji.tar &&
+		 if test ! -f ImageJ-win32.exe
+		 then
+			cp ImageJ.exe ImageJ-win32.exe
+		 fi)
 	  fi &&
 
 	  if ! test -f bin_Win32/plugins/MMJ_.jar

@@ -102,14 +102,13 @@ EOF
 			contrib@fiji.sc:/srv/git/micromanager1.4 &&
 		 git config branch.openspim.rebase interactive)
 	 fi &&
-
 	 if ! test -x "$HOME/bin/ant"
 	 then
 		cat > "$HOME/bin/ant" << EOF
 #!/bin/sh
 
 export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
-exec "$SRC/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
+exec "$(pwd)/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
 EOF
 	 fi &&
 	 if ! test -x "$HOME/bin/jvisualvm"

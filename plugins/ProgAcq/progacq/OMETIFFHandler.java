@@ -32,8 +32,6 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	private int imageCounter, sliceCounter;
 	private IFormatWriter writer;
 
-	private Vector3D lastPosition;
-	private double lastTheta;
 
 	private CMMCore core;
 	private int stacks, timesteps;
@@ -66,26 +64,11 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			throw new IllegalArgumentException(t);
 		}
 	}
-/*
-	private void resetWriter() throws Exception {
-		defaultMetaData();
 
-		writer = new ImageWriter().getWriter(outputDirectory.getAbsolutePath());
-		writer.setWriteSequentially(true);
-		writer.setMetadataRetrieve(meta);
-		writer.setInterleaved(false);
-		writer.setValidBitsPerPixel((int) core.getImageBitDepth());
-		writer.setCompression("Uncompressed");
-		writer.setSeries(imageCounter);
-		writer.setId(outputDirectory.getAbsolutePath());
-
-		sliceCounter = 0;
-	}
-*/
 	private void openWriter(Vector3D position, double theta) throws Exception {
 		File path = new File(outputDirectory,
-				imageCounter + " - " + position.getX() + " x " +
-						position.getY() + " - " + theta + ".ome.tiff"
+				"blub" + imageCounter + "-x" + position.getX() + "-y" +
+						position.getY() + "-theta" + theta + ".ome.tiff"
 		);
 
 		defaultMetaData();
@@ -116,7 +99,7 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 		meta.setPixelsSizeX(new PositiveInteger((int)core.getImageWidth()), 0);
 		meta.setPixelsSizeY(new PositiveInteger((int)core.getImageHeight()), 0);
-		meta.setPixelsSizeZ(new PositiveInteger(stackDepths[imageCounter]), 0);
+		meta.setPixelsSizeZ(new PositiveInteger(stackDepths[imageCounter % stackDepths.length]), 0);
 		meta.setPixelsSizeC(new PositiveInteger(1), 0);
 		meta.setPixelsSizeT(new PositiveInteger(timesteps), 0);
 
@@ -149,26 +132,16 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		Vector3D pos = getPos(metaobj);
 
 		// Determine differences from the last position.
-		if(lastPosition == null) {
+		if(writer == null) {
 			openWriter(pos, metaobj.getDouble(xytzDevices[1]));
-		} else { 
-			Vector3D diff = pos.subtract(lastPosition);
-			if(diff.getX() != 0 || diff.getY() != 0 || diff.getZ() == 0 ||
-				metaobj.getDouble(xytzDevices[1]) != lastTheta) {
-				ReportingUtils.logMessage("X/Y changed! " + pos.toString() + ", " + lastPosition.toString());
-
-				writer.close();
-				openWriter(pos, metaobj.getDouble(xytzDevices[1]));
-			}
 		}
 
-		lastPosition = pos;
-		lastTheta = metaobj.getDouble(xytzDevices[1]);
 
 		meta.setPlanePositionX(pos.getX(), 0, sliceCounter);
 		meta.setPlanePositionY(pos.getY(), 0, sliceCounter);
 		meta.setPlanePositionZ(pos.getZ(), 0, sliceCounter);
 		meta.setPlaneDeltaT(metaobj.getDouble(xytzDevices[3]), 0, sliceCounter);
+		meta.setPlaneAnnotationRef(pos.getX() + "/" + pos.getY() + "/" + pos.getZ(), 0, sliceCounter, 0);
 
 		writer.savePlane(sliceCounter, data);
 
@@ -176,12 +149,22 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	}
 
 	@Override
-	public void finalize() throws Exception {
+	public void finalizeStack(int depth) throws Exception {
+		ReportingUtils.logMessage("Finished stack along dimension " + depth);
+
 		writer.close();
+		writer = null;
+	}
+
+	@Override
+	public void finalizeAcquisition() throws Exception {
+		if(writer != null)
+			writer.close();
 
 		ReportingUtils.logMessage("" + imageCounter + " vs " + stacks);
 		imageCounter = 0;
-		lastPosition = null;
-		lastTheta = 0;
+
+		writer = null;
+
 	}
 }

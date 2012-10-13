@@ -28,6 +28,14 @@ public interface AcqOutputHandler {
 	public abstract void processSlice(ImageProcessor ip, JSONObject meta) throws Exception;
 
 	/**
+	 * A stack has finished being acquired; react accordingly.
+	 *
+	 * @param depth The dimension along which the stack has been finished.
+	 * @throws Exception
+	 */
+	public abstract void finalizeStack(int depth) throws Exception;
+
+	/**
 	 * The acquisition has ended; do any clean-up and finishing steps (such as
 	 * saving the collected data to a file). IMPORTANT: After a call to finalize
 	 * the handler should be in a state where it can accept new slices as an
@@ -35,5 +43,5 @@ public interface AcqOutputHandler {
 	 *
 	 * @throws Exception
 	 */
-	public abstract void finalize() throws Exception;
+	public abstract void finalizeAcquisition() throws Exception;
 }

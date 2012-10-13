@@ -43,9 +43,11 @@ import mmcorej.TaggedImage;
 import org.micromanager.MMStudioMainFrame;
 import org.micromanager.api.MMPlugin;
 import org.micromanager.api.ScriptInterface;
+import org.micromanager.utils.ReportingUtils;
 
 public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		ChangeListener {
+	public static final String STACK_DIVIDER = "-- STACK DIVIDER --";
 	private static final String BTN_STOP = "Stop!";
 	private static final String TAB_TABLE = "Tabular";
 	private static final String TAB_NDIM = "N-Dim";
@@ -834,6 +836,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 			int step = 0;
 			for (String[] positions : rows) {
+				if(positions[0].equals(STACK_DIVIDER)) {
+					ReportingUtils.logMessage("Finished a stack at step " + step);
+					handler.finalizeStack(0); // TODO: Replace this with a better concept (i.e. an AcquisitionRow object).
+					continue;
+				}
+
 				runDevicesAtRow(core, devices, positions, step);
 
 				if (!continuous) {
@@ -852,6 +860,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 				final Double progress = (double) (rowcnt * seq + step + 1)
 						/ (rowcnt * timeseqs);
+
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
@@ -875,12 +884,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				core.logMessage("Behind schedule! (next seq in "
 						+ Double.toString(wait) + "ms)");
 		}
-		
-		handler.finalize();
+
+		handler.finalizeAcquisition();
 
 		if (liveModeWasOn)
 			main.enableLiveMode(true);
-		
+
 		return handler.getImagePlus();
 	}
 

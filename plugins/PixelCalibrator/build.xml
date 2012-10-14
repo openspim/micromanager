@@ -39,7 +39,17 @@
 	<target name="compile" description="Compile PixelCalibrator plugin.">
 		<mkdir dir="build" />
 		<javac srcdir="./src" destdir="./build" optimize="on" source="1.5" target="1.5" debug="on">
-			<classpath refid="project.class.path" />
+			<classpath>
+				<fileset dir="../../bin_Win32/jars/" >
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="../../bin_Win32/plugins/" >
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="../../../3rdpartypublic/classext/" >
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
 		</javac>
 		<copy file="./src/org/micromanager/pixelcalibrator/PixelCalibratorDialog.form" todir="./build/org/micromanager/pixelcalibrator/" />
 	</target>

@@ -12,4 +12,4 @@ done &&
 
 export JAVA_HOME="$(cd "$FIJI_JAVA_HOME" && pwd -W)"
 export PATH="$FIJI_JAVA_HOME"/bin:$PATH
-exec "$(dirname "$0")"/bin_Win32/ImageJ.exe --run Micro-Manager_Studio "$@"
+exec "$(dirname "$0")"/bin_Win32/ImageJ-win32.exe --run Micro-Manager_Studio "$@" --console

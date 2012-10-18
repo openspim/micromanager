@@ -45,7 +45,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build Big.jar">
+	<target name="build" depends="compile" description="Build Big.jar">
 		<jar jarfile="Big.jar" basedir="build" />
 		<copy file="Big.jar" todir="${MMPluginsDir-inst}" />
 	</target>

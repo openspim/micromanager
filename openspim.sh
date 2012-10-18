@@ -99,15 +99,37 @@ EOF
 			contrib@fiji.sc:/srv/git/micromanager1.4 &&
 		 git config branch.openspim.rebase interactive)
 	 fi &&
+	 if ! test -x "$HOME/bin/ant"
+	 then
+		cat > "$HOME/bin/ant" << EOF
+#!/bin/sh
+
+export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
+exec "$(pwd)/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
+EOF
+	 fi &&
+	 if ! test -x "$HOME/bin/jvisualvm"
+	 then
+		cat > "$HOME/bin/jvisualvm" << EOF
+#!/bin/sh
+
+export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
+exec "\$JAVA_HOME/bin/jvisualvm" "\$@"
+EOF
+	 fi &&
 	 (cd micromanager &&
-	  if ! test -f bin_Win32/ImageJ.exe
+	  if ! test -f bin_Win32/ImageJ-win32.exe
 	  then
 		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
 		(cd /src/fiji/ &&
 		 ./ImageJ.exe --full-classpath \
 			--main-class=fiji.packaging.Packager fiji.tar) &&
 		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xf /src/fiji/fiji.tar)
+		 tar --strip-components=1 -xf /src/fiji/fiji.tar &&
+		 if test ! -f ImageJ-win32.exe
+		 then
+			cp ImageJ.exe ImageJ-win32.exe
+		 fi)
 	  fi &&
 
 	  if ! test -f bin_Win32/plugins/MMJ_.jar

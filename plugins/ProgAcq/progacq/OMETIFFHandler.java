@@ -95,7 +95,8 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		meta.setChannelID(MetadataTools.createLSID("Channel", 0), 0, 0);
 		meta.setChannelSamplesPerPixel(new PositiveInteger(1), 0, 0);
 		meta.setPixelsBinDataBigEndian(Boolean.FALSE, 0, 0);
-		meta.setPixelsType(PixelType.UINT16, 0);
+		long bitDepth = core.getImageBitDepth();
+		meta.setPixelsType(bitDepth == 8 ? PixelType.UINT8 : PixelType.UINT16, 0);
 
 		meta.setPixelsSizeX(new PositiveInteger((int)core.getImageWidth()), 0);
 		meta.setPixelsSizeY(new PositiveInteger((int)core.getImageHeight()), 0);
@@ -127,7 +128,10 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	@Override
 	public void processSlice(ImageProcessor ip, JSONObject metaobj)
 			throws Exception {
-		byte[] data = DataTools.shortsToBytes((short[])ip.getPixels(), true);
+		long bitDepth = core.getImageBitDepth();
+		byte[] data = bitDepth == 8 ?
+			(byte[])ip.getPixels() :
+			DataTools.shortsToBytes((short[])ip.getPixels(), true);
 
 		Vector3D pos = getPos(metaobj);
 

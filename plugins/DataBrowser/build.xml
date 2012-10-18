@@ -50,7 +50,7 @@
 		</java>
 	</target>
 
-	<target name="build" description="Build DataBrowser.jar">
+	<target name="build" depends="compile" description="Build DataBrowser.jar">
 		<jar jarfile="DataBrowser.jar" basedir="classes" />
 		<copy file="DataBrowser.jar" todir="${MMPluginsDir-inst}" />
 	</target>

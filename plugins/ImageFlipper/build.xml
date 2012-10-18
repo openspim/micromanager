@@ -18,7 +18,7 @@
 		</copy>
 	</target>
 
-	<target name="build" description="Build ImageFlipper.jar">
+	<target name="build" depends="compile" description="Build ImageFlipper.jar">
 		<jar jarfile="ImageFlipper.jar" basedir="build" />
 		<copy file="ImageFlipper.jar" todir="..\..\Install_AllPlatforms\micro-manager\mmplugins\" />
 	</target>

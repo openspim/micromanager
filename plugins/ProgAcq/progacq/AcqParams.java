@@ -196,4 +196,19 @@ public class AcqParams {
 	public void setOutputHandler(AcqOutputHandler outputHandler) {
 		this.outputHandler = outputHandler;
 	}
+
+	// TODO: Implement the following:
+	public boolean isAntiDriftOn() {
+		return false;
+	};
+	
+	AcqRow[] rows;
+
+	public AcqRow[] getRows() {
+		return rows;
+	};
+
+	public void setRows(AcqRow[] irows) {
+		rows = irows;
+	};
 }

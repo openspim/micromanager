@@ -893,7 +893,144 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		return handler.getImagePlus();
 	}
 
-	private static void handleSlice(CMMCore core, String[] devices, long start,
+	public static ImagePlus performAcquisition2(final AcqParams params) throws Exception {
+		final CMMCore core = params.getCore();
+
+		MMStudioMainFrame frame = MMStudioMainFrame.getInstance();
+		boolean liveOn = frame.isLiveModeOn();
+		if(liveOn)
+			frame.enableLiveMode(false);
+
+		final String[] metaDevs = params.getMetaDevices();
+		String[] devices = params.getStepDevices();
+
+		final AcqOutputHandler handler = params.getOutputHandler();
+
+		final double acqBegan = System.nanoTime() / 1e9;
+
+		for(int timeSeq = 0; timeSeq < params.getTimeSeqCount(); ++timeSeq) {
+			Thread continuousThread = null;
+			if (params.isContinuous()) {
+				continuousThread = new Thread() {
+					private Throwable lastExc;
+
+					@Override
+					public void run() {
+						try {
+							core.clearCircularBuffer();
+							core.startContinuousSequenceAcquisition(0);
+
+							while (!Thread.interrupted()) {
+								if (core.getRemainingImageCount() == 0) {
+									Thread.yield();
+									continue;
+								};
+
+								handleSlice(core, metaDevs, acqBegan, core.popNextTaggedImage(), handler);
+							}
+
+							core.stopSequenceAcquisition();
+						} catch (Throwable e) {
+							lastExc = e;
+						}
+					}
+
+					@Override
+					public String toString() {
+						if (lastExc == null)
+							return super.toString();
+						else
+							return lastExc.getMessage();
+					}
+				};
+
+				continuousThread.start();
+			}
+
+			int step = 0;
+			for(AcqRow row : params.getRows()) {
+				runDevicesAtRow(core, devices, row.getPrimaryPositions(), step);
+
+				if(params.isAntiDriftOn()) {
+					// TODO: Implement anti-drift.
+				};
+
+				switch(row.getZMode()) {
+				case SINGLE_POSITION:
+					core.waitForImageSynchro();
+
+					if(!params.isContinuous()) {
+						core.snapImage();
+						handleSlice(core, metaDevs, acqBegan, core.getTaggedImage(), handler);
+					};
+					break;
+				case STEPPED_RANGE: {
+					for(double zStart = row.getStartPosition(); zStart <= row.getEndPosition(); zStart += row.getStepSize()) {
+						core.setPosition(row.getDevice(), zStart);
+						core.waitForImageSynchro();
+
+						core.snapImage();
+
+						if(!params.isContinuous())
+							handleSlice(core, metaDevs, acqBegan, core.getTaggedImage(), handler);
+					};
+					break;
+				}
+				case CONTINUOUS_SWEEP: {
+					core.setProperty(row.getDevice(), "Velocity", row.getVelocity());
+
+					core.setPosition(row.getDevice(), row.getEndPosition());
+
+					core.waitForImageSynchro();
+					break;
+				}
+				};
+
+				handler.finalizeStack(0);
+
+				if(Thread.interrupted())
+					return handler.getImagePlus();
+				
+				if(params.isContinuous() && !continuousThread.isAlive())
+					throw new Exception(continuousThread.toString());
+
+				final Double progress = (double) (params.getRows().length * timeSeq + step + 1)
+						/ (params.getRows().length * params.getTimeSeqCount());
+
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						params.getProgressListener().stateChanged(new ChangeEvent(progress));
+					}
+				});
+
+				++step;
+			}
+
+			if (params.isContinuous()) {
+				continuousThread.interrupt();
+				continuousThread.join();
+			}
+
+			double wait = (params.getTimeStepSeconds() * (timeSeq + 1)) -
+					(System.nanoTime() / 1e9 - acqBegan);
+
+			if(wait > 0D)
+				core.sleep(wait * 1e3);
+			else
+				core.logMessage("Behind schedule! (next seq in "
+						+ Double.toString(wait) + "ms)");
+		}
+
+		handler.finalizeAcquisition();
+
+		if(liveOn)
+			frame.enableLiveMode(true);
+
+		return handler.getImagePlus();
+	}
+
+	private static void handleSlice(CMMCore core, String[] devices, double start,
 			TaggedImage slice, AcqOutputHandler handler) throws Exception {
 
 		slice.tags.put("t", System.nanoTime() / 1e9 - start);

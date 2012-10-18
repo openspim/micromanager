@@ -227,4 +227,19 @@ public class AcqParams {
 
 		return outputHandler.getConstructor(argClasses).newInstance(handlerParams);
 	}
+
+	// TODO: Implement the following:
+	public boolean isAntiDriftOn() {
+		return false;
+	};
+	
+	AcqRow[] rows;
+
+	public AcqRow[] getRows() {
+		return rows;
+	};
+
+	public void setRows(AcqRow[] irows) {
+		rows = irows;
+	};
 }

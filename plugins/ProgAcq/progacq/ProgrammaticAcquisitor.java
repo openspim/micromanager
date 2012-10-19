@@ -728,172 +728,14 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	}
 
 	/**
-	 * This function runs a generalized acquisition sequence. It's a mixture of
-	 * Micro-Manager's built in sequencing support (confusing) and waiting for
-	 * motors.
+	 * Performs an acquisition sequence according to the parameters passed.
 	 * 
-	 * @param core
-	 *            The Micro-Manager core reference to work with. This class has
-	 *            a reference, but it's possible (in the future) that this class
-	 *            may be referenced without being instantiated.
-	 * @param devices
-	 *            A list of devices to work with. Should be as long as each row
-	 *            in 'steps'. Should only contain stage and X/Y stage device
-	 *            labels (nothing else is supported just yet!).
-	 * @param rows
-	 *            A list of states for all devices. Each 'row' should have the
-	 *            same length, the length of the above. For X/Y stages, elements
-	 *            should be ordered pairs. For stage devices, elements should be
-	 *            doubles as strings. No other devices are yet supported (state
-	 *            based devices will hopefully be added soon!).
-	 * @param timeseqs
-	 *            Number of acquisition sequences to run.
-	 * @param timestep
-	 *            Delay in milliseconds between the beginning of each
-	 *            acquisition. Arbitrary if only a single acquisition.
-	 * @param continuous
-	 *            If true, uses a separate thread without synchronizing for
-	 *            acquisition. The net effect is a 'video' as the devices move
-	 *            through the paces.
-	 * @return An ImageJ ImagePlus of the stack of acquired images.
+	 *
+	 * @param params
+	 * @return
 	 * @throws Exception
-	 *             on encountering malformed data or bad device names, or an
-	 *             exception while stepping (i.e. motor malfunction).
 	 */
-	public static ImagePlus performAcquisition(final AcqParams params)
-			throws Exception {
-
-		final CMMCore core = params.getCore();
-		final String[] devices = params.getStepDevices();
-		final String[] metaDevices = params.getMetaDevices();
-
-		List<String[]> rows = params.getSteps();
-		final int rowcnt = rows.size();
-
-		boolean continuous = params.isContinuous();
-
-		int timeseqs = params.getTimeSeqCount();
-		double timestep = params.getTimeStepSeconds();
-
-		final ChangeListener listener = params.getProgressListener();
-
-		final MMStudioMainFrame main = MMStudioMainFrame.getInstance();
-		final boolean liveModeWasOn = main.isLiveModeOn();
-		if (liveModeWasOn)
-			main.enableLiveMode(false);
-
-		core.removeImageSynchroAll();
-		for (String dev : devices)
-			core.assignImageSynchro(dev);
-
-		// Reset the devices and wait on them. Prevents a bad first frame.
-		runDevicesAtRow(core, devices, rows.get(0), -1);
-		core.waitForImageSynchro();
-		core.snapImage(); // Take up a bad image...
-
-		final long beginAll = (long) (System.nanoTime() / 1e9);
-
-		final AcqOutputHandler handler = params.getOutputHandler();
-
-		for (int seq = 0; seq < timeseqs; ++seq) {
-			Thread continuousThread = null;
-			if (continuous) {
-				continuousThread = new Thread() {
-					private Throwable lastExc;
-
-					@Override
-					public void run() {
-						try {
-							core.clearCircularBuffer();
-							core.startContinuousSequenceAcquisition(0);
-
-							while (!Thread.interrupted()) {
-								if (core.getRemainingImageCount() == 0) {
-									Thread.yield();
-									continue;
-								};
-
-								handleSlice(core, metaDevices, beginAll, core.popNextTaggedImage(), handler);
-							}
-
-							core.stopSequenceAcquisition();
-						} catch (Throwable e) {
-							lastExc = e;
-						}
-					}
-
-					@Override
-					public String toString() {
-						if (lastExc == null)
-							return super.toString();
-						else
-							return lastExc.getMessage();
-					}
-				};
-
-				continuousThread.start();
-			}
-
-			int step = 0;
-			for (String[] positions : rows) {
-				if(positions[0].equals(STACK_DIVIDER)) {
-					ReportingUtils.logMessage("Finished a stack at step " + step);
-					handler.finalizeStack(0); // TODO: Replace this with a better concept (i.e. an AcquisitionRow object).
-					continue;
-				}
-
-				runDevicesAtRow(core, devices, positions, step);
-
-				if (!continuous) {
-					core.snapImage();
-
-					handleSlice(core, metaDevices, beginAll, core.getTaggedImage(), handler);
-				} else {
-					core.waitForImageSynchro();
-				}
-
-				if (Thread.interrupted())
-					return handler.getImagePlus();
-
-				if (continuous && continuousThread.isAlive() == false)
-					throw new Exception(continuousThread.toString());
-
-				final Double progress = (double) (rowcnt * seq + step + 1)
-						/ (rowcnt * timeseqs);
-
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						listener.stateChanged(new ChangeEvent(progress));
-					}
-				});
-
-				++step;
-			}
-
-			if (continuous) {
-				continuousThread.interrupt();
-				continuousThread.join();
-			}
-
-			double wait = (timestep * (seq + 1))
-					- (System.nanoTime() / 1e9 - beginAll);
-			if (wait > 0D)
-				core.sleep(wait * 1e3);
-			else
-				core.logMessage("Behind schedule! (next seq in "
-						+ Double.toString(wait) + "ms)");
-		}
-
-		handler.finalizeAcquisition();
-
-		if (liveModeWasOn)
-			main.enableLiveMode(true);
-
-		return handler.getImagePlus();
-	}
-
-	public static ImagePlus performAcquisition2(final AcqParams params) throws Exception {
+	public static ImagePlus performAcquisition(final AcqParams params) throws Exception {
 		final CMMCore core = params.getCore();
 
 		MMStudioMainFrame frame = MMStudioMainFrame.getInstance();
@@ -969,10 +811,21 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						core.setPosition(row.getDevice(), zStart);
 						core.waitForImageSynchro();
 
-						core.snapImage();
-
-						if(!params.isContinuous())
+						if(!params.isContinuous()) {
+							core.snapImage();
 							handleSlice(core, metaDevs, acqBegan, core.getTaggedImage(), handler);
+						}
+
+						double stackProg = (zStart - row.getStartPosition())/(row.getEndPosition() - row.getStartPosition());
+
+						final Double progress = (double) (params.getRows().length * timeSeq + step + stackProg) / (params.getRows().length * params.getTimeSeqCount());
+
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								params.getProgressListener().stateChanged(new ChangeEvent(progress));
+							}
+						});
 					};
 					break;
 				}
@@ -990,7 +843,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 				if(Thread.interrupted())
 					return handler.getImagePlus();
-				
+
 				if(params.isContinuous() && !continuousThread.isAlive())
 					throw new Exception(continuousThread.toString());
 
@@ -1012,14 +865,16 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				continuousThread.join();
 			}
 
-			double wait = (params.getTimeStepSeconds() * (timeSeq + 1)) -
-					(System.nanoTime() / 1e9 - acqBegan);
-
-			if(wait > 0D)
-				core.sleep(wait * 1e3);
-			else
-				core.logMessage("Behind schedule! (next seq in "
-						+ Double.toString(wait) + "ms)");
+			if(timeSeq + 1 < params.getTimeSeqCount()) {
+				double wait = (params.getTimeStepSeconds() * (timeSeq + 1)) -
+						(System.nanoTime() / 1e9 - acqBegan);
+	
+				if(wait > 0D)
+					core.sleep(wait * 1e3);
+				else
+					core.logMessage("Behind schedule! (next seq in "
+							+ Double.toString(wait) + "ms)");
+			}
 		}
 
 		handler.finalizeAcquisition();
@@ -1224,7 +1079,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	private void startLocalAcq(final String[] devs, final List<String[]> rows) {
 		// Okay, we've been asked to run the acquisition sequence(s). Check
 		// the timing options first.
-
+/*
 		final int timeSeqs;
 		final double timeStep;
 
@@ -1266,7 +1121,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		};
 
 		acqThread.start();
-		goBtn.setText(BTN_STOP);
+		goBtn.setText(BTN_STOP);*/
+		JOptionPane.showMessageDialog(frame, "No longer existent; use OpenSPIM plugin, please!");
 	}
 
 	/**

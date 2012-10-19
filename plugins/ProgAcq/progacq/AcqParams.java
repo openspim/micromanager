@@ -1,8 +1,6 @@
 package progacq;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
@@ -11,7 +9,7 @@ import mmcorej.CMMCore;
 public class AcqParams {
 	private CMMCore			core;
 	private String[]		stepDevices;
-	private List<String[]>	steps;
+	private AcqRow[]		rows;
 
 	private double			timeStepSeconds;
 	private int				timeSeqCount;
@@ -28,23 +26,23 @@ public class AcqParams {
 		this(null, null, null, 0D, 0, false, null, null, false, null);
 	}
 
-	public AcqParams(CMMCore icore, String[] idevices, List<String[]> isteps) {
-		this(icore, idevices, isteps, 0D, 1, false, null, idevices, false, null);
+	public AcqParams(CMMCore icore, String[] idevices, AcqRow[] rows) {
+		this(icore, idevices, rows, 0D, 1, false, null, idevices, false, null);
 	}
 
-	public AcqParams(CMMCore core, String[] devs, List<String[]> steps, double deltat, int count)
+	public AcqParams(CMMCore core, String[] devs, AcqRow[] rows, double deltat, int count)
 	{
-		this(core, devs, steps, deltat, count, false, null, devs, false, null);
+		this(core, devs, rows, deltat, count, false, null, devs, false, null);
 	}
 
-	public AcqParams(CMMCore iCore, String[] iDevices, List<String[]> iSteps,
+	public AcqParams(CMMCore iCore, String[] iDevices, AcqRow[] iRows,
 			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
 			ChangeListener iListener, String[] iMetaDevices, boolean saveIndv,
 			File rootDir) {
 		this(
 			iCore,
 			iDevices,
-			iSteps,
+			iRows,
 			iTimeStep,
 			iTimeSeqCnt,
 			iContinuous,
@@ -60,14 +58,14 @@ public class AcqParams {
 		);
 	}
 
-	public AcqParams(CMMCore iCore, String[] iDevs, List<String[]> iRows,
+	public AcqParams(CMMCore iCore, String[] iDevs, AcqRow[] iRows,
 			double iTimeStep, int iTimeSeqCnt, boolean iContinuous,
 			ChangeListener iListener, String[] iMetaDevices,
 			AcqOutputHandler handler) {
 
 		setCore(iCore);
 		setStepDevices(iDevs);
-		setSteps(iRows);
+		setRows(iRows);
 		setTimeStepSeconds(iTimeStep);
 		setTimeSeqCount(iTimeSeqCnt);
 		setContinuous(iContinuous);
@@ -103,20 +101,6 @@ public class AcqParams {
 	 */
 	public void setStepDevices(String[] stepDevices) {
 		this.stepDevices = stepDevices;
-	}
-
-	/**
-	 * @return the steps
-	 */
-	public List<String[]> getSteps() {
-		return steps;
-	}
-
-	/**
-	 * @param steps the steps to set
-	 */
-	public void setSteps(List<String[]> steps) {
-		this.steps = steps;
 	}
 
 	/**
@@ -202,8 +186,6 @@ public class AcqParams {
 		return false;
 	};
 	
-	AcqRow[] rows;
-
 	public AcqRow[] getRows() {
 		return rows;
 	};

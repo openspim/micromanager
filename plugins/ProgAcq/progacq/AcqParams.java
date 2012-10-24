@@ -23,6 +23,8 @@ public class AcqParams {
 
 	private String[]		metaDevices;
 
+	private boolean			antiDrift;
+
 	public AcqParams() {
 		this(null, null, null, 0D, 0, false, null, null, false, null);
 	}
@@ -225,9 +227,13 @@ public class AcqParams {
 
 	// TODO: Implement the following:
 	public boolean isAntiDriftOn() {
-		return false;
+		return antiDrift;
 	};
-	
+
+	public void setAntiDriftOn(boolean in) {
+		antiDrift = in;
+	};
+
 	public AcqRow[] getRows() {
 		return rows;
 	};

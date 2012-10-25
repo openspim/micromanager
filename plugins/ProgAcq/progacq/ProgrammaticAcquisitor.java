@@ -826,7 +826,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					};
 					break;
 				case STEPPED_RANGE: {
-					for(double zStart = row.getStartPosition(); zStart <= row.getEndPosition(); zStart += row.getStepSize()) {
+					double start = core.getPosition(row.getDevice());
+					double end = start + row.getEndPosition() - row.getStartPosition();
+					for(double zStart = start; zStart <= end; zStart += row.getStepSize()) {
 						core.setPosition(row.getDevice(), zStart);
 						core.waitForImageSynchro();
 
@@ -924,6 +926,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		if(offset[3] != 1)
 			throw new Error("Attempt to anti-drift with unfinished offset.");
 
+		String oldVel = core.getProperty(row.getDevice(), "Velocity");
+		core.setProperty(row.getDevice(),"Velocity",1);
+
 		// Re-determine the center of intensity.
 		double[] cint = new double[] {0, 0, 0, 0};
 
@@ -958,6 +963,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		core.setXYPosition(core.getXYStageDevice(), cint[0] + offset[0], cint[1] + offset[1]);
 		core.setPosition(row.getDevice(), cint[2] + offset[2]);
+		core.waitForDevice(row.getDevice());
+
+		core.setProperty(row.getDevice(), "Velocity", oldVel);
 	}
 
 	private static double[] tallyAntiDriftSlice(CMMCore core, AcqRow row, double[] offs, TaggedImage img /*, double divisor*/) throws Exception {

@@ -811,7 +811,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					if((offs = driftCompMap.get(row)) != null)
 						compensateForDrift(core, row, offs);
 					else
-						xyzi = new double[] {0, 0, 0, 0};
+						xyzi = new double[] {0, 0, 0, 0, 0, 0};
 				};
 
 				switch(row.getZMode()) {
@@ -865,8 +865,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				handler.finalizeStack(0);
 
 				if(xyzi != null && xyzi[3] != 1) {
-					xyzi[2] /= xyzi[3];
-					xyzi[3] = 1;
+					xyzi = finalizeAntiDriftData(core, row, xyzi);
 
 					ReportingUtils.logMessage("--- !!! --- !!! --- Determined CINT1: " + Arrays.toString(xyzi));
 
@@ -930,7 +929,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		core.setProperty(row.getDevice(),"Velocity",1);
 
 		// Re-determine the center of intensity.
-		double[] cint = new double[] {0, 0, 0, 0};
+		double[] cint = new double[] {0, 0, 0, 0, 0, 0};
 
 		// isAntiDriftOn() => !isContinuous(), so we can use snapImage...
 		switch(row.getZMode()) {
@@ -946,6 +945,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			for(double zStart = row.getStartPosition(); zStart <= row.getEndPosition(); zStart += row.getStepSize()) {
 				core.setPosition(row.getDevice(), zStart);
 				core.waitForImageSynchro();
+				core.snapImage();
 
 				cint = tallyAntiDriftSlice(core, row, cint, core.getTaggedImage());
 			};
@@ -955,11 +955,9 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			throw new Error("Bad mode during anti-drift...");
 		};
 
-		cint[2] /= cint[3];
-		cint[3] = 1;
+		cint = finalizeAntiDriftData(core, row, cint);
 
-		ReportingUtils.logMessage("--- !!! --- !!! --- Determined CINT2" +
-				": " + Arrays.toString(cint));
+		ReportingUtils.logMessage("--- !!! --- !!! --- Determined CINT2: " + Arrays.toString(cint));
 
 		core.setXYPosition(core.getXYStageDevice(), cint[0] + offset[0], cint[1] + offset[1]);
 		core.setPosition(row.getDevice(), cint[2] + offset[2]);
@@ -968,17 +966,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		core.setProperty(row.getDevice(), "Velocity", oldVel);
 	}
 
-	private static double[] tallyAntiDriftSlice(CMMCore core, AcqRow row, double[] offs, TaggedImage img /*, double divisor*/) throws Exception {
-		double divisor = 0;
-
-		if(row.getZMode().equals(AcqRow.ZMode.SINGLE_POSITION))
-			divisor = 1;
-		else if(row.getZMode().equals(AcqRow.ZMode.STEPPED_RANGE))
-			divisor = (row.getEndPosition() - row.getStartPosition())/row.getStepSize();
-		else
-			throw new Error("Bwuh?");
-
-
+	private static double[] tallyAntiDriftSlice(CMMCore core, AcqRow row, double[] offs, TaggedImage img) throws Exception {
 		double[] pix = new double[(int) (core.getImageWidth()*core.getImageHeight())];
 
 		if(img.pix instanceof byte[]) {
@@ -993,19 +981,40 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 			throw new Error("Unhandled image type! Implement more!");
 		}
 
-		double bg = 0;
-		for(int x=0; x < core.getImageWidth(); ++x)
-			bg += pix[x] + pix[(int) ((core.getImageHeight()-1)*core.getImageWidth() + x)];
-		for(int y=1; y < core.getImageHeight()-1; ++y)
-			bg += pix[(int) (core.getImageWidth()*y)] + pix[(int) ((core.getImageWidth()+1)*y-1)];
-		bg /= 2*(core.getImageWidth() + core.getImageHeight()) - 4;
+		if(offs == null)
+			offs = new double[] {0, 0, 0, 0, Double.MAX_VALUE, Double.MIN_VALUE};
 
-		ReportingUtils.logMessage("Background: " + bg);
+		for(int x=0; x < core.getImageWidth(); ++x) {
+			double first = pix[x];
+			double last = pix[(int) ((core.getImageHeight()-1)*core.getImageWidth() + x)];
+
+			if(first < offs[4])
+				offs[4] = first;
+			if(last < offs[4])
+				offs[4] = last;
+			if(first > offs[5])
+				offs[5] = first;
+			if(last > offs[5])
+				offs[5] = last;
+		}
+		for(int y=1; y < core.getImageHeight()-1; ++y) {
+			double first = pix[(int) (core.getImageWidth()*y)];
+			double last = pix[(int) ((core.getImageWidth()+1)*y-1)];
+
+			if(first < offs[4])
+				offs[4] = first;
+			if(last < offs[4])
+				offs[4] = last;
+			if(first > offs[5])
+				offs[5] = first;
+			if(last > offs[5])
+				offs[5] = last;
+		}
 
 		double xt = 0, yt = 0, it = 0;
 		for(int y=0; y < core.getImageHeight(); ++y) {
 			for(int x=0; x < core.getImageWidth(); ++x) {
-				double i = pix[(int) (y*core.getImageWidth()+x)]/* - bg*/;
+				double i = pix[(int) (y*core.getImageWidth()+x)];
 				xt += x*i;
 				yt += y*i;
 				it += i;
@@ -1014,21 +1023,43 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ReportingUtils.logMessage("XT, YT, IT: " + (xt/it) + ", " + (yt/it) + ", " + it);
 
-		xt = core.getXPosition(core.getXYStageDevice()) + ((xt / it) - core.getImageWidth()/2)*core.getPixelSizeUm();
-		yt = core.getYPosition(core.getXYStageDevice()) + ((yt / it) - core.getImageHeight()/2)*core.getPixelSizeUm();
+		offs[0] += xt;
+		offs[1] += yt;
+		offs[2] += (core.getPosition(row.getDevice()) * it);
+		offs[3] += it;
 
-		ReportingUtils.logMessage("Weighted center: " + xt + ", " + yt + ", " + core.getPosition(row.getDevice()));
+		return offs;
+	}
 
-		if(offs == null)
-			offs = new double[] {0, 0, 0, 0};
+	private static double[] finalizeAntiDriftData(CMMCore core, AcqRow row, double[] data) throws Exception {
+		double divisor = 0;
 
-		double[] out = new double[4];
-		out[0] = offs[0] + (xt / divisor);
-		out[1] = offs[1] + (yt / divisor);
-		out[2] = offs[2] + (core.getPosition(row.getDevice()) * it / divisor);
-		out[3] = offs[3] + it;
+		if(row.getZMode().equals(AcqRow.ZMode.SINGLE_POSITION))
+			divisor = 1;
+		else if(row.getZMode().equals(AcqRow.ZMode.STEPPED_RANGE))
+			divisor = (row.getEndPosition() - row.getStartPosition())/row.getStepSize();
+		else
+			throw new Error("Bwuh?");
 
-		return out;
+		ReportingUtils.logMessage("Pre-finalized data: " + Arrays.toString(data));
+
+		// Finish averaging the Z coordinate and mark that as done. 
+		double background = (data[5] - data[4])*0.6;
+		double w = core.getImageWidth();
+		double h = core.getImageHeight();
+		data[0] -= background*divisor*h*(w*(w+1))/2;
+		data[1] -= background*divisor*w*(h*(h+1))/2;
+		data[2] -= background*w*h*(divisor*(divisor+1))/2;
+
+		data[0] /= data[3] - background*w*h*divisor;
+		data[1] /= data[3] - background*w*h*divisor;
+		data[2] /= data[3] - background*w*h*divisor;
+		data[3] = 1;
+		data[4] = data[5] = 0;
+
+		ReportingUtils.logMessage("Finalized CINT: " + Arrays.toString(data));
+
+		return data;
 	}
 
 	private static void handleSlice(CMMCore core, String[] devices, double start,

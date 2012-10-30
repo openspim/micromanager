@@ -1,5 +1,4 @@
 dir = getDirectory("Directory to rename blub<number> files");
-//dir = "/home/pete/Desktop/2012-10-17/";
 list = getFileList(dir);
 
 prefix = "blub";
@@ -47,7 +46,9 @@ if (nAngles < 0) {
 
 for (i = 0; i < counter; i++) {
 	dash = indexOf(sorted[i], "-");
-	target = prefix + "-t" + floor(i / nAngles) + substring(sorted[i], dash);
-	File.rename(dir + list[i], dir + target);
-	//log("File.rename(" + dir + list[i] + ", " + dir + target + ")");
+	timePoint = 1 + floor(i / nAngles);
+	angle = i % nAngles;
+	target = "spim_TL" + timePoint + "_Angle" + angle + ".ome.tiff";
+	File.rename(dir + sorted[i], dir + target);
+	//write("File.rename(" + dir + sorted[i] + ", " + dir + target + ")");
 }

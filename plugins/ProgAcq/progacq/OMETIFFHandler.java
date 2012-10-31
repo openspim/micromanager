@@ -21,6 +21,7 @@ import mmcorej.CMMCore;
 
 import ome.xml.model.enums.DimensionOrder;
 import ome.xml.model.enums.PixelType;
+import ome.xml.model.primitives.NonNegativeInteger;
 import ome.xml.model.primitives.PositiveFloat;
 import ome.xml.model.primitives.PositiveInteger;
 
@@ -60,18 +61,38 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			meta = new ServiceFactory().getInstance(OMEXMLService.class).createOMEXMLMetadata(null);
 
 			meta.createRoot();
+
+			meta.setDatasetID(MetadataTools.createLSID("Dataset", 0), 0);
+
+			for(int image = 0; image < stacks; ++image) {
+				meta.setImageID(MetadataTools.createLSID("Image", image), image);
+				meta.setPixelsID(MetadataTools.createLSID("Pixels", 0), image);
+				meta.setPixelsDimensionOrder(DimensionOrder.XYCZT, image);
+				meta.setPixelsBinDataBigEndian(Boolean.FALSE, 0, image);
+				meta.setPixelsType(core.getImageBitDepth() == 8 ? PixelType.UINT8 : PixelType.UINT16, image);
+				meta.setChannelID(MetadataTools.createLSID("Channel", 0), 0, image);
+				meta.setChannelSamplesPerPixel(new PositiveInteger(1), 0, image);
+
+				meta.setPixelsSizeX(new PositiveInteger((int)core.getImageWidth()), image);
+				meta.setPixelsSizeY(new PositiveInteger((int)core.getImageHeight()), image);
+				meta.setPixelsSizeZ(new PositiveInteger(stackDepths[image % stacks]), image);
+				meta.setPixelsSizeC(new PositiveInteger(1), image);
+				meta.setPixelsSizeT(new PositiveInteger(timesteps), image);
+
+				meta.setPixelsPhysicalSizeX(new PositiveFloat(core.getPixelSizeUm()), image);
+				meta.setPixelsPhysicalSizeY(new PositiveFloat(core.getPixelSizeUm()), image);
+				meta.setPixelsPhysicalSizeZ(new PositiveFloat(1d), image);
+				meta.setPixelsTimeIncrement(new Double(deltat), image);
+			}
 		} catch(Throwable t) {
 			throw new IllegalArgumentException(t);
 		}
 	}
 
-	private void openWriter(Vector3D position, double theta) throws Exception {
+	private void openWriter(int timepoint, double theta) throws Exception {
 		File path = new File(outputDirectory,
-				"blub" + imageCounter + "-x" + position.getX() + "-y" +
-						position.getY() + "-theta" + theta + ".ome.tiff"
+				"spim_TL" + timepoint + "_Angle" + theta + ".ome.tiff"
 		);
-
-		defaultMetaData();
 
 		writer = new ImageWriter().getWriter(path.getAbsolutePath());
 
@@ -81,33 +102,9 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		writer.setValidBitsPerPixel((int) core.getImageBitDepth());
 		writer.setCompression("Uncompressed");
 		writer.setId(path.getAbsolutePath());
+		writer.setSeries(++imageCounter % stacks);
 
-		++imageCounter;
 		sliceCounter = 0;
-	}
-
-	private void defaultMetaData() throws Exception {
-		meta.setDatasetID(MetadataTools.createLSID("Dataset", 0), 0);
-
-		meta.setImageID(MetadataTools.createLSID("Image", imageCounter), 0);
-		meta.setPixelsID(MetadataTools.createLSID("Pixels", 0), 0);
-		meta.setPixelsDimensionOrder(DimensionOrder.XYCZT, 0);
-		meta.setChannelID(MetadataTools.createLSID("Channel", 0), 0, 0);
-		meta.setChannelSamplesPerPixel(new PositiveInteger(1), 0, 0);
-		meta.setPixelsBinDataBigEndian(Boolean.FALSE, 0, 0);
-		long bitDepth = core.getImageBitDepth();
-		meta.setPixelsType(bitDepth == 8 ? PixelType.UINT8 : PixelType.UINT16, 0);
-
-		meta.setPixelsSizeX(new PositiveInteger((int)core.getImageWidth()), 0);
-		meta.setPixelsSizeY(new PositiveInteger((int)core.getImageHeight()), 0);
-		meta.setPixelsSizeZ(new PositiveInteger(stackDepths[imageCounter % stackDepths.length]), 0);
-		meta.setPixelsSizeC(new PositiveInteger(1), 0);
-		meta.setPixelsSizeT(new PositiveInteger(timesteps), 0);
-
-		meta.setPixelsPhysicalSizeX(new PositiveFloat(core.getPixelSizeUm()), 0);
-		meta.setPixelsPhysicalSizeY(new PositiveFloat(core.getPixelSizeUm()), 0);
-		meta.setPixelsPhysicalSizeZ(new PositiveFloat(1d), 0);
-		meta.setPixelsTimeIncrement(new Double(deltat), 0);
 	}
 
 	@Override
@@ -135,17 +132,21 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 		Vector3D pos = getPos(metaobj);
 
-		// Determine differences from the last position.
-		if(writer == null) {
-			openWriter(pos, metaobj.getDouble(xytzDevices[1]));
+		if(/*lastPosition == null ||*/ writer == null) {
+			openWriter((imageCounter/stacks)+1, metaobj.getDouble(xytzDevices[1]));
 		}
 
+//		lastPosition = pos;
+//		lastTheta = metaobj.getDouble(xytzDevices[1]);
 
-		meta.setPlanePositionX(pos.getX(), 0, sliceCounter);
-		meta.setPlanePositionY(pos.getY(), 0, sliceCounter);
-		meta.setPlanePositionZ(pos.getZ(), 0, sliceCounter);
-		meta.setPlaneDeltaT(metaobj.getDouble(xytzDevices[3]), 0, sliceCounter);
-		meta.setPlaneAnnotationRef(pos.getX() + "/" + pos.getY() + "/" + pos.getZ(), 0, sliceCounter, 0);
+		meta.setPlanePositionX(pos.getX(), imageCounter % stacks, sliceCounter);
+		meta.setPlanePositionY(pos.getY(), imageCounter % stacks, sliceCounter);
+		meta.setPlanePositionZ(pos.getZ(), imageCounter % stacks, sliceCounter);
+//		meta.setPlaneTheC(new NonNegativeInteger((int)metaobj.getDouble(xytzDevices[1])), 0, sliceCounter);
+		meta.setPlaneTheZ(new NonNegativeInteger(sliceCounter), imageCounter % stacks, sliceCounter);
+		meta.setPlaneTheT(new NonNegativeInteger((imageCounter/stacks)+1), imageCounter % stacks, sliceCounter);
+		meta.setPlaneDeltaT(metaobj.getDouble(xytzDevices[3]), imageCounter % stacks, sliceCounter);
+		meta.setPlaneAnnotationRef(pos.getX() + "/" + pos.getY() + "/" + pos.getZ(), imageCounter % stacks, sliceCounter, 0);
 
 		writer.savePlane(sliceCounter, data);
 

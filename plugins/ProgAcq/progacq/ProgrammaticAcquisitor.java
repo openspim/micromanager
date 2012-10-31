@@ -1000,7 +1000,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		for(int y=1; y < core.getImageHeight()-1; ++y) {
 			double first = pix[(int) (core.getImageWidth()*y)];
 			double last = pix[(int) ((core.getImageWidth()+1)*y-1)];
-
 			if(first < offs[4])
 				offs[4] = first;
 			if(last < offs[4])
@@ -1025,7 +1024,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		offs[0] += xt;
 		offs[1] += yt;
-		offs[2] += (core.getPosition(row.getDevice()) * it);
+		offs[2] += (core.getPosition(row.getDevice()) - row.getStartPosition()) * it;
 		offs[3] += it;
 
 		return offs;
@@ -1043,8 +1042,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ReportingUtils.logMessage("Pre-finalized data: " + Arrays.toString(data));
 
-		// Finish averaging the Z coordinate and mark that as done. 
-		double background = (data[5] - data[4])*0.6;
+		// Finish averaging the coordinates and put them in motor space.
+		double background = (data[5] - data[4])*0.6 + data[4];
 		double w = core.getImageWidth();
 		double h = core.getImageHeight();
 		data[0] -= background*divisor*h*(w*(w+1))/2;
@@ -1056,6 +1055,10 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		data[2] /= data[3] - background*w*h*divisor;
 		data[3] = 1;
 		data[4] = data[5] = 0;
+
+		data[0] = (data[0] - core.getImageWidth()/2)*core.getPixelSizeUm() + core.getXPosition(core.getXYStageDevice());
+		data[1] = (data[1] - core.getImageHeight()/2)*core.getPixelSizeUm() + core.getYPosition(core.getXYStageDevice());
+		data[2] = row.getStartPosition() + data[2];
 
 		ReportingUtils.logMessage("Finalized CINT: " + Arrays.toString(data));
 

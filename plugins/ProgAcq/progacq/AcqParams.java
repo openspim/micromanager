@@ -183,7 +183,6 @@ public class AcqParams {
 		this.outputHandler = outputHandler;
 	}
 
-	// TODO: Implement the following:
 	public boolean isAntiDriftOn() {
 		return antiDrift;
 	};

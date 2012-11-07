@@ -46,16 +46,16 @@ public class IndividualImagesHandler implements AcqOutputHandler {
 	}
 
 	@Override
-	public void processSlice(ImageProcessor ip, JSONObject meta)
+	public void processSlice(ImageProcessor ip, double X, double Y, double Z, double theta, double deltaT)
 			throws Exception {
-		String name = nameImage(meta);
+		String name = String.format("spim_TL%04f_Angle%f", deltaT, theta); //nameImage(meta);
 		ImagePlus imp = new ImagePlus(name, ip);
 		
-		imp.setProperty("Info", meta.toString());
+		imp.setProperty("Info", X + "/" + Y + "/" + Z + ", " + theta + " @ " + deltaT + "s");
 		
 		IJ.save(imp, new File(outputDirectory, name).getAbsolutePath());
 	}
-
+/*
 	private String nameImage(JSONObject metaData) throws JSONException {
 		String result = new String(namingScheme);
 
@@ -67,7 +67,7 @@ public class IndividualImagesHandler implements AcqOutputHandler {
 
 		return result;
 	}
-
+*/
 	@Override
 	public void finalizeAcquisition() throws Exception {
 		// Nothing to do.
@@ -83,6 +83,13 @@ public class IndividualImagesHandler implements AcqOutputHandler {
 
 	@Override
 	public void finalizeStack(int depth) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void beginStack(int axis) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

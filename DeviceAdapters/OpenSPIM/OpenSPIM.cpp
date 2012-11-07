@@ -41,6 +41,8 @@ const char* g_Keyword_MaxX = "X-Max";
 const char* g_Keyword_MinY = "Y-Min";
 const char* g_Keyword_MaxY = "Y-Max";
 const char* g_Keyword_Velocity = "Velocity";
+const char* g_Keyword_VelocityX = "X-Velocity";
+const char* g_Keyword_VelocityY = "Y-Velocity";
 
 // windows DLL entry code
 #ifdef WIN32
@@ -552,6 +554,20 @@ CSIABXYStage::CSIABXYStage()
 	SetErrorText(XYERR_MOVE_X, "X stage out of range.");
 	SetErrorText(XYERR_MOVE_Y, "Y stage out of range.");
 
+	CPropertyAction* pVelX = new CPropertyAction(this, &CSIABXYStage::OnVelocityX);
+	CPropertyAction* pVelY = new CPropertyAction(this, &CSIABXYStage::OnVelocityY);
+	CreateProperty(g_Keyword_VelocityX, "10", MM::Integer, false, pVelX, false);
+	CreateProperty(g_Keyword_VelocityY, "10", MM::Integer, false, pVelY, false);
+
+	char buffer[3];
+	std::vector<std::string> allowed_values = std::vector<std::string>();
+	for(int i=1; i <= 10; ++i) {
+		sprintf(buffer, "%i", i);
+		allowed_values.push_back(buffer);
+	};
+	SetAllowedValues(g_Keyword_VelocityX, allowed_values);
+	SetAllowedValues(g_Keyword_VelocityY, allowed_values);
+
 	CPropertyAction* pActMinX = new CPropertyAction(this, &CSIABXYStage::OnMinX);
 	CPropertyAction* pActMaxX = new CPropertyAction(this, &CSIABXYStage::OnMaxX);
 	CPropertyAction* pActMinY = new CPropertyAction(this, &CSIABXYStage::OnMinY);
@@ -656,6 +672,46 @@ int CSIABXYStage::OnMaxY(MM::PropertyBase *pProp, MM::ActionType eAct)
 		pProp->Set((long)maxY_);
 	else if (eAct == MM::AfterSet)
 		pProp->Get((long&)maxY_);
+
+	return DEVICE_OK;
+}
+
+int CSIABXYStage::OnVelocityX(MM::PropertyBase *pProp, MM::ActionType eAct)
+{
+	int value = -1;
+	if(eAct == MM::BeforeGet)
+	{
+		if(piGetMotorVelocity(&value, handleX_) != 0)
+			return DEVICE_ERR;
+
+		pProp->Set((long)value);
+	}
+	else if(eAct == MM::AfterSet)
+	{
+		pProp->Get((long&)value);
+
+		return piSetMotorVelocity(value, handleX_);
+	};
+
+	return DEVICE_OK;
+}
+
+int CSIABXYStage::OnVelocityY(MM::PropertyBase *pProp, MM::ActionType eAct)
+{
+	int value = -1;
+	if(eAct == MM::BeforeGet)
+	{
+		if(piGetMotorVelocity(&value, handleY_) != 0)
+			return DEVICE_ERR;
+
+		pProp->Set((long)value);
+	}
+	else if(eAct == MM::AfterSet)
+	{
+		pProp->Get((long&)value);
+
+		return piSetMotorVelocity(value, handleY_);
+	};
 
 	return DEVICE_OK;
 }

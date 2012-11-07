@@ -925,9 +925,6 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 		if(offset[3] != 1)
 			throw new Error("Attempt to anti-drift with unfinished offset.");
 
-		String oldVel = core.getProperty(row.getDevice(), "Velocity");
-		core.setProperty(row.getDevice(),"Velocity",1);
-
 		// Re-determine the center of intensity.
 		double[] cint = new double[] {0, 0, 0, 0, 0, 0};
 
@@ -959,11 +956,20 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ReportingUtils.logMessage("--- !!! --- !!! --- Determined CINT2: " + Arrays.toString(cint));
 
+		String oldVelZ = core.getProperty(row.getDevice(), "Velocity");
+		String oldVelX = core.getProperty(core.getXYStageDevice(), "X-Velocity");
+		String oldVelY = core.getProperty(core.getXYStageDevice(), "Y-Velocity");
+		core.setProperty(row.getDevice(),"Velocity",1);
+		core.setProperty(core.getXYStageDevice(), "X-Velocity", 1);
+		core.setProperty(core.getXYStageDevice(), "Y-Velocity", 1);
+
 		core.setXYPosition(core.getXYStageDevice(), cint[0] + offset[0], cint[1] + offset[1]);
 		core.setPosition(row.getDevice(), cint[2] + offset[2]);
 		core.waitForDevice(row.getDevice());
 
-		core.setProperty(row.getDevice(), "Velocity", oldVel);
+		core.setProperty(row.getDevice(), "Velocity", oldVelZ);
+		core.setProperty(core.getXYStageDevice(), "X-Velocity", oldVelX);
+		core.setProperty(core.getXYStageDevice(), "Y-Velocity", oldVelY);
 	}
 
 	private static double[] tallyAntiDriftSlice(CMMCore core, AcqRow row, double[] offs, TaggedImage img) throws Exception {

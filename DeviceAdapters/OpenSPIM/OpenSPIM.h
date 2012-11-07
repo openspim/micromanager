@@ -161,6 +161,8 @@ private:
 	int OnMaxX(MM::PropertyBase* pProp, MM::ActionType eAct);
 	int OnMinY(MM::PropertyBase* pProp, MM::ActionType eAct);
 	int OnMaxY(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnVelocityX(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnVelocityY(MM::PropertyBase* pProp, MM::ActionType eAct);
 
 	int serialX_, serialY_;
 	int velocityX_, velocityY_;

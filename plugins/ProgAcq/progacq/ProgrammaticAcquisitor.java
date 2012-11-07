@@ -814,6 +814,8 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 						xyzi = new double[] {0, 0, 0, 0, 0, 0};
 				};
 
+				handler.beginStack(0);
+
 				switch(row.getZMode()) {
 				case SINGLE_POSITION:
 					core.waitForImageSynchro();
@@ -839,7 +841,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 								xyzi = tallyAntiDriftSlice(core, row, xyzi, core.getTaggedImage());
 						}
 
-						double stackProg = (zStart - row.getStartPosition())/(row.getEndPosition() - row.getStartPosition());
+						double stackProg = Math.max(Math.min((zStart - start)/(end - start),1),0);
 
 						final Double progress = (double) (params.getRows().length * timeSeq + step + stackProg) / (params.getRows().length * params.getTimeSeqCount());
 
@@ -1092,7 +1094,12 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 
 		ImageProcessor ip = newImageProcessor(core, slice.pix);
 
-		handler.processSlice(ip, slice.tags);
+		// FIXME: Don't assume the name is 'Picard Twister'...
+		handler.processSlice(ip, core.getXPosition(core.getXYStageDevice()),
+				core.getYPosition(core.getXYStageDevice()),
+				core.getPosition(core.getFocusDevice()),
+				core.getPosition("Picard Twister"),
+				System.nanoTime() / 1e9 - start);
 	}
 
 	/**

@@ -17,15 +17,26 @@ public interface AcqOutputHandler {
 	public abstract ImagePlus getImagePlus() throws Exception;
 
 	/**
+	 * Called by the acquisition code when about to begin snapping a new stack.
+	 * 
+	 * @param axis The dimension along which the stack is beginning.
+	 * @throws Exception
+	 */
+	void beginStack(int axis) throws Exception;
+
+	/**
 	 * Handle the next slice as output by the acquisition code. What this means
 	 * obviously depends largely on implementation.
 	 *
 	 * @param ip an ImageProcessor holding the pixels
-	 * @param meta a JSONObject containing metadata (including the state of all
-	 * 	relevant devices).
+	 * @param X the X coordinate at which the image was acquired
+	 * @param Y the X coordinate at which the image was acquired
+	 * @param Z the X coordinate at which the image was acquired
+	 * @param theta the theta at which the image was acquired
+	 * @param deltaT the time since beginning, in seconds, at which the image was acquired
 	 * @throws Exception
 	 */
-	public abstract void processSlice(ImageProcessor ip, JSONObject meta) throws Exception;
+	public abstract void processSlice(ImageProcessor ip, double X, double Y, double Z, double theta, double deltaT) throws Exception;
 
 	/**
 	 * A stack has finished being acquired; react accordingly.
@@ -44,4 +55,5 @@ public interface AcqOutputHandler {
 	 * @throws Exception
 	 */
 	public abstract void finalizeAcquisition() throws Exception;
+
 }

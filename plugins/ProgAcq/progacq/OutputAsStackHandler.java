@@ -16,12 +16,12 @@ public class OutputAsStackHandler implements AcqOutputHandler {
 	}
 
 	@Override
-	public void processSlice(ImageProcessor ip, JSONObject meta)
+	public void processSlice(ImageProcessor ip, double X, double Y, double Z, double theta, double deltaT)
 			throws Exception {
 		if(stack == null)
 			stack = new ImageStack(ip.getWidth(), ip.getHeight());
 
-		stack.addSlice("t=" + meta.getString("t"), ip);
+		stack.addSlice("t=" + deltaT, ip);
 	}
 
 	@Override
@@ -36,6 +36,12 @@ public class OutputAsStackHandler implements AcqOutputHandler {
 
 	@Override
 	public void finalizeStack(int depth) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void beginStack(int axis) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

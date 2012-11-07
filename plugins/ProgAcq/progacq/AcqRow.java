@@ -58,6 +58,22 @@ public class AcqRow {
 		return stepOrSpeed;
 	}
 
+	public int getDepth() {
+		return (int) ((end - start + 1) / stepOrSpeed);
+	}
+
+	public double getX() {
+		return Double.parseDouble(mainPositions[0].substring(0, mainPositions[0].indexOf(',')));
+	}
+
+	public double getY() {
+		return Double.parseDouble(mainPositions[0].substring(mainPositions[0].indexOf(',') + 2));
+	}
+	
+	public double getTheta() {
+		return Double.parseDouble(mainPositions[1]);
+	}
+
 	public String[] getPrimaryPositions() {
 		return mainPositions;
 	}

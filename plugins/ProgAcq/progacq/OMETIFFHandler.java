@@ -82,7 +82,7 @@ public class OMETIFFHandler implements AcqOutputHandler {
 						int td = depth*t + z;
 
 						meta.setUUIDFileName(fileName, image, td);
-						meta.setUUIDValue("urn:uuid:" + (String)UUID.nameUUIDFromBytes(fileName.getBytes()).toString(), image, td);
+//						meta.setUUIDValue("urn:uuid:" + (String)UUID.nameUUIDFromBytes(fileName.getBytes()).toString(), image, td);
 
 						meta.setTiffDataPlaneCount(new NonNegativeInteger(1), image, td);
 						meta.setTiffDataFirstT(new NonNegativeInteger(t), image, td);

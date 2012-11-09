@@ -1,6 +1,5 @@
 package progacq;
 
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.UUID;
 
@@ -9,8 +8,6 @@ import ij.ImagePlus;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
-import org.apache.commons.math.geometry.euclidean.threed.Vector3D;
-import org.json.JSONObject;
 import org.micromanager.utils.ReportingUtils;
 
 import loci.common.DataTools;
@@ -32,7 +29,6 @@ import ome.xml.model.primitives.PositiveInteger;
 
 public class OMETIFFHandler implements AcqOutputHandler {
 	private File outputDirectory;
-	private String[] xytzDevices;
 
 	private IMetadata meta;
 	private int imageCounter, sliceCounter;
@@ -42,15 +38,13 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	private int stacks, timesteps;
 	private AcqRow[] acqRows;
 	private double deltat;
-
+	
 	public OMETIFFHandler(CMMCore iCore, File outDir, String xyDev,
 			String cDev, String zDev, String tDev, AcqRow[] acqRows,
 			int iTimeSteps, double iDeltaT) {
 
 		if(outDir == null || !outDir.exists() || !outDir.isDirectory())
 			throw new IllegalArgumentException("Null path specified: " + outDir.toString());
-
-		xytzDevices = new String[] {xyDev, cDev, zDev, tDev};
 
 		imageCounter = -1;
 		sliceCounter = 0;
@@ -63,20 +57,17 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		this.acqRows = acqRows;
 
 		try {
-			meta = new ServiceFactory().getInstance(OMEXMLService.class).createOMEXMLMetadata(null);
+			meta = new ServiceFactory().getInstance(OMEXMLService.class).createOMEXMLMetadata();
 
 			meta.createRoot();
 
 			meta.setDatasetID(MetadataTools.createLSID("Dataset", 0), 0);
 
-			//for(int image = 0; image < stacks*timesteps; ++image) {
 			for (int image = 0; image < stacks; ++image) {
 				meta.setImageID(MetadataTools.createLSID("Image", image), image);
 
 				AcqRow row = acqRows[image];
 				int depth = row.getDepth();
-
-				//meta.setUUID((String) fileNamesAndUUIDs[image][1]);
 
 				meta.setPixelsID(MetadataTools.createLSID("Pixels", 0), image);
 				meta.setPixelsDimensionOrder(DimensionOrder.XYCZT, image);
@@ -87,13 +78,17 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 				for (int t = 0; t < timesteps; ++t) {
 					String fileName = makeFilename(image, t);
-					meta.setUUIDFileName(fileName, image, t);
-					meta.setUUIDValue("urn:uuid:" + (String)UUID.nameUUIDFromBytes(fileName.getBytes()).toString(), image, t);
+					for(int z = 0; z < depth; ++z) {
+						int td = depth*t + z;
 
-					meta.setTiffDataPlaneCount(new NonNegativeInteger(depth), image, t);
-					meta.setTiffDataFirstC(new NonNegativeInteger(0), image, t);
-					meta.setTiffDataFirstZ(new NonNegativeInteger(0), image, t);
-					meta.setTiffDataFirstT(new NonNegativeInteger(t), image, t);
+						meta.setUUIDFileName(fileName, image, td);
+//						meta.setUUIDValue("urn:uuid:" + (String)UUID.nameUUIDFromBytes(fileName.getBytes()).toString(), image, td);
+
+						meta.setTiffDataPlaneCount(new NonNegativeInteger(1), image, td);
+						meta.setTiffDataFirstT(new NonNegativeInteger(t), image, td);
+						meta.setTiffDataFirstC(new NonNegativeInteger(0), image, td);
+						meta.setTiffDataFirstZ(new NonNegativeInteger(z), image, td);
+					};
 				};
 
 				meta.setPixelsSizeX(new PositiveInteger((int)core.getImageWidth()), image);
@@ -116,10 +111,11 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			writer.setInterleaved(false);
 			writer.setValidBitsPerPixel((int) core.getImageBitDepth());
 			writer.setCompression("Uncompressed");
-			openWriter(0, 0);
+//			openWriter(0, 0);
 
 			IJ.log(((OMEXMLMetadata)meta).dumpXML());
 		} catch(Throwable t) {
+			t.printStackTrace();
 			throw new IllegalArgumentException(t);
 		}
 	}
@@ -133,9 +129,10 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 	}
 	private void openWriter(int angleIndex, int timepoint) throws Exception {
-		meta.setUUID(meta.getUUIDValue(angleIndex, timepoint));
-		writer.changeOutputFile(makePath(angleIndex, timepoint));
+//		writer.changeOutputFile(makePath(angleIndex, timepoint));
+		writer.changeOutputFile(new File(outputDirectory, meta.getUUIDFileName(angleIndex, acqRows[angleIndex].getDepth()*timepoint)).getAbsolutePath());
 		writer.setSeries(angleIndex);
+		meta.setUUID(meta.getUUIDValue(angleIndex, acqRows[angleIndex].getDepth()*timepoint));
 
 		sliceCounter = 0;
 	}
@@ -163,13 +160,14 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			DataTools.shortsToBytes((short[])ip.getPixels(), true);
 
 		int image = imageCounter % stacks;
-		int plane = (imageCounter / stacks)*acqRows[image].getDepth() + sliceCounter;
+		int timePoint = imageCounter / stacks;
+		int plane = timePoint*acqRows[image].getDepth() + sliceCounter;
 
 		meta.setPlanePositionX(X, image, plane);
 		meta.setPlanePositionY(Y, image, plane);
 		meta.setPlanePositionZ(Z, image, plane);
-		meta.setPlaneTheZ(new NonNegativeInteger(sliceCounter+1), image, plane);
-		meta.setPlaneTheT(new NonNegativeInteger(imageCounter / stacks + 1), image, plane);
+		meta.setPlaneTheZ(new NonNegativeInteger(sliceCounter), image, plane);
+		meta.setPlaneTheT(new NonNegativeInteger(timePoint), image, plane);
 		meta.setPlaneDeltaT(deltaT, image, plane);
 		meta.setPlaneAnnotationRef(X + "/" + Y + "/" + Z, image, plane, 0);
 		writer.saveBytes(image, data);
@@ -211,6 +209,7 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		}
 
 		// Hopefully this doesn't do anything horrible.
+		// EDIT: Well, this does something horrible. :(
 		class mockCore extends CMMCore {
 			mockCore() {
 			}

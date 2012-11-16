@@ -806,7 +806,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 				runDevicesAtRow(core, devices, row.getPrimaryPositions(), step);
 
 				double[] xyzi = null;
-				if(params.isAntiDriftOn()) {
+				if(row.getZMode() != AcqRow.ZMode.CONTINUOUS_SWEEP && params.isAntiDriftOn()) {
 					double[] offs;
 					if((offs = driftCompMap.get(row)) != null)
 						compensateForDrift(core, row, offs);
@@ -855,11 +855,14 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 					break;
 				}
 				case CONTINUOUS_SWEEP: {
-					core.setProperty(row.getDevice(), "Velocity", row.getVelocity());
+					core.setPosition(row.getDevice(), row.getStartPosition());
+					String oldVel = core.getProperty(row.getDevice(), "Velocity");
 
+					core.setProperty(row.getDevice(), "Velocity", row.getVelocity());
 					core.setPosition(row.getDevice(), row.getEndPosition());
 
-					core.waitForImageSynchro();
+					core.waitForDevice(row.getDevice());
+					core.setProperty(row.getDevice(), "Velocity", oldVel);
 					break;
 				}
 				};

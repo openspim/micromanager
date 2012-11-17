@@ -1206,7 +1206,7 @@ public class ProgrammaticAcquisitor implements MMPlugin, ActionListener,
 	 * @throws Exception
 	 *             On unsupported image modes.
 	 */
-	private static ImageProcessor newImageProcessor(CMMCore core, Object image)
+	public static ImageProcessor newImageProcessor(CMMCore core, Object image)
 			throws Exception {
 		if (core.getBytesPerPixel() == 1) {
 			return new ByteProcessor((int) core.getImageWidth(),

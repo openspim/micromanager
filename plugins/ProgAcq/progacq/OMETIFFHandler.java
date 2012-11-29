@@ -126,8 +126,8 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 	private String makePath(int angleIndex, int timepoint) {
 		return new File(outputDirectory, makeFilename(angleIndex, timepoint)).getAbsolutePath();
-
 	}
+
 	private void openWriter(int angleIndex, int timepoint) throws Exception {
 //		writer.changeOutputFile(makePath(angleIndex, timepoint));
 		writer.changeOutputFile(new File(outputDirectory, meta.getUUIDFileName(angleIndex, acqRows[angleIndex].getDepth()*timepoint)).getAbsolutePath());
@@ -170,7 +170,7 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		meta.setPlaneTheT(new NonNegativeInteger(timePoint), image, plane);
 		meta.setPlaneDeltaT(deltaT, image, plane);
 		meta.setPlaneAnnotationRef(X + "/" + Y + "/" + Z, image, plane, 0);
-		writer.saveBytes(image, data);
+		writer.saveBytes(plane, data);
 
 		++sliceCounter;
 	}

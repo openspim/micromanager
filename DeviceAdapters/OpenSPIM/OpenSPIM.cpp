@@ -209,10 +209,10 @@ int CSIABTwister::SetPositionUm(double pos)
 	if((int)at != (int)pos) {
 		int temp = 0;
 		while(!Busy() && (int)at != (int)pos && temp++ < 1e2) {
+			CDeviceUtils::SleepMs(1);
+
 			if(GetPositionUm(at) != DEVICE_OK)
 				return DEVICE_ERR;
-
-			Sleep(1);
 		};
 
 		if(temp >= 5e1)
@@ -428,10 +428,10 @@ int CSIABStage::SetPositionUm(double pos)
 	if((int)at != (int)pos) {
 		int temp = 0;
 		while(!Busy() && (int)at != (int)pos && temp++ < 1e2) {
+			CDeviceUtils::SleepMs(1);
+
 			if(GetPositionUm(at) != DEVICE_OK)
 				return DEVICE_ERR;
-
-			Sleep(1);
 		};
 
 		if(temp >= 5e1)
@@ -799,6 +799,11 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	bool flipX, flipY;
 	GetOrientation(flipX, flipY);
 
+	if(x < minX_ || x > maxX_)
+		x = min(maxX_, max(x, minX_));
+	if(y < minY_ || y > maxY_)
+		y = min(maxY_, max(y, minY_));
+
 	int toX = flipX ? (maxX_ - (int)x) + minX_ : (int)x;
 	int toY = flipY ? (maxY_ - (int)y) + minY_ : (int)y;
 #ifdef XYSTAGE_DBG_ON
@@ -811,10 +816,6 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	str << "to X/Y={" << toX << ", " << toY << "}";
 	LogMessage(str.str().c_str());
 #endif
-	if(toX < minX_ || toX > maxX_)
-		return XYERR_MOVE_X;
-	if(toY < minY_ || toY > maxY_)
-		return XYERR_MOVE_Y;
 
 	int moveX = piRunMotorToPosition(toX, velocityX_, handleX_);
 	int moveY = piRunMotorToPosition(toY, velocityY_, handleY_) << 1;
@@ -827,10 +828,10 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	if((int)atX != (int)x || (int)atY != (int)y) {
 		int temp = 0;
 		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && temp++ < 1e2) {
+			CDeviceUtils::SleepMs(1);
+
 			if(GetPositionUm(atX, atY) != DEVICE_OK)
 				return DEVICE_ERR;
-
-			Sleep(1);
 		};
 
 		if(temp >= 5e1)

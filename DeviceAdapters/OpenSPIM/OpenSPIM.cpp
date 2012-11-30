@@ -584,56 +584,62 @@ CSIABXYStage::~CSIABXYStage()
 
 int CSIABXYStage::OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct)
 {
-   if (eAct == MM::BeforeGet)
-   {
-      // instead of relying on stored state we could actually query the device
-      pProp->Set((long)serialX_);
-   }
-   else if (eAct == MM::AfterSet)
-   {
-      long serial;
-      pProp->Get(serial);
-      serialX_ = (int)serial;
+	if (eAct == MM::BeforeGet)
+	{
+		// instead of relying on stored state we could actually query the device
+		pProp->Set((long)serialX_);
+	}
+	else if (eAct == MM::AfterSet)
+	{
+		long serial;
+		pProp->Get(serial);
+		serialX_ = (int)serial;
 
 		int errorX = -1;
 		handleX_ = piConnectMotor(&errorX, serialX_);
 		if (handleX_)
+		{
 			piGetMotorVelocity(&velocityX_, handleX_);
-		else {
+		}
+		else
+		{
 			std::ostringstream buffer;
 			buffer << "Could not initialize X motor " << serialX_ << " (error code " << errorX << ")";
 			LogMessage(buffer.str().c_str(), false);
 			return XYERR_INIT_X;
 		}
-   }
-   return DEVICE_OK;
+	}
+	return DEVICE_OK;
 }
 
 int CSIABXYStage::OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct)
 {
-   if (eAct == MM::BeforeGet)
-   {
-      // instead of relying on stored state we could actually query the device
-      pProp->Set((long)serialY_);
-   }
-   else if (eAct == MM::AfterSet)
-   {
-      long serial;
-      pProp->Get(serial);
-      serialY_ = (int)serial;
+	if (eAct == MM::BeforeGet)
+	{
+		// instead of relying on stored state we could actually query the device
+		pProp->Set((long)serialY_);
+	}
+	else if (eAct == MM::AfterSet)
+	{
+		long serial;
+		pProp->Get(serial);
+		serialY_ = (int)serial;
 
 		int errorY = -1;
 		handleY_ = piConnectMotor(&errorY, serialY_);
 		if (handleY_)
+		{
 			piGetMotorVelocity(&velocityY_, handleY_);
-		else {
+		}
+		else
+		{
 			std::ostringstream buffer;
 			buffer << "Could not initialize Y motor " << serialY_ << " (error code " << errorY << ")";
 			LogMessage(buffer.str().c_str(), false);
 			return XYERR_INIT_Y;
 		}
-   }
-   return DEVICE_OK;
+	}
+	return DEVICE_OK;
 }
 
 int CSIABXYStage::OnMinX(MM::PropertyBase *pProp, MM::ActionType eAct)
@@ -678,6 +684,9 @@ int CSIABXYStage::OnMaxY(MM::PropertyBase *pProp, MM::ActionType eAct)
 
 int CSIABXYStage::OnVelocityX(MM::PropertyBase *pProp, MM::ActionType eAct)
 {
+	if(handleX_ == NULL)
+		return (eAct == MM::BeforeGet ? DEVICE_OK : DEVICE_ERR);
+
 	int value = -1;
 	if(eAct == MM::BeforeGet)
 	{
@@ -698,6 +707,9 @@ int CSIABXYStage::OnVelocityX(MM::PropertyBase *pProp, MM::ActionType eAct)
 
 int CSIABXYStage::OnVelocityY(MM::PropertyBase *pProp, MM::ActionType eAct)
 {
+	if(handleY_ == NULL)
+		return (eAct == MM::BeforeGet ? DEVICE_OK : DEVICE_ERR);
+
 	int value = -1;
 	if(eAct == MM::BeforeGet)
 	{

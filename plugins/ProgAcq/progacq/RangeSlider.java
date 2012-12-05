@@ -1,6 +1,7 @@
 package progacq;
 
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Dictionary;
@@ -17,7 +18,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.PanelUI;
 
-import org.micromanager.utils.ReportingUtils;
+import progacq.LayoutUtils;
 
 public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	private static final long serialVersionUID = -4704266057756694946L;
@@ -29,43 +30,23 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	public RangeSlider(Double minv, Double maxv) {
 		triggering = true;
 
-		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-
-		JPanel top = new JPanel();
-		top.setLayout(new BoxLayout(top, BoxLayout.LINE_AXIS));
-
+		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+		
 		final JLabel minLbl = new JLabel("Min:");
 		final JLabel maxLbl = new JLabel("Max:");
 		final JLabel stpLbl = new JLabel("Step:");
 
-		min = new JTextField(8);
+		min = new JTextField(4);
 		min.setMaximumSize(min.getPreferredSize());
-		min.setAlignmentX(LEFT_ALIGNMENT);
 		min.addKeyListener(this);
 
-		step = new JTextField(8);
+		step = new JTextField(4);
 		step.setMaximumSize(step.getPreferredSize());
-		step.setAlignmentX(CENTER_ALIGNMENT);
 		step.addKeyListener(this);
 
-		max = new JTextField(8);
+		max = new JTextField(4);
 		max.setMaximumSize(max.getPreferredSize());
-		max.setAlignmentX(RIGHT_ALIGNMENT);
 		max.addKeyListener(this);
-
-		top.add(minLbl);
-		top.add(min);
-		top.add(Box.createRigidArea(new Dimension(4, 10)));
-		top.add(stpLbl);
-		top.add(step);
-		top.add(Box.createRigidArea(new Dimension(4, 10)));
-		top.add(maxLbl);
-		top.add(max);
-
-		add(top);
-
-		JPanel bot = new JPanel();
-		bot.setLayout(new BoxLayout(bot, BoxLayout.LINE_AXIS));
 
 		sliderMin = new JSlider(minv.intValue(), maxv.intValue(),
 				minv.intValue());
@@ -79,11 +60,6 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		sliderMax.setPaintLabels(true);
 		sliderMax.addChangeListener(this);
 
-		bot.add(sliderMin);
-		bot.add(sliderMax);
-
-		add(bot);
-
 		JPanel stepBox = new JPanel();
 		stepBox.setLayout(new BoxLayout(stepBox, BoxLayout.LINE_AXIS));
 
@@ -94,23 +70,32 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 
 		setMinMax(minv, maxv);
 
-		stepBox.add(new JLabel("Step size:"));
-		stepBox.add(sliderStep);
+		JPanel boxesBox = new JPanel();
+		boxesBox.setLayout(new GridLayout(3,2,4,4));
 
-		add(stepBox);
+		LayoutUtils.addAll(boxesBox, minLbl, min, stpLbl, step, maxLbl, max);
+
+		LayoutUtils.addAll(this,
+			LayoutUtils.vertPanel(
+				LayoutUtils.horizPanel(sliderMin, sliderMax),
+				sliderStep
+			),
+			Box.createHorizontalGlue(),
+			LayoutUtils.vertPanel(
+				Box.createVerticalGlue(),
+				boxesBox,
+				Box.createVerticalGlue()
+			)
+		);
 
 		this.setUI(new PanelUI() {
 			@Override
 			public Dimension getPreferredSize(JComponent c) {
-				int width = minLbl.getPreferredSize().width
-						+ min.getPreferredSize().width
+				int width = (int)(sliderStep.getPreferredSize().width*1.5)
 						+ stpLbl.getPreferredSize().width
-						+ step.getPreferredSize().width
-						+ maxLbl.getPreferredSize().width
-						+ max.getPreferredSize().width;
+						+ step.getPreferredSize().width;
 
-				int height = min.getPreferredSize().height
-						+ sliderMin.getPreferredSize().height
+				int height = sliderMin.getPreferredSize().height
 						+ sliderStep.getPreferredSize().height;
 
 				return new Dimension(width, height);
@@ -155,8 +140,6 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			if (round > 0)
 				nearPos = Math.round(nearPos / round) * round;
 
-			ReportingUtils.logMessage("" + lbl + ": Putting " + (int) nearPos
-					+ " (" + nearPos + ")");
 			table.put((int) nearPos, new JLabel("" + (int) nearPos));
 		}
 

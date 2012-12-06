@@ -808,6 +808,9 @@ void CSIABXYStage::GetOrientation(bool& mirrorX, bool& mirrorY)
 
 int CSIABXYStage::SetPositionUm(double x, double y)
 {
+	if(handleX_ == NULL || handleY_ == NULL)
+		return DEVICE_ERR;
+
 	bool flipX, flipY;
 	GetOrientation(flipX, flipY);
 
@@ -870,6 +873,9 @@ int CSIABXYStage::SetAdapterOriginUm(double x, double y)
 
 int CSIABXYStage::GetPositionUm(double& x, double& y)
 {
+	if(handleX_ == NULL || handleY_ == NULL)
+		return DEVICE_ERR;
+
 	bool flipX, flipY;
 	GetOrientation(flipX, flipY);
 

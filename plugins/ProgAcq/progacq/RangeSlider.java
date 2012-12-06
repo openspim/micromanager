@@ -31,7 +31,7 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 		triggering = true;
 
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		
+
 		final JLabel minLbl = new JLabel("Min:");
 		final JLabel maxLbl = new JLabel("Max:");
 		final JLabel stpLbl = new JLabel("Step:");
@@ -197,12 +197,12 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			if (val <= 0)
 				val = 1;
 
-			sliderMin.setLabelTable(sliderMin.createStandardLabels(val * 2));
-			sliderMax.setLabelTable(sliderMax.createStandardLabels(val * 2));
-			sliderMin.setMajorTickSpacing(val * 2);
-			sliderMax.setMajorTickSpacing(val * 2);
-			sliderMin.setMinorTickSpacing(val);
-			sliderMax.setMinorTickSpacing(val);
+			sliderMin.setLabelTable(makeLabelTable(sliderMin.getValue(), sliderMax.getValue(), val / 2, val / 2, 0));
+			sliderMax.setLabelTable(makeLabelTable(sliderMin.getValue(), sliderMax.getValue(), val / 2, val / 2, 0));
+			sliderMin.setMajorTickSpacing(val);
+			sliderMax.setMajorTickSpacing(val);
+			sliderMin.setMinorTickSpacing(val / 2);
+			sliderMax.setMinorTickSpacing(val / 2);
 		}
 
 		triggering = false;
@@ -255,12 +255,12 @@ public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 			if (value <= 0)
 				value = 1;
 
-			sliderMin.setMajorTickSpacing(value * 2);
-			sliderMax.setMajorTickSpacing(value * 2);
-			sliderMin.setMinorTickSpacing(value);
-			sliderMax.setMinorTickSpacing(value);
-			sliderMin.setLabelTable(sliderMin.createStandardLabels(value * 2));
-			sliderMax.setLabelTable(sliderMax.createStandardLabels(value * 2));
+			sliderMin.setMajorTickSpacing(value);
+			sliderMax.setMajorTickSpacing(value);
+			sliderMin.setMinorTickSpacing(value / 2);
+			sliderMax.setMinorTickSpacing(value / 2);
+			sliderMin.setLabelTable(makeLabelTable(sliderMin.getValue(), sliderMax.getValue(), value / 2, value / 2, 0));
+			sliderMax.setLabelTable(makeLabelTable(sliderMin.getValue(), sliderMax.getValue(), value / 2, value / 2, 0));
 		}
 
 		triggering = false;

@@ -572,9 +572,9 @@ CSIABXYStage::CSIABXYStage()
 	CPropertyAction* pActMaxX = new CPropertyAction(this, &CSIABXYStage::OnMaxX);
 	CPropertyAction* pActMinY = new CPropertyAction(this, &CSIABXYStage::OnMinY);
 	CPropertyAction* pActMaxY = new CPropertyAction(this, &CSIABXYStage::OnMaxY);
-	CreateProperty(g_Keyword_MinX, "1", MM::Integer, false, pActMinX, true);
+	CreateProperty(g_Keyword_MinX, "0", MM::Integer, false, pActMinX, true);
 	CreateProperty(g_Keyword_MaxX, "8000", MM::Integer, false, pActMaxX, true);
-	CreateProperty(g_Keyword_MinY, "1", MM::Integer, false, pActMinY, true);
+	CreateProperty(g_Keyword_MinY, "0", MM::Integer, false, pActMinY, true);
 	CreateProperty(g_Keyword_MaxY, "8000", MM::Integer, false, pActMaxY, true);
 }
 

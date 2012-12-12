@@ -19,6 +19,8 @@
 //                CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 //                INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
 
+#include <iostream>
+
 #include "OpenSPIM.h"
 #include "../../MMDevice/ModuleInterface.h"
 #include "../../../3rdpartypublic/picard/PiUsb.h"
@@ -63,9 +65,85 @@ BOOL APIENTRY DllMain( HANDLE /*hModule*/,
 }
 #endif
 
+#define MAX_IDX 500
 
+class CPiDetector
+{
+	public:
+	CPiDetector()
+	{
+		std::cout << "Pinging motors..." << endl;
 
+		m_pMotorList = new int[16];
+		m_pTwisterList = new int[4];
 
+		int error = PingDevices(&piConnectMotor, &piDisconnectMotor, m_pMotorList, 16, &m_iMotorCount);
+		if(error > 1)
+			std::cout << " Error detecting motors: " << error << endl;
+
+		error = PingDevices(&piConnectTwister, &piDisconnectTwister, m_pTwisterList, 4, &m_iTwisterCount);
+		if(error > 1)
+			std::cout << " Error detecting twisters: " << error << endl;
+
+		std::cout << "Found " << m_iMotorCount << " motors and " << m_iTwisterCount << " twisters." << endl;
+	}
+
+	int GetMotorSerial(int idx)
+	{
+		if(idx < m_iMotorCount)
+			return m_pMotorList[idx];
+
+		return -1;
+	}
+
+	int GetTwisterSerial(int idx)
+	{
+		if(idx < m_iTwisterCount)
+			return m_pTwisterList[idx];
+
+		return -1;
+	}
+
+	~CPiDetector()
+	{
+		delete[] m_pMotorList;
+		delete[] m_pTwisterList;
+	}
+
+	private:
+	int PingDevices(void* (__stdcall* connfn)(int*, int), void (__stdcall* discfn)(void*), int* pOutArray, const int iMax, int* pOutCount)
+	{
+		void* handle = NULL;
+		int error = 0;
+		int count = 0;
+		for(int idx = 0; idx < MAX_IDX && count < iMax; ++idx)
+		{
+			if((handle = (*connfn)(&error, idx)) != NULL && error <= 1)
+			{
+				pOutArray[count++] = idx;
+				(*discfn)(handle);
+				handle = NULL;
+			}
+			else if(error > 1)
+			{
+				std::cout << "Error scanning index " << idx << ": " << error << "" << endl;
+				*pOutCount = count;
+				return error;
+			}
+		}
+
+		*pOutCount = count;
+		return 0;
+	}
+
+	int*	m_pMotorList;
+	int		m_iMotorCount;
+
+	int*	m_pTwisterList;
+	int		m_iTwisterCount;
+};
+
+static CPiDetector* g_pPiDetector = new CPiDetector();
 
 ///////////////////////////////////////////////////////////////////////////////
 // Exported MMDevice API
@@ -80,6 +158,11 @@ BOOL APIENTRY DllMain( HANDLE /*hModule*/,
  */
 MODULE_API void InitializeModuleData()
 {
+	if(g_pPiDetector != NULL)
+		delete g_pPiDetector;
+
+	g_pPiDetector = new CPiDetector();
+
    AddAvailableDeviceName(g_TwisterDeviceName, "Twister");
    AddAvailableDeviceName(g_StageDeviceName, "Z stage");
    AddAvailableDeviceName(g_XYStageDeviceName, "XY stage");
@@ -119,10 +202,13 @@ MODULE_API void DeleteDevice(MM::Device* pDevice)
 // The twister
 
 CSIABTwister::CSIABTwister()
-: serial_(35), handle_(NULL)
+: serial_(g_pPiDetector->GetTwisterSerial(0)), handle_(NULL)
 {
+	char buf[16];
+	itoa(serial_, buf, 10);
+
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABTwister::OnSerialNumber);
-	CreateProperty(g_Keyword_SerialNumber, "35", MM::String, false, pAct, true);
+	CreateProperty(g_Keyword_SerialNumber, buf, MM::String, false, pAct, true);
 	SetErrorText(1, "Could not initialize twister");
 }
 
@@ -309,10 +395,13 @@ bool CSIABTwister::IsContinuousFocusDrive() const
 // The Stage
 
 CSIABStage::CSIABStage()
-: serial_(126), handle_(NULL)
+: serial_(g_pPiDetector->GetMotorSerial(2)), handle_(NULL)
 {
+	char buf[16];
+	itoa(serial_, buf, 10);
+
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
-	CreateProperty(g_Keyword_SerialNumber, "126", MM::Integer, false, pAct, true);
+	CreateProperty(g_Keyword_SerialNumber, buf, MM::Integer, false, pAct, true);
 
 	pAct = new CPropertyAction (this, &CSIABStage::OnVelocity);
 	CreateProperty(g_Keyword_Velocity, "10", MM::Integer, false, pAct);
@@ -542,13 +631,19 @@ bool CSIABStage::IsContinuousFocusDrive() const
 #define XYERR_MOVE_Y 5
 
 CSIABXYStage::CSIABXYStage()
-: serialX_(125), serialY_(124), handleX_(NULL), handleY_(NULL), minX_(1),
-  minY_(1), maxX_(8000), maxY_(8000)
+: serialX_(g_pPiDetector->GetMotorSerial(1)), serialY_(g_pPiDetector->GetMotorSerial(0)),
+  handleX_(NULL), handleY_(NULL), minX_(1), minY_(1), maxX_(8000), maxY_(8000)
 {
+	char buf[16];
+	itoa(serialX_, buf, 10);
+
 	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
+	CreateProperty(g_Keyword_SerialNumberX, buf, MM::Integer, false, pActX, true);
+
+	itoa(serialY_, buf, 10);
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
-	CreateProperty(g_Keyword_SerialNumberX, "125", MM::Integer, false, pActX, true);
-	CreateProperty(g_Keyword_SerialNumberY, "124", MM::Integer, false, pActY, true);
+	CreateProperty(g_Keyword_SerialNumberY, buf, MM::Integer, false, pActY, true);
+
 	SetErrorText(XYERR_INIT_X, "Could not initialize motor (X stage)");
 	SetErrorText(XYERR_INIT_Y, "Could not initialize motor (Y stage)");
 	SetErrorText(XYERR_MOVE_X, "X stage out of range.");

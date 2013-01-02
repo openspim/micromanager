@@ -1,10 +1,8 @@
-package progacq;
+package spim.progacq;
 
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-
-import org.json.JSONObject;
 
 public class OutputAsStackHandler implements AcqOutputHandler {
 	private ImageStack stack;

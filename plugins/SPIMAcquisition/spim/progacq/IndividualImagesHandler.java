@@ -1,16 +1,10 @@
-package progacq;
+package spim.progacq;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class IndividualImagesHandler implements AcqOutputHandler {
 	private File outputDirectory;
@@ -25,11 +19,21 @@ public class IndividualImagesHandler implements AcqOutputHandler {
 	 * @param nameMap map of short names for devices to be in the filename.
 	 * @return the generated scheme (is also saved to this object!)
 	 */
-	public static String shortNamesToScheme(String header, boolean t, String[] devices, Map<String, String> nameMap) {
-		String nameScheme = header + (t ? "-t=$(t)" : "-");
+	public static String shortNamesToScheme(String header, boolean xyztt[], String[] nameMap) {
+		String nameScheme = header;
 
-		for(String dev : devices)
-			nameScheme += "-" + (nameMap == null ? dev : nameMap.get(dev)) + "=$(" + dev + ")";
+		if(xyztt[4])
+			nameScheme += "-t=$(dt)";
+		if(xyztt[0])
+			nameScheme += "-" + (nameMap == null ? "X" : nameMap[0]) + "=$(X)";
+		if(xyztt[1])
+			nameScheme += "-" + (nameMap == null ? "Y" : nameMap[1]) + "=$(Y)";
+
+		if(xyztt[2])
+			nameScheme += "-" + (nameMap == null ? "Z" : nameMap[2]) + "=$(Z)";
+		
+		if(xyztt[3])
+			nameScheme += "-" + (nameMap == null ? "Theta" : nameMap[3]) + "=$(T)";
 
 		nameScheme += ".tif";
 
@@ -48,26 +52,26 @@ public class IndividualImagesHandler implements AcqOutputHandler {
 	@Override
 	public void processSlice(ImageProcessor ip, double X, double Y, double Z, double theta, double deltaT)
 			throws Exception {
-		String name = String.format("spim_TL%04f_Angle%f", deltaT, theta); //nameImage(meta);
+		String name = nameImage(X, Y, Z, theta, deltaT);
 		ImagePlus imp = new ImagePlus(name, ip);
 		
 		imp.setProperty("Info", X + "/" + Y + "/" + Z + ", " + theta + " @ " + deltaT + "s");
 		
 		IJ.save(imp, new File(outputDirectory, name).getAbsolutePath());
 	}
-/*
-	private String nameImage(JSONObject metaData) throws JSONException {
+
+	private String nameImage(double X, double Y, double Z, double T, double dT) {
 		String result = new String(namingScheme);
 
-		Iterator<String> iter = metaData.keys();
-		while(iter.hasNext()) {
-			String mde = iter.next();
-			result = result.replace("$(" + mde + ")", metaData.getString(mde));
-		}
+		result = result.replace("$(X)", Double.toString(X));
+		result = result.replace("$(Y)", Double.toString(Y));
+		result = result.replace("$(Z)", Double.toString(Z));
+		result = result.replace("$(T)", Double.toString(T));
+		result = result.replace("$(dt)", Double.toString(dT));
 
 		return result;
 	}
-*/
+
 	@Override
 	public void finalizeAcquisition() throws Exception {
 		// Nothing to do.

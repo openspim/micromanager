@@ -1,4 +1,4 @@
-package progacq;
+package spim.progacq;
 
 public class AcqRow {
 	public enum ZMode {

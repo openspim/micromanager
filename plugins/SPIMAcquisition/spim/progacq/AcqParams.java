@@ -1,4 +1,4 @@
-package progacq;
+package spim.progacq;
 
 import java.io.File;
 
@@ -53,7 +53,7 @@ public class AcqParams {
 			(saveIndv ?
 				new IndividualImagesHandler(
 					rootDir,
-					IndividualImagesHandler.shortNamesToScheme("PA", true, iMetaDevices, null)
+					IndividualImagesHandler.shortNamesToScheme("PA", new boolean[] {true, false, false, true}, null)
 				) :
 				new OutputAsStackHandler()
 			)

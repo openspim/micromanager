@@ -1,7 +1,7 @@
 /**
  * 
  */
-package progacq;
+package spim.progacq;
 
 import java.util.HashMap;
 import java.util.Iterator;

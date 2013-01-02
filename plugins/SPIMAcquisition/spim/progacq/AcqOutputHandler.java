@@ -1,6 +1,4 @@
-package progacq;
-
-import org.json.JSONObject;
+package spim.progacq;
 
 import ij.ImagePlus;
 import ij.process.ImageProcessor;

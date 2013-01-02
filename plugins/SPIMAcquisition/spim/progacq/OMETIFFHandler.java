@@ -1,7 +1,6 @@
-package progacq;
+package spim.progacq;
 
 import java.io.File;
-import java.util.UUID;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -111,7 +110,6 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			writer.setInterleaved(false);
 			writer.setValidBitsPerPixel((int) core.getImageBitDepth());
 			writer.setCompression("Uncompressed");
-//			openWriter(0, 0);
 
 			IJ.log(((OMEXMLMetadata)meta).dumpXML());
 		} catch(Throwable t) {
@@ -124,12 +122,7 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		return "spim_TL" + (timepoint + 1) + "_Angle" + angleIndex + ".ome.tiff";
 	}
 
-	private String makePath(int angleIndex, int timepoint) {
-		return new File(outputDirectory, makeFilename(angleIndex, timepoint)).getAbsolutePath();
-	}
-
 	private void openWriter(int angleIndex, int timepoint) throws Exception {
-//		writer.changeOutputFile(makePath(angleIndex, timepoint));
 		writer.changeOutputFile(new File(outputDirectory, meta.getUUIDFileName(angleIndex, acqRows[angleIndex].getDepth()*timepoint)).getAbsolutePath());
 		writer.setSeries(angleIndex);
 		meta.setUUID(meta.getUUIDValue(angleIndex, acqRows[angleIndex].getDepth()*timepoint));

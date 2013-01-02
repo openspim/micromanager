@@ -1,4 +1,4 @@
-package progacq;
+package spim.progacq;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -18,7 +18,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.PanelUI;
 
-import progacq.LayoutUtils;
+import spim.LayoutUtils;
 
 public class RangeSlider extends JPanel implements ChangeListener, KeyListener {
 	private static final long serialVersionUID = -4704266057756694946L;

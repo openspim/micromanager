@@ -1,13 +1,9 @@
-package progacq;
+package spim.progacq;
 
 import java.io.File;
-import java.util.UUID;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
-
 import org.micromanager.utils.ReportingUtils;
 
 import loci.common.DataTools;
@@ -17,7 +13,6 @@ import loci.formats.IFormatWriter;
 import loci.formats.ImageWriter;
 import loci.formats.MetadataTools;
 import loci.formats.meta.IMetadata;
-import loci.formats.ome.OMEXMLMetadata;
 import loci.formats.services.OMEXMLService;
 import mmcorej.CMMCore;
 
@@ -99,9 +94,8 @@ public class OMETIFFHandler implements AcqOutputHandler {
 
 				meta.setPixelsPhysicalSizeX(new PositiveFloat(core.getPixelSizeUm()), image);
 				meta.setPixelsPhysicalSizeY(new PositiveFloat(core.getPixelSizeUm()), image);
-				meta.setPixelsPhysicalSizeZ(new PositiveFloat(1d), image);
+				meta.setPixelsPhysicalSizeZ(new PositiveFloat(row.getZStepSize()*1.5D), image); // TODO: This is hardcoded. Change the DAL.
 				meta.setPixelsTimeIncrement(new Double(deltat), image);
-
 			}
 
 			writer = new ImageWriter().getWriter(makeFilename(0, 0));
@@ -111,9 +105,6 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			writer.setInterleaved(false);
 			writer.setValidBitsPerPixel((int) core.getImageBitDepth());
 			writer.setCompression("Uncompressed");
-//			openWriter(0, 0);
-
-			IJ.log(((OMEXMLMetadata)meta).dumpXML());
 		} catch(Throwable t) {
 			t.printStackTrace();
 			throw new IllegalArgumentException(t);
@@ -121,15 +112,10 @@ public class OMETIFFHandler implements AcqOutputHandler {
 	}
 
 	private static String makeFilename(int angleIndex, int timepoint) {
-		return "spim_TL" + (timepoint + 1) + "_Angle" + angleIndex + ".ome.tiff";
-	}
-
-	private String makePath(int angleIndex, int timepoint) {
-		return new File(outputDirectory, makeFilename(angleIndex, timepoint)).getAbsolutePath();
+		return String.format("spim_TL%02d_Angle%01d.ome.tiff", (timepoint + 1), angleIndex);
 	}
 
 	private void openWriter(int angleIndex, int timepoint) throws Exception {
-//		writer.changeOutputFile(makePath(angleIndex, timepoint));
 		writer.changeOutputFile(new File(outputDirectory, meta.getUUIDFileName(angleIndex, acqRows[angleIndex].getDepth()*timepoint)).getAbsolutePath());
 		writer.setSeries(angleIndex);
 		meta.setUUID(meta.getUUIDValue(angleIndex, acqRows[angleIndex].getDepth()*timepoint));
@@ -151,6 +137,17 @@ public class OMETIFFHandler implements AcqOutputHandler {
 			openWriter(imageCounter % stacks, imageCounter / stacks);
 	}
 
+	private int doubleAnnotations = 0;
+	private int storeDouble(int image, int plane, int n, String name, double val) {
+		String key = String.format("%d/%d/%d: %s", image, plane, n, name);
+
+		meta.setDoubleAnnotationID(key, doubleAnnotations);
+		meta.setDoubleAnnotationValue(val, doubleAnnotations);
+		meta.setPlaneAnnotationRef(key, image, plane, n);
+
+		return doubleAnnotations++;
+	}
+
 	@Override
 	public void processSlice(ImageProcessor ip, double X, double Y, double Z, double theta, double deltaT)
 			throws Exception {
@@ -169,8 +166,17 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		meta.setPlaneTheZ(new NonNegativeInteger(sliceCounter), image, plane);
 		meta.setPlaneTheT(new NonNegativeInteger(timePoint), image, plane);
 		meta.setPlaneDeltaT(deltaT, image, plane);
-		meta.setPlaneAnnotationRef(X + "/" + Y + "/" + Z, image, plane, 0);
-		writer.saveBytes(plane, data);
+
+		storeDouble(image, plane, 0, "Theta", theta);
+
+		try {
+			writer.saveBytes(plane, data);
+		} catch(java.io.IOException ioe) {
+			finalizeStack(0);
+			if(writer != null)
+				writer.close();
+			throw new Exception("Error writing OME-TIFF.", ioe);
+		}
 
 		++sliceCounter;
 	}
@@ -185,105 +191,8 @@ public class OMETIFFHandler implements AcqOutputHandler {
 		if(writer != null)
 			writer.close();
 
-		ReportingUtils.logMessage("" + imageCounter + " vs " + stacks);
 		imageCounter = 0;
 
 		writer = null;
-	}
-
-
-	private static long WIDTH = 256;
-	private static long HEIGHT = 256;
-	private static long BITDEPTH = 16;
-	private static double UMPERPIX = (10D / 23D);
-
-	public static void main(String[] args) {
-		if(args.length < 5) {
-			args = new String[] {
-				"OMETIFFHandler.java",
-				"2",
-				"5",
-				"2",
-				"C:\\Documents and Settings\\LOCI\\Desktop\\blehtest\\"
-			};
-		}
-
-		// Hopefully this doesn't do anything horrible.
-		// EDIT: Well, this does something horrible. :(
-		class mockCore extends CMMCore {
-			mockCore() {
-			}
-			public long getImageBitDepth() {
-				return BITDEPTH;
-			}
-
-			public long getImageWidth() {
-				return WIDTH;
-			}
-
-			public long getImageHeight() {
-				return HEIGHT;
-			}
-
-			public double getPixelSizeUm() {
-				return UMPERPIX;
-			}
-		}
-
-		int stacks = Integer.parseInt(args[1]);
-		int depth = Integer.parseInt(args[2]);
-		int timePoints = Integer.parseInt(args[3]);
-
-		File outDir = new File(args[4]);
-
-		AcqRow[] rows = new AcqRow[stacks];
-		for(int xyt=0; xyt < stacks; ++xyt)
-			rows[xyt] = new AcqRow(new String[] {"Picard XY Stage", "Picard Twister", "t"},
-					"Picard Stage", "1:1:" + depth);
-
-		mockCore core = new mockCore();
-
-		OMETIFFHandler handler = new OMETIFFHandler(core, outDir, "Picard XY Stage", "Picard Twister", "Picard Stage", "t", rows, timePoints, 13);
-
-		for(int t=0; t < timePoints; ++t) {
-			for(int xyt=0; xyt < stacks; ++xyt) {
-				try {
-					handler.beginStack(0);
-				} catch(Exception e) {
-					ReportingUtils.logException("Error beginning stack: " + t + " " + xyt, e);
-					return;
-				}
-
-				for(int z=1; z <= depth; ++z) {
-					short[] pix = new short[(int) (WIDTH*HEIGHT)];
-
-					for(int y=0; y < HEIGHT; ++y)
-						for(int x=0; x < WIDTH; ++x)
-							pix[(int) (y*WIDTH + x)] = (short) (Math.pow(2,BITDEPTH-2)*(Math.sin((x - xyt*8D)*Math.PI*8/WIDTH)+1)*(Math.sin((y - t*8D)*Math.PI*8/HEIGHT)+1)*z/depth);
-
-					try {
-						handler.processSlice(new ShortProcessor((int) WIDTH, (int) HEIGHT, pix, null), 0, 0, z, xyt, t);
-					} catch(Exception e) {
-						ReportingUtils.logException("Error processing slice: " + t + " " + xyt + " " + z, e);
-						return;
-					}
-				}
-
-				try {
-					handler.finalizeStack(0);
-				} catch(Exception e) {
-					ReportingUtils.logException("Error finalizing stack: " + t + " " + xyt, e);
-					return;
-				}
-			}
-		}
-
-		try {
-			handler.finalizeAcquisition();
-		} catch (Exception e) {
-			ReportingUtils.logException("Error finalizing acquisition.", e);
-		}
-
-		core.delete();
 	}
 }

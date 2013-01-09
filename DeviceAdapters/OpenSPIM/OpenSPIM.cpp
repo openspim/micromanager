@@ -625,10 +625,12 @@ bool CSIABStage::IsContinuousFocusDrive() const
 }
 
 // The XY Stage
-#define XYERR_INIT_X 1
-#define XYERR_INIT_Y 2
-#define XYERR_MOVE_X 3
-#define XYERR_MOVE_Y 5
+enum XYSTAGE_ERRORS {
+	XYERR_INIT_X = 1347,
+	XYERR_INIT_Y,
+	XYERR_MOVE_X,
+	XYERR_MOVE_Y
+};
 
 CSIABXYStage::CSIABXYStage()
 : serialX_(g_pPiDetector->GetMotorSerial(1)), serialY_(g_pPiDetector->GetMotorSerial(0)),

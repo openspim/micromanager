@@ -25,8 +25,28 @@ eval $IJ --update update
 echo "Zipping..."
 
 ZIP=OpenSPIM-$(date +%Y%m%d).zip
-eval $IJ --full-classpath --main-class=fiji.packaging.Packager \
-	--jre --prefix=OpenSPIM.app $ZIP
+cat << EOF |
+import javassist.ClassPool;
+import javassist.expr.ExprEditor;
+import javassist.expr.MethodCall;
+
+pool = ClassPool.getDefault();
+clazz = pool.getCtClass("fiji.packaging.Packager");
+clazz.getMethod("addFile", "(Ljava/lang/String;Z)Z").instrument(new ExprEditor() {
+	public void edit(MethodCall call) {
+		if (call.getMethodName().equals("putNextEntry")) {
+			call.replace("String path = \$1;"
+				+ "if (path.startsWith(\"Fiji.app/\"))"
+				+ " path = \"OpenSPIM.app\" + path.substring(8);"
+				+ "putNextEntry(path, \$2, \$3);");
+		}
+	}
+});
+c = clazz.toClass();
+main = c.getMethod("main", new Class[] { String[].class });
+main.invoke(null, new Object[] { new String[] { "$ZIP" } });
+EOF
+eval $IJ --bsh
 
 echo "Cleaning up..."
 

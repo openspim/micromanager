@@ -4,11 +4,12 @@ VCEXPRESS="$PROGRAMFILES/Microsoft Visual Studio 9.0/Common7/IDE/VCExpress.exe"
 VCEXPRESS_URL=http://msdn.microsoft.com/en-us/express/future/bb421473
 STABLE_FIJI_URL=http://jenkins.imagej.net/job/Stable-Fiji
 FIJI_URL=$STABLE_FIJI_URL/lastSuccessfulBuild/artifact/fiji-win32.tar.gz
+JDK_URL="http://fiji.sc/cgi-bin/gitweb.cgi?p=java/win32.git;a=snapshot;h=HEAD;sf=tgz"
 
 SRC=/src
 test ! -d /src/fiji/modules/micromanager ||
 SRC=/src/fiji/modules
-FIJI_JAVA_HOME="$SRC/micromanager/bin_Win32/java/win32/jdk1.6.0_24/jre"
+FIJI_JAVA_HOME="$SRC/micromanager/bin_Win32/java/win32/jdk1.6.0_24"
 
 maxwidth () {
 	while test $# -gt 0
@@ -102,6 +103,15 @@ EOF
 			contrib@fiji.sc:/srv/git/micromanager1.4 &&
 		 git config branch.openspim.rebase interactive)
 	 fi &&
+
+	 if ! test -f $FIJI_JAVA_HOME/include/jni.h
+	 then
+		echo "Downloading and unpacking the JDK" &&
+		curl "$JDK_URL" |
+		(cd $FIJI_JAVA_HOME &&
+		 tar --strip-components=2 -xzf -)
+	 fi
+
 	 if ! test -x "$HOME/bin/ant"
 	 then
 		cat > "$HOME/bin/ant" << EOF

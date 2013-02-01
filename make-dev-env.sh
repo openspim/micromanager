@@ -39,8 +39,16 @@ curl -O $URL
  cp ../openspim.sh etc/profile.d/ ||
  die "Could not copy etc/profile.d/openspim.sh"
 
+ (cd /share/msysGit &&
+  make) ||
+ die "Could not make create-shortcut.exe"
+
+ mkdir -p bin &&
+ cp /share/msysGit/{create-shortcut.exe,add-shortcut.tcl} bin/ ||
+ die "Could not copy desktop icon making script"
+
  /share/7-Zip/7za a $NEW_FILE \
-	etc/profile.d/openspim.sh ||
+	etc/profile.d/openspim.sh bin/{create-shortcut.exe,add-shortcut.tcl} ||
  die "Could not add files"
 
  start=$(get_offset 'Progress="yes"' $NEW_FILE) || exit

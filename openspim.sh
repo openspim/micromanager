@@ -1,29 +1,62 @@
 #!/bin/sh
 
 VCEXPRESS="$PROGRAMFILES/Microsoft Visual Studio 9.0/Common7/IDE/VCExpress.exe"
+VCEXPRESS_URL=http://msdn.microsoft.com/en-us/express/future/bb421473
+STABLE_FIJI_URL=http://jenkins.imagej.net/job/Stable-Fiji
+FIJI_URL=$STABLE_FIJI_URL/lastSuccessfulBuild/artifact/fiji-win32.tar.gz
+
+SRC=/src
+test ! -d /src/fiji/modules/micromanager ||
+SRC=/src/fiji/modules
+FIJI_JAVA_HOME="$SRC/micromanager/bin_Win32/java/win32/jdk1.6.0_24/jre"
+
+maxwidth () {
+	while test $# -gt 0
+	do
+		printf '%s' "$1" | wc -c
+		shift
+	done |
+	tr -dc '0-9\n' |
+	sort -n |
+	tail -n 1
+}
+
+repeat () {
+	counter="$1"
+	while test $counter -gt 0
+	do
+		printf '%s' "$2"
+		counter=$(($counter-1))
+	done
+}
+
+box () {
+	indent=5
+	indent1=$(($indent - 1))
+	width=$(maxwidth "$@")
+	printf '\n\n\n% *s%s\n' \
+		$indent ' ' $(repeat $(($width + 2 * $indent)) '!')
+	while test $# -gt 0
+	do
+		printf '%-*s!% *s%-*s% *s!\n' \
+			$indent ' ' $indent1 ' ' $width "$1" $indent1 ' '
+		shift
+		test $# = 0 ||
+		printf '%-*s!% *s!\n' \
+			$indent ' ' $(($width + 2 * $indent - 2)) ' '
+	done
+	printf '% *s%s\n\n\n' \
+		$indent ' ' $(repeat $(($width + 2 * $indent)) '!')
+}
 
 if ! test -x "$VCEXPRESS"
 then
-
-	cat >&2 << EOF
-
-
-
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      !       Please install Visual Express Studio:                     !
-      !                                                                 !
-      !       http://msdn.microsoft.com/en-us/express/future/bb421473   !
-      !                                                                 !
-      !       This is needed to compile Micro-Manager.                  !
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
-EOF
-
-elif test /src/fiji/modules/micromanager/openspim.sh -nt "$BASH_ARGV"
+	box "Please install Visual Express Studio:" \
+		"$VCEXPRESS_URL" \
+		"This is needed to compile Micro-Manager."
+elif test $SRC/micromanager/openspim.sh -nt "$BASH_ARGV"
 then
-	. /src/fiji/modules/micromanager/openspim.sh
+	. $SRC/micromanager/openspim.sh
 else
 
 	if ! test -f /bin/git.exe
@@ -33,37 +66,8 @@ else
 	fi &&
 	git config --global core.autocrlf false &&
 
-	(cd /src &&
-
-	 if ! test -d fiji
-	 then
-		echo "Cloning Fiji" &&
-		git clone git://fiji.sc/fiji.git &&
-		(cd fiji &&
-		 git config remote.origin.pushURL \
-			contrib@fiji.sc:/srv/git/fiji.git) &&
-		mkdir -p /.git/info &&
-		echo /src/fiji/ >> /.git/info/exclude
-	 fi &&
-	 cd fiji/ &&
-	 if ! test -x ImageJ.exe
-	 then
-		echo "Building Fiji" &&
-		./Build.sh
-	 fi &&
-
-	 FIJI_JAVA_HOME= &&
-	 for d in /src/fiji/java/win32/*
-	 do
-		if test -z "$FIJI_JAVA_HOME" || test "$d" -nt "$FIJI_JAVA_HOME"
-		then
-			FIJI_JAVA_HOME="$d"
-		fi
-	 done &&
-	 : "Fiji's Java is located at $FIJI_JAVA_HOME" &&
-
-	 if ! test -x "$HOME/bin/vcexpress.sh"
-	 then
+	if ! test -x "$HOME/bin/vcexpress.sh"
+	then
 		mkdir -p "$HOME/bin" &&
 		cat > "$HOME/bin/vcexpress.sh" << EOF
 #!/bin/sh
@@ -71,18 +75,18 @@ else
 export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
 exec "$VCEXPRESS" "\$@"
 EOF
-	 fi &&
+	fi &&
 
-	 cd modules/ &&
+	(mkdir -p $SRC &&
+	 cd $SRC &&
 
 	 if ! test -d 3rdpartypublic
 	 then
 		echo "Cloning Micro-Manager's 3rdparty libraries" &&
-		git clone git://fiji.sc/mmanager-3rdparty 3rdpartypublic &&
+		git clone git://github.com/openspim/3rdpartypublic &&
 		(cd 3rdpartypublic/ &&
 		 git config remote.origin.pushURL \
-			contrib@fiji.sc:/srv/git/mmanager-3rdparty &&
-		 git checkout openspim)
+			contrib@fiji.sc:/srv/git/mmanager-3rdparty)
 	 fi &&
 	 if ! test -d 3rdparty
 	 then
@@ -92,20 +96,20 @@ EOF
 	 if ! test -d micromanager
 	 then
 		echo "Cloning Micro-Manager" &&
-		git clone git://fiji.sc/micromanager1.4 micromanager &&
+		git clone git://github.com/openspim/micromanager &&
 		(cd micromanager/ &&
-		 git checkout openspim &&
 		 git config remote.origin.pushURL \
 			contrib@fiji.sc:/srv/git/micromanager1.4 &&
 		 git config branch.openspim.rebase interactive)
 	 fi &&
+
 	 if ! test -x "$HOME/bin/ant"
 	 then
 		cat > "$HOME/bin/ant" << EOF
 #!/bin/sh
 
 export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
-exec "$(pwd)/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
+exec "$SRC/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
 EOF
 	 fi &&
 	 if ! test -x "$HOME/bin/jvisualvm"
@@ -121,11 +125,12 @@ EOF
 	  if ! test -f bin_Win32/ImageJ.exe
 	  then
 		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
-		(cd /src/fiji/ &&
-		 ./ImageJ.exe --full-classpath \
-			--main-class=fiji.packaging.Packager fiji.tar) &&
+		curl $FIJI_URL |
 		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xf /src/fiji/fiji.tar)
+		 tar --strip-components=1 -xzf - &&
+		 ./ImageJ-win32.exe --update add-update-site \
+			OpenSPIM http://openspim.org/update/ \
+			spim@openspim.org update/)
 	  fi &&
 
 	  if ! test -f bin_Win32/plugins/MMJ_.jar
@@ -156,14 +161,11 @@ building everything by pressing <F7>, and then calling
 
     ./bin_Win32/ImageJ --build
 
-in /src/fiji/modules/micromanager/. Then start Micro-Manager with
+in $SRC/micromanager/. Then start Micro-Manager with
 
     ./start-openspim.sh
 
 
 EOF
-
-	cd /src/fiji/modules/micromanager/ &&
-	add-desktop-shortcut.sh
-
+	cd $SRC/micromanager
 fi

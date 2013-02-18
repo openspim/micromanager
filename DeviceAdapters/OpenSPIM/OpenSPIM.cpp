@@ -46,6 +46,8 @@ const char* g_Keyword_Velocity = "Velocity";
 const char* g_Keyword_VelocityX = "X-Velocity";
 const char* g_Keyword_VelocityY = "Y-Velocity";
 
+#define MAX_WAIT 0.3 // Maximum time to wait for the motors to begin motion, in seconds.
+
 // windows DLL entry code
 #ifdef WIN32
 BOOL APIENTRY DllMain( HANDLE /*hModule*/, 
@@ -293,15 +295,15 @@ int CSIABTwister::SetPositionUm(double pos)
 		return DEVICE_ERR;
 
 	if((int)at != (int)pos) {
-		int temp = 0;
-		while(!Busy() && (int)at != (int)pos && temp++ < 1e2) {
+		time_t start = time(NULL);
+		while(!Busy() && (int)at != (int)pos && difftime(time(NULL),start) < MAX_WAIT) {
 			CDeviceUtils::SleepMs(1);
 
 			if(GetPositionUm(at) != DEVICE_OK)
 				return DEVICE_ERR;
 		};
 
-		if(temp >= 5e1)
+		if(difftime(time(NULL),start) >= MAX_WAIT/2)
 			LogMessage("Long wait (twister)...");
 	};
 
@@ -515,15 +517,15 @@ int CSIABStage::SetPositionUm(double pos)
 	// WORKAROUND: piRunMotorToPosition doesn't wait for the motor to get
 	// underway. Wait a bit here.
 	if((int)at != (int)pos) {
-		int temp = 0;
-		while(!Busy() && (int)at != (int)pos && temp++ < 1e2) {
+		time_t start = time(NULL);
+		while(!Busy() && (int)at != (int)pos && difftime(time(NULL),start) < MAX_WAIT) {
 			CDeviceUtils::SleepMs(1);
 
 			if(GetPositionUm(at) != DEVICE_OK)
 				return DEVICE_ERR;
 		};
 
-		if(temp >= 5e1)
+		if(difftime(time(NULL),start) >= MAX_WAIT/2)
 			LogMessage("Long wait...");
 	};
 
@@ -901,8 +903,6 @@ void CSIABXYStage::GetOrientation(bool& mirrorX, bool& mirrorY)
 	mirrorY = false;
 }
 
-#define XYSTAGE_DBG_ON 1
-
 int CSIABXYStage::SetPositionUm(double x, double y)
 {
 	if(handleX_ == NULL || handleY_ == NULL)
@@ -918,7 +918,7 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 	int toX = flipX ? (maxX_ - (int)x) + minX_ : (int)x;
 	int toY = flipY ? (maxY_ - (int)y) + minY_ : (int)y;
-#ifdef XYSTAGE_DBG_ON
+
 	std::ostringstream str;
 	str << "SetPositionUm(" << x << ", " << y << "): ";
 	str << "sn X/Y={" << serialX_ << ", " << serialY_ << "}, ";
@@ -926,8 +926,7 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	str << "min/max X=[" << minX_ << ", " << maxX_ << "], ";
 	str << "min/max Y=[" << minY_ << ", " << maxY_ << "], ";
 	str << "to X/Y={" << toX << ", " << toY << "}";
-	LogMessage(str.str().c_str());
-#endif
+	LogMessage(str.str().c_str(), true);
 
 	int moveX = piRunMotorToPosition(toX, velocityX_, handleX_);
 	int moveY = piRunMotorToPosition(toY, velocityY_, handleY_) << 1;
@@ -938,15 +937,15 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 		return ret;
 
 	if((int)atX != (int)x || (int)atY != (int)y) {
-		int temp = 0;
-		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && temp++ < 1e2) {
+		time_t start = time(NULL);
+		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && difftime(time(NULL),start) < MAX_WAIT) {
 			CDeviceUtils::SleepMs(1);
 
 			if(GetPositionUm(atX, atY) != DEVICE_OK)
 				return DEVICE_ERR;
 		};
 
-		if(temp >= 5e1)
+		if(difftime(time(NULL),start) >= MAX_WAIT/2)
 			LogMessage("Long wait (X/Y)...");
 	};
 

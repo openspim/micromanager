@@ -182,8 +182,8 @@
    motor1.setSpeed(50); //sets the Adafruit Motor Shield stepper motor 1 speed in rpm
    motor2.setSpeed(50); //sets the Adafruit Motor Shield stepper motor 2 speed in rpm
    
-  /* int origin1 = digitalRead(A0);
-   while(origin1 == 0){
+   int origin1 = digitalRead(A0);
+   while(origin1 == 1){                         // Equal to one for the design proposed
      motor1.step(1, BACKWARD, INTERLEAVE);
      origin1 = digitalRead(A0);
      current_position2=0;
@@ -191,13 +191,13 @@
    motor1.step(1, BACKWARD, INTERLEAVE);
    
    int origin2 = digitalRead(A1);
-   while(origin2 == 0){
+   while(origin2 == 1){                         // Equal to one for the design proposed
      motor2.step(1, BACKWARD, INTERLEAVE);
      origin2 = digitalRead(A1);
      current_position=0;
    }
    motor2.step(1, BACKWARD, INTERLEAVE);
-   */ 
+    
  }
  
  void loop() {
@@ -213,48 +213,21 @@
             currentPattern_ = currentPattern_ & B00111111;
             
             if (!blanking_){
-              if(currentPattern_ == 2)      {mov=200; motor2.step(mov, FORWARD, INTERLEAVE);}        //B00000010  //180            
-              else if(currentPattern_ == 4) {mov=100; motor2.step(mov, FORWARD, INTERLEAVE);}    //B00000100  // 90
-              else if(currentPattern_ == 6) {mov=50;  motor2.step(mov, FORWARD, INTERLEAVE);}    //B00000110  // 45
-              else if(currentPattern_ == 8) {mov=20;  motor2.step(mov, FORWARD, INTERLEAVE);}    //B00001000  // 18
-              else if(currentPattern_ == 10) {mov=10; motor2.step(mov, FORWARD, INTERLEAVE);}    //B00001010  //  9
-              else if(currentPattern_ == 12) {mov=1; motor2.step(mov, FORWARD, INTERLEAVE);}    //B00001100  //  0.9
-              
-              else if(currentPattern_ == 3) {mov=200; motor2.step(mov, BACKWARD, INTERLEAVE);}   //B00010010  //180            
-              else if(currentPattern_ == 5) {mov=100; motor2.step(mov, BACKWARD, INTERLEAVE);}    //B00010100  // 90
-              else if(currentPattern_ == 7) {mov=50;  motor2.step(mov, BACKWARD, INTERLEAVE);}    //B00010110  // 45
-              else if(currentPattern_ == 9) {mov=20;  motor2.step(mov, BACKWARD, INTERLEAVE);}    //B00011000  // 18
-              else if(currentPattern_ == 11) {mov=10; motor2.step(mov, BACKWARD, INTERLEAVE);}    //B00011010  //  9
-              else if(currentPattern_ == 13) {mov=1; motor2.step(mov, BACKWARD, INTERLEAVE);}    //B00011100  //  0.9
-              
-              else if(currentPattern_ == 14) {x=0;   mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}           
-              else if(currentPattern_ == 32) {x=67;  mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;} 
-              else if(currentPattern_ == 18) {x=133; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;} 
-              else if(currentPattern_ == 20) {x=200; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;} 
-              else if(currentPattern_ == 22) {x=267; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;} 
-              else if(currentPattern_ == 24) {x=333; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;} 
+        
+              if(currentPattern_ == 14) {x=0;   mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}           //FILTER #1 In Emission Filter Wheel
+              else if(currentPattern_ == 32) {x=67;  mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}      //FILTER #2 In Emission Filter Wheel
+              else if(currentPattern_ == 18) {x=133; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}      //FILTER #3 In Emission Filter Wheel 
+              else if(currentPattern_ == 20) {x=200; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}      //FILTER #4 In Emission Filter Wheel
+              else if(currentPattern_ == 22) {x=267; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}      //FILTER #5 In Emission Filter Wheel 
+              else if(currentPattern_ == 24) {x=333; mov=x-current_position; if(mov<0){mov=mov+400;}; motor2.step(mov, FORWARD, INTERLEAVE); current_position=x;}      //FILTER #6 In Emission Filter Wheel 
 
-              else if(currentPattern_ == 15) {x=0;   mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}            
-              else if(currentPattern_ == 17) {x=67;  mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;} 
-              else if(currentPattern_ == 19) {x=133; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;} 
-              else if(currentPattern_ == 21) {x=200; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;} 
-              else if(currentPattern_ == 23) {x=267; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;} 
-              else if(currentPattern_ == 25) {x=333; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;} 
-              
-              /*else if(currentPattern_ == 14) {filterMovement (1, 1);} //B00000010 1st filter          
-              else if(currentPattern_ == 32) {filterMovement (1, 2);} //B00000100 2nd filter
-              else if(currentPattern_ == 18) {filterMovement (1, 3);} //B00000110 3rd filter
-              else if(currentPattern_ == 20) {filterMovement (1, 4);} //B00001000 4th filter
-              else if(currentPattern_ == 22) {filterMovement (1, 5);} //B00001010 5th filter
-              else if(currentPattern_ == 24) {filterMovement (1, 6);} //B00001100 6th filter           
-
-              else if(currentPattern_ == 15) {filterMovement (2, 1);} //B00110010       
-              else if(currentPattern_ == 17) {filterMovement (2, 2);} //B00110100
-              else if(currentPattern_ == 19) {filterMovement (2, 3);} //B00110110
-              else if(currentPattern_ == 21) {filterMovement (2, 4);} //B00111000
-              else if(currentPattern_ == 23) {filterMovement (2, 5);} //B00111010
-              else if(currentPattern_ == 25) {filterMovement (2, 6);} //B00111100*/
-              
+              else if(currentPattern_ == 15) {x=0;   mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}    //FILTER #1 In Excitation Filter Wheel            
+              else if(currentPattern_ == 17) {x=67;  mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}    //FILTER #2 In Excitation Filter Wheel 
+              else if(currentPattern_ == 19) {x=133; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}    //FILTER #3 In Excitation Filter Wheel 
+              else if(currentPattern_ == 21) {x=200; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}    //FILTER #4 In Excitation Filter Wheel 
+              else if(currentPattern_ == 23) {x=267; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}    //FILTER #5 In Excitation Filter Wheel 
+              else if(currentPattern_ == 25) {x=333; mov=x-current_position2; if(mov<0){mov=mov+400;}; motor1.step(mov, FORWARD, INTERLEAVE); current_position2=x;}    //FILTER #6 In Excitation Filter Wheel 
+                       
               else {PORTB = currentPattern_;}
             }
             Serial.write( byte(1));
@@ -486,174 +459,7 @@ bool waitForSerial(unsigned long timeOut)
     return false;
  }
 
-// Sets analogue output in the TLV5618
-// channel is either 0 ('A') or 1 ('B')
-// value should be between 0 and 4095 (12 bit max)
-// pins should be connected as described above
 
-void move(int winding) {
-  if (winding == 1) {
-    digitalWrite(aP1, HIGH);
-    digitalWrite(bP2, LOW);
-    digitalWrite(aN3, LOW);
-    digitalWrite(bN4, LOW);
-  }
-  if (winding == 2) {
-    digitalWrite(aP1, LOW);
-    digitalWrite(bP2, HIGH);
-    digitalWrite(aN3, LOW);
-    digitalWrite(bN4, LOW);
-  }
-  if (winding == 3) {
-    digitalWrite(aP1, LOW);
-    digitalWrite(bP2, LOW);
-    digitalWrite(aN3, HIGH);
-    digitalWrite(bN4, LOW);
-  }
-  if (winding == 4) {
-    digitalWrite(aP1, LOW);
-    digitalWrite(bP2, LOW);
-    digitalWrite(aN3, LOW);
-    digitalWrite(bN4, HIGH);
-  }
-}
-
-void moveit() {
-  int movimento = 1;
-  while (steps < stepsFinal) {
-  /*
-  if (movimento == 1){      //para evitar falhas na comunicação
-    Serial.print(1, BYTE);
-    movimento = 0;
-  }
-  */
-  delay(delayTime);
-    if (previous == 4) {
-      if (clockwise == 1) {
-        move(1);
-        previous = 1;
-        steps = steps + 1;
-      }
-      else {
-        move(3);
-        previous = 3;
-        steps = steps + 1;
-      }
-    }
-    else if (previous == 1) {
-      if (clockwise == 1) {
-        move(2);
-        previous = 2;
-        steps = steps + 1;
-      }
-      else {
-        move(4);
-        previous = 4;
-        steps = steps + 1;
-      }
-    }
-    else if (previous == 2) {
-      if (clockwise == 1) {
-        move(3);
-        previous = 3;
-        steps = steps + 1;
-      }
-      else {
-        move(1);
-        previous = 1;
-        steps = steps + 1;
-      }
-    }
-    else if (previous == 3) {
-      if (clockwise == 1) {
-        move(4);
-        previous = 4;
-        steps = steps + 1;
-      }
-      else {
-        move(2);
-        previous = 2;
-        steps = steps + 1;
-      }
-    }
-  }
-}
-
-void filterMovement (int motorNumber, int wantedFilter){
-  if (motorNumber == 1){
-    int filterChanges = wantedFilter - currentFilter1;
-    if (filterChanges < 0){
-      filterChanges = filterChanges + 6;
-    }
-    currentFilter1 = wantedFilter;
-    totalfilterChanges1 = totalfilterChanges1 + filterChanges;
-    int stepstobedone = filterChanges * 66;
-    if(totalfilterChanges1 > 5){
-      motor1.step(stepstobedone + 4, BACKWARD, INTERLEAVE);
-      totalfilterChanges1 = totalfilterChanges1 - 6;
-    }
-    else if(totalfilterChanges1 > 3){
-      motor1.step(stepstobedone + 2, BACKWARD, INTERLEAVE);
-      totalfilterChanges1 = totalfilterChanges1 - 3;
-    }
-    else {
-      motor1.step(stepstobedone, BACKWARD, INTERLEAVE);
-    }
-  }
-  else if (motorNumber == 2){
-    int filterChanges = wantedFilter - currentFilter2;
-    if (filterChanges < 0){
-      filterChanges = filterChanges + 6;
-    }
-    currentFilter2 = wantedFilter;
-    totalfilterChanges2 = totalfilterChanges2 + filterChanges;
-    int stepstobedone = filterChanges * 66;
-    if(totalfilterChanges2 > 5){
-      motor2.step(stepstobedone + 4, BACKWARD, INTERLEAVE);
-      totalfilterChanges2 = totalfilterChanges2 - 6;
-    }
-    else if(totalfilterChanges2 > 3){
-      motor2.step(stepstobedone + 2, BACKWARD, INTERLEAVE);
-      totalfilterChanges2 = totalfilterChanges2 - 3;
-    }
-    else {
-      motor2.step(stepstobedone, BACKWARD, INTERLEAVE);
-    }
-  }
-}
-
-/* 
- // This function is called through an interrupt   
-void triggerMode() 
-{
-  if (triggerNr_ >=0) {
-    PORTB = triggerPattern_[sequenceNr_];
-    sequenceNr_++;
-    if (sequenceNr_ >= patternLength_)
-      sequenceNr_ = 0;
-  }
-  triggerNr_++;
-}
-
-
-void blankNormal() 
-{
-    if (DDRD & B00000100) {
-      PORTB = currentPattern_;
-    } else
-      PORTB = 0;
-}
-
-void blankInverted()
-{
-   if (DDRD & B00000100) {
-     PORTB = 0;
-   } else {     
-     PORTB = currentPattern_;  
-   }
-}   
-
-*/
   
 
 

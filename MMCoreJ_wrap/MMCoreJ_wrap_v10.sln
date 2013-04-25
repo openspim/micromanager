@@ -248,6 +248,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MMCore", "..\MMCore\MMCore.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenSPIM", "..\DeviceAdapters\OpenSPIM\OpenSPIM.vcxproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "..\mmstudio\mmstudio.vcxproj", "{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -1579,6 +1581,15 @@ Global
 		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|Win32.Build.0 = Release|Win32
 		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|x64.ActiveCfg = Release|x64
 		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|x64.Build.0 = Release|x64
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Debug|Win32.Build.0 = Debug|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Debug|x64.ActiveCfg = Debug|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Quick|Win32.ActiveCfg = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Quick|Win32.Build.0 = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Quick|x64.ActiveCfg = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.ActiveCfg = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.Build.0 = Release|Win32
+		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

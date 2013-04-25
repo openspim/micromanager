@@ -19,6 +19,7 @@
 	<property name="MMCoreJ" value="../bin_Win32/plugins/MMCoreJ.jar"/>
 	<property name="MMPluginDir-inst" value="${InstallRoot}/plugins/Micro-Manager"/>
 	<property name="BinRoot" value="../bin_Win32"/>
+	<property name="MMPluginDir" value="${BinRoot}/jars"/>
 
 	<path id="project.MMPlugins.path">
 		<pathelement location="${MMPluginDir}"/>

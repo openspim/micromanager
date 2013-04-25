@@ -105,8 +105,8 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
-copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)</Command>
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
+copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platform)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

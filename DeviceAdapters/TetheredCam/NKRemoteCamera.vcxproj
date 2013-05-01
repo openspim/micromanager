@@ -110,9 +110,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
 copy NKRemoteLib.dll ..\..\Install_$(Platform)\micro-manager
-copy NKRemoteLib.dll ..\..\bin_$(Platform)
+copy NKRemoteLib.dll ..\..\bin_$(Platform)\mm\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -143,9 +143,9 @@ copy NKRemoteLib.dll ..\..\bin_$(Platform)
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
 copy NKRemoteLib.dll ..\..\Install_$(Platform)\micro-manager
-copy NKRemoteLib.dll ..\..\bin_$(Platform)
+copy NKRemoteLib.dll ..\..\bin_$(Platform)\mm\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -181,9 +181,9 @@ copy NKRemoteLib.dll ..\..\bin_$(Platform)
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
 copy NKRemoteLib.dll ..\..\Install_$(Platform)\micro-manager
-copy NKRemoteLib.dll ..\..\bin_$(Platform)
+copy NKRemoteLib.dll ..\..\bin_$(Platform)\mm\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -217,9 +217,9 @@ copy NKRemoteLib.dll ..\..\bin_$(Platform)
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
 copy NKRemoteLib.dll ..\..\Install_$(Platform)\micro-manager
-copy NKRemoteLib.dll ..\..\bin_$(Platform)
+copy NKRemoteLib.dll ..\..\bin_$(Platform)\mm\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -337,4 +337,4 @@ copy NKRemoteLib.dll ..\..\bin_$(Platform)
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project>

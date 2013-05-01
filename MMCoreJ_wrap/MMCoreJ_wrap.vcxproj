@@ -119,7 +119,7 @@ copy $(ProjectDir)\TaggedImage.java $(ProjectDir)\mmcorej\
 del mmcorej\*.class
 "%JAVA_HOME%\bin\javac" -source 5 mmcorej\*.java ../mmstudio/src/org/json/*.java
 "%JAVA_HOME%\bin\jar" cvf MMCoreJ.jar mmcorej\*.class
-copy *.jar ..\bin_$(Platform)\plugins
+copy *.jar ..\bin_$(Platform)
 rem copy *.jar \"Program Files"\ImageJ\plugins\Micro-Manager
 rem copy ..\bin_$(Platform)\*.dll  \"Program Files"\ImageJ
 </Command>

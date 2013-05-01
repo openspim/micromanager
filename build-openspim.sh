@@ -21,10 +21,14 @@ msbuild="$dotnetfwdir$dotnetfwver\\msbuild.exe";
 
 test -a $msbuild || die "Couldn't find msbuild.exe ($msbuild). No .NET framework?";
 
+echo "Found msbuild.exe at $msbuild."
+
 # TODO: Is this recorded anywhere definitive?
 ant="$(pwd)/../3rdpartypublic/apache-ant-1.6.5/bin/ant"
 
 test -a $ant || die "Couldn't find Apache Ant at $ant. Did you pull 3rdpartypublic?";
+
+echo "Found ant at $ant."
 
 banner "BUILDING MMCORE & MMSTUDIO"
 

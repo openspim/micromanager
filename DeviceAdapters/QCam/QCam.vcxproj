@@ -176,6 +176,7 @@
     <ClCompile Include="QICamera.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\MMDevice\Debayer.h" />
     <ClInclude Include="..\..\MMDevice\DeviceBase.h" />
     <ClInclude Include="..\..\MMDevice\DeviceUtils.h" />
     <ClInclude Include="..\..\MMDevice\ImgBuffer.h" />

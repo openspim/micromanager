@@ -45,7 +45,7 @@ test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO
 
 banner "BUILDING DEVICE ADAPTERS"
 
-$msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /target:DemoCamera\;TIScam\;QCam\;OpenSPIM\;SerialManager\;CoherentCube //fileLogger2 //verbosity:minimal || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
+$msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /target:DemoCamera\;TIScam\;QCam\;PicardStage\;SerialManager\;CoherentCube //fileLogger2 //verbosity:minimal || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 
 test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 

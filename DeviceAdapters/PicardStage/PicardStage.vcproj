@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="OpenSPIM"
+	Name="PicardStage"
 	ProjectGUID="{FB87D337-AFA5-4DA8-8D99-84461B363108}"
-	RootNamespace="OpenSPIM"
+	RootNamespace="PicardStage"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -70,14 +70,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
+				OutputFile="$(OutDir)/mmgr_dal_PicardStage.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/OpenSPIM.pdb"
+				ProgramDatabaseFile="$(OutDir)/PicardStage.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/OpenSPIM.lib"
+				ImportLibrary="$(OutDir)/PicardStage.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -100,7 +100,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -152,7 +152,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
+				OutputFile="$(OutDir)/mmgr_dal_PicardStage.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -160,7 +160,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/OpenSPIM.lib"
+				ImportLibrary="$(OutDir)/PicardStage.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -183,7 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -238,14 +238,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
+				OutputFile="$(OutDir)/mmgr_dal_PicardStage.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/OpenSPIM.pdb"
+				ProgramDatabaseFile="$(OutDir)/PicardStage.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/OpenSPIM.lib"
+				ImportLibrary="$(OutDir)/PicardStage.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -268,7 +268,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 		<Configuration
@@ -320,7 +320,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/mmgr_dal_OpenSPIM.dll"
+				OutputFile="$(OutDir)/mmgr_dal_PicardStage.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -328,7 +328,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/OpenSPIM.lib"
+				ImportLibrary="$(OutDir)/PicardStage.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -351,7 +351,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -408,7 +408,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OpenSPIM.cpp"
+				RelativePath=".\PicardStage.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -454,7 +454,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\OpenSPIM.h"
+				RelativePath=".\PicardStage.h"
 				>
 			</File>
 		</Filter>

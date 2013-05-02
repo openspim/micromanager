@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FB87D337-AFA5-4DA8-8D99-84461B363108}</ProjectGuid>
-    <RootNamespace>OpenSPIM</RootNamespace>
+    <RootNamespace>PicardStage</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -94,14 +94,14 @@
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)mmgr_dal_OpenSPIM.dll</OutputFile>
+      <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)OpenSPIM.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)PicardStage.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>$(OutDir)OpenSPIM.lib</ImportLibrary>
+      <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
@@ -125,7 +125,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)mmgr_dal_OpenSPIM.dll</OutputFile>
+      <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -133,7 +133,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>$(OutDir)OpenSPIM.lib</ImportLibrary>
+      <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
@@ -162,14 +162,14 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)mmgr_dal_OpenSPIM.dll</OutputFile>
+      <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)OpenSPIM.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)PicardStage.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>$(OutDir)OpenSPIM.lib</ImportLibrary>
+      <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
@@ -193,7 +193,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)mmgr_dal_OpenSPIM.dll</OutputFile>
+      <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -201,7 +201,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>$(OutDir)OpenSPIM.lib</ImportLibrary>
+      <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
@@ -222,7 +222,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\MMDevice\Property.cpp" />
-    <ClCompile Include="OpenSPIM.cpp">
+    <ClCompile Include="PicardStage.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -235,7 +235,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
     <ClInclude Include="..\..\MMDevice\ModuleInterface.h" />
     <ClInclude Include="..\..\..\3rdpartypublic\picard\PiUsb.h" />
     <ClInclude Include="..\..\MMDevice\Property.h" />
-    <ClInclude Include="OpenSPIM.h" />
+    <ClInclude Include="PicardStage.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\..\3rdpartypublic\picard\PiUsb.lib" />

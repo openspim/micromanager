@@ -246,7 +246,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MoticMicroscope", "..\Devic
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MMCore", "..\MMCore\MMCore.vcxproj", "{36571628-728C-4ACD-A47F-503BA91C5D43}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenSPIM", "..\DeviceAdapters\OpenSPIM\OpenSPIM.vcxproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PicardStage", "..\DeviceAdapters\PicardStage\PicardStage.vcxproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmstudio", "..\mmstudio\mmstudio.vcxproj", "{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}"
 EndProject

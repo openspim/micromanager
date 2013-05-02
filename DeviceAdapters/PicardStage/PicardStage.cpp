@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-// FILE:          OpenSPIM.cpp
+// FILE:          PicardStage.cpp
 // PROJECT:       Micro-Manager
 // SUBSYSTEM:     DeviceAdapters
 //-----------------------------------------------------------------------------
-// DESCRIPTION:   The drivers required for the OpenSPIM project
+// DESCRIPTION:   The drivers required for the Picard Industries USB stages
 //                
 // AUTHOR:        Johannes Schindelin, 2011
 //
@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "OpenSPIM.h"
+#include "PicardStage.h"
 #include "../../MMDevice/ModuleInterface.h"
 #include "../../../3rdpartypublic/picard/PiUsb.h"
 
@@ -31,7 +31,7 @@
 using namespace std;
 
 // External names used used by the rest of the system
-// to load particular device from the "OpenSPIM.dll" library
+// to load particular device from the "PicardStage.dll" library
 const char* g_TwisterDeviceName = "Picard Twister";
 const char* g_StageDeviceName = "Picard Z Stage";
 const char* g_XYStageDeviceName = "Picard XY Stage";

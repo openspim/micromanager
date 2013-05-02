@@ -236,6 +236,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Standa", "DeviceAdapters\St
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FLICamera", "DeviceAdapters\FLICamera\FLICamera.vcxproj", "{4FFC5AC3-7A59-40C2-B155-AA3EA5D391AE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PicardStage", "DeviceAdapters\PicardStage\PicardStage.vcxproj", "{FB87D337-AFA5-4DA8-8D99-84461B363108}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IDS_uEye", "DeviceAdapters\IDS_uEye\IDS_uEye.vcxproj", "{AFC831A1-1946-43A5-BCA9-1B4618703C20}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Oxxius", "DeviceAdapters\Oxxius\Oxxius.vcxproj", "{70ADDFBB-1216-412E-B326-51A146C3B8A4}"
@@ -1331,6 +1333,18 @@ Global
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.ActiveCfg = Release|Win32
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|Win32.Build.0 = Release|Win32
 		{9A4DDFD0-64D3-40C1-A59F-3BEA31C21F6A}.Release|x64.ActiveCfg = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|Win32.Build.0 = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Debug|x64.ActiveCfg = Debug|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|Win32.ActiveCfg = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|Win32.Build.0 = Release|Win32
+		{E7652AF0-5A10-4219-B430-D0B8DE2FBFFF}.Release|x64.ActiveCfg = Release|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Debug|Win32.Build.0 = Debug|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Debug|x64.ActiveCfg = Debug|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|Win32.ActiveCfg = Release|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|Win32.Build.0 = Release|Win32
+		{FB87D337-AFA5-4DA8-8D99-84461B363108}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

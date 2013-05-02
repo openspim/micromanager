@@ -24,7 +24,7 @@
     <ClCompile Include="..\..\MMDevice\Property.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenSPIM.cpp">
+    <ClCompile Include="PicardStage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,7 +44,7 @@
     <ClInclude Include="..\..\MMDevice\Property.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OpenSPIM.h">
+    <ClInclude Include="PicardStage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-// FILE:          OpenSPIM.h
+// FILE:          PicardStage.h
 // PROJECT:       Micro-Manager
 // SUBSYSTEM:     DeviceAdapters
 //-----------------------------------------------------------------------------
-// DESCRIPTION:   The drivers for the OpenSPIM project
+// DESCRIPTION:   The drivers for the Picard Industries USB stages
 //                Based on the CDemoStage and CDemoXYStage classes
 //                
 // AUTHOR:        Johannes Schindelin
@@ -21,8 +21,8 @@
 //                CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 //                INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
 
-#ifndef _OPENSPIM_H_
-#define _OPENSPIM_H_
+#ifndef _PICARDSTAGE_H_
+#define _PICARDSTAGE_H_
 
 #include "../../MMDevice/DeviceBase.h"
 
@@ -171,4 +171,4 @@ private:
 	int minY_, maxY_;
 };
 
-#endif //_OPENSPIM_H_
+#endif //_PICARDSTAGE_H_

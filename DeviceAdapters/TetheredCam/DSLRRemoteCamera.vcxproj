@@ -80,9 +80,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
 copy DSLRRemoteLib.dll ..\..\Install_$(Platform)\micro-manager
-copy DSLRRemoteLib.dll ..\..\bin_$(Platform)
+copy DSLRRemoteLib.dll ..\..\bin_$(Platform)\mm\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -113,9 +113,9 @@ copy DSLRRemoteLib.dll ..\..\bin_$(Platform)
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
 copy DSLRRemoteLib.dll ..\..\Install_$(Platform)\micro-manager
-copy DSLRRemoteLib.dll ..\..\bin_$(Platform)
+copy DSLRRemoteLib.dll ..\..\bin_$(Platform)\mm\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -195,4 +195,4 @@ copy DSLRRemoteLib.dll ..\..\bin_$(Platform)
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project>

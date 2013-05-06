@@ -7,14 +7,13 @@ die() {
 
 banner() {
 	echo;
-	echo "----==== $1 ====----";
+	len=$(echo "$1" | wc -c);
+	printf "%*s%s%s%s%*s\n" "$(expr \( 61 - $len \) / 2 )" "" "----==== " "$1" " ====----" "$(expr \( 62 - $len \) / 2 )" "";
 	echo;
 }
 
 bannerdie() {
-	echo;
-	echo "----==== $1 ====----";
-	echo;
+	banner "$@";
 	exit 1;
 }
 

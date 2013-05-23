@@ -47,6 +47,7 @@
 				Optimization="0"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../../../3rdpartypublic/picard/4D-Stage DLL and Docs;../../MMDevice "
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -70,6 +71,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib&quot;"
 				OutputFile="$(OutDir)/mmgr_dal_PicardStage.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -100,7 +102,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -131,6 +133,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS"
 				ExceptionHandling="2"
 				RuntimeLibrary="0"
@@ -152,6 +155,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib&quot;"
 				OutputFile="$(OutDir)/mmgr_dal_PicardStage.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
@@ -183,7 +187,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)"
+				CommandLine="copy &quot;$(TargetPath)&quot; ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(PlatformName)\mm\$(PlatformName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -226,6 +230,7 @@
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4290"
+				AdditionalIncludeDirectories="../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -247,6 +252,7 @@
 				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/PicardStage.lib"
 				TargetMachine="17"
+				AdditionalDependencies="&quot;../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -308,6 +314,7 @@
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4290"
+				AdditionalIncludeDirectories="../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -330,6 +337,7 @@
 				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/PicardStage.lib"
 				TargetMachine="17"
+				AdditionalDependencies="&quot;../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -404,10 +412,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\MMDevice\Property.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\PicardStage.cpp"
 				>
 				<FileConfiguration
@@ -426,6 +430,10 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\MMDevice\Property.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -446,15 +454,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PicardStage.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\3rdpartypublic\picard\PiUsb.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\MMDevice\Property.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PicardStage.h"
 				>
 			</File>
 		</Filter>

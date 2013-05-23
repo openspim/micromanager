@@ -210,7 +210,7 @@ copy $(ProjectDir)\TaggedImage.java $(ProjectDir)\mmcorej\
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\bin_$(Platform)
+      <Command>copy "$(TargetPath)" ..\bin_$(Platform)\mm\$(Platform)
 del mmcorej\*.class
 "%JAVA_HOME%\bin\javac" -source 5 mmcorej\*.java ../mmstudio/src/org/json/*.java
 "%JAVA_HOME%\bin\jar" cvf MMCoreJ.jar mmcorej\*.class

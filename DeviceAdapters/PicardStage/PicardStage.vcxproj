@@ -95,6 +95,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -106,10 +107,11 @@
       </DataExecutionPrevention>
       <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>"../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
-copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platform)</Command>
+copy "..\..\..\3rdpartypublic\picard\4D-Stage DLL and Docs\$(Platform)\PiUsb.dll" "..\..\bin_$(Platform)\mm\$(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -126,6 +128,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -138,10 +141,11 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       </DataExecutionPrevention>
       <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>"../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
-copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platform)</Command>
+copy "..\..\..\3rdpartypublic\picard\4D-Stage DLL and Docs\$(Platform)\PiUsb.dll" "..\..\bin_$(Platform)\mm\$(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -163,6 +167,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -174,9 +179,11 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       </DataExecutionPrevention>
       <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>"../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)</Command>
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
+copy "..\..\..\3rdpartypublic\picard\4D-Stage DLL and Docs\$(Platform)\PiUsb.dll" "..\..\bin_$(Platform)\mm\$(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -195,6 +202,7 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -207,9 +215,11 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
       </DataExecutionPrevention>
       <ImportLibrary>$(OutDir)PicardStage.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>"../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)</Command>
+      <Command>copy "$(TargetPath)" ..\..\bin_$(Platform)\mm\$(Platform)
+copy "..\..\..\3rdpartypublic\picard\4D-Stage DLL and Docs\$(Platform)\PiUsb.dll" "..\..\bin_$(Platform)\mm\$(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -240,9 +250,6 @@ copy ..\..\..\3rdpartypublic\picard\PiUsb.dll ..\..\bin_$(Platform)\mm\$(Platfor
     <ClInclude Include="..\..\..\3rdpartypublic\picard\PiUsb.h" />
     <ClInclude Include="..\..\MMDevice\Property.h" />
     <ClInclude Include="PicardStage.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\..\3rdpartypublic\picard\PiUsb.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -65,7 +65,7 @@ $msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /property:Configuration=$config /prop
 
 banner "${target:+RE}BUILDING DEVICE ADAPTERS IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
 
-$msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /property:Configuration=$config /property:Platform=$platform /target:DemoCamera${target}\;TIScam${target}\;QCam${target}\;PicardStage${target}\;SerialManager${target}\;CoherentCube${target} //fileLogger2 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
+$msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /property:Configuration=$config /property:Platform=$platform /target:DemoCamera${target}\;PicardStage${target}\;SerialManager${target}\;CoherentCube${target} //fileLogger2 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 
 banner "BUILDING MICRO-MANAGER PLUGINS";
 

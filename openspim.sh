@@ -89,11 +89,11 @@ EOF
 		 git config remote.origin.pushURL \
 			contrib@fiji.sc:/srv/git/mmanager-3rdparty)
 	 fi &&
-	 if ! test -d 3rdparty
-	 then
-		echo "Cloning Micro-Manager's 3rdparty libraries" &&
-		git clone contrib@fiji.sc:mmanager-private 3rdparty
-	 fi &&
+#	 if ! test -d 3rdparty
+#	 then
+#		echo "Cloning Micro-Manager's 3rdparty libraries" &&
+#		git clone contrib@fiji.sc:mmanager-private 3rdparty
+#	 fi &&
 	 if ! test -d micromanager
 	 then
 		echo "Cloning Micro-Manager" &&

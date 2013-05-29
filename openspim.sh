@@ -89,11 +89,6 @@ EOF
 		 git config remote.origin.pushURL \
 			contrib@fiji.sc:/srv/git/mmanager-3rdparty)
 	 fi &&
-#	 if ! test -d 3rdparty
-#	 then
-#		echo "Cloning Micro-Manager's 3rdparty libraries" &&
-#		git clone contrib@fiji.sc:mmanager-private 3rdparty
-#	 fi &&
 	 if ! test -d micromanager
 	 then
 		echo "Cloning Micro-Manager" &&
@@ -108,7 +103,8 @@ EOF
 	 then
 		echo "Downloading and unpacking the JDK" &&
 		curl "$JDK_URL" |
-		(cd $FIJI_JAVA_HOME &&
+		(mkdir -p $FIJI_JAVA_HOME &&
+		 cd $FIJI_JAVA_HOME &&
 		 tar --strip-components=2 -xzf -)
 	 fi
 
@@ -118,7 +114,7 @@ EOF
 #!/bin/sh
 
 export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
-exec "$(pwd)/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
+exec "$SRC/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
 EOF
 	 fi &&
 	 if ! test -x "$HOME/bin/jvisualvm"
@@ -136,11 +132,7 @@ EOF
 		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
 		curl $FIJI_URL |
 		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xf /src/fiji/fiji.tar &&
-		 if test ! -f ImageJ-win32.exe
-		 then
-			cp ImageJ.exe ImageJ-win32.exe
-		 fi &&
+		 tar --strip-components=1 -xzf - &&
 		 ./ImageJ-win32.exe --update add-update-site \
 			OpenSPIM http://openspim.org/update/ \
 			spim@openspim.org update/)
@@ -150,7 +142,8 @@ EOF
 	  then
 		echo "Building Micro-Manager" &&
 		./build.sh
-	  fi)) &&
+	  fi &&
+	  add-desktop-shortcut.sh)) &&
 
 	cat << EOF &&
 

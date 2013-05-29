@@ -8,7 +8,7 @@ test -f "$USERPROFILE/Desktop/OpenSPIM Dev Env.lnk" || {
 		BIN=/share/msysGit
 		test -x $BIN/add-shortcut.tcl || {
 			echo "Skipping shortcut creation" >&2
-			exit 1
+			exit 0
 		}
 	}
 	tcl=$BIN/tmp.$$.tcl

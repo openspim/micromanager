@@ -67,8 +67,12 @@ banner "${target:+RE}BUILDING DEVICE ADAPTERS IN $(echo $config | tr '[:lower:]'
 
 $msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /property:Configuration=$config /property:Platform=$platform /target:DemoCamera${target}\;PicardStage${target}\;SerialManager${target}\;CoherentCube${target} //fileLogger2 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 
+banner "BUILDING MICRO-MANAGER ACQUISITION ENGINE";
+
+$ant -quiet -buildfile "acqEngine/build.xml" ${target:+clean }compile build || bannerdie "FAILED TO BUILD ACQUISITION ENGINE! :(";
+
 banner "BUILDING MICRO-MANAGER PLUGINS";
 
-$ant -quiet -buildfile "plugins/build.xml" clean compile build || bannerdie "FAILED TO BUILD MICRO-MANAGER PLUGINS! :(";
+$ant -quiet -buildfile "plugins/build.xml" ${target:+clean }compile build || bannerdie "FAILED TO BUILD MICRO-MANAGER PLUGINS! :(";
 
 banner "DONE! :D";

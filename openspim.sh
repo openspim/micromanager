@@ -145,7 +145,7 @@ EOF
 	  if ! test -f bin_Win32/plugins/MMJ_.jar
 	  then
 		echo "Building Micro-Manager" &&
-		./build.sh
+		JAVA_HOME=$FIJI_JAVA_HOME ./build.sh
 	  fi &&
 	  add-desktop-shortcut.sh)) &&
 

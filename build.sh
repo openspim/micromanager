@@ -20,6 +20,7 @@ bannerdie() {
 platform="Win32"
 config="Release"
 target=
+slnver=
 
 for arg;
 do
@@ -33,6 +34,12 @@ do
 	--rebuild)
 		target=":REBUILD";
 		;;
+	--vc100)
+		slnver="_v10";
+		;;
+	--vc90)
+		slnver="_v9";
+		;;
 	*)
 		;;
 	esac;
@@ -40,20 +47,22 @@ done;
 
 banner "FINDING MY MARBLES D:";
 
-# TODO: Set all the correct environment variables; check the VS2010 bat?
 dotnetfwdir=$(reg query HKLM\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7 //v FrameworkDir32 | grep 'FrameworkDir32' | sed -r -e 's/\s*FrameworkDir32\s*REG_SZ\s*([^\s]*)/\1/g');
 dotnetfwver=$(reg query HKLM\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7 //v FrameworkVer32 | grep 'FrameworkVer32' | sed -r -e 's/\s*FrameworkVer32\s*REG_SZ\s*([^\s]*)/\1/g');
 
+test -z "$slnver" && test "$(echo "$dotnetfwver" | head -c2)" = "v4" && slnver="_v10";
+test "$slnver" = "_v9" && slnver='' dotnetfwver='v3.5';
+
 msbuild="$dotnetfwdir$dotnetfwver\\msbuild.exe";
 
-test -a $msbuild || die "Couldn't find msbuild.exe ($msbuild). No .NET framework?";
+test -x $msbuild || die "Couldn't find msbuild.exe ($msbuild). No .NET framework?";
 
-echo "Found msbuild.exe at $msbuild.";
+echo "Found msbuild.exe at $msbuild (fw "$dotnetfwver").";
 
 # TODO: Is this recorded anywhere definitive?
 ant="$(pwd)/../3rdpartypublic/apache-ant-1.6.5/bin/ant";
 
-test -a $ant || die "Couldn't find Apache Ant at $ant. Did you pull 3rdpartypublic?";
+test -x $ant || die "Couldn't find Apache Ant at $ant. Did you pull 3rdpartypublic?";
 
 echo "Found ant at $ant.";
 
@@ -61,11 +70,11 @@ banner "${target:+RE}BUILDING MMCORE & MMSTUDIO IN $(echo $config | tr '[:lower:
 
 # For some reason, you can't specify Build as a target -- you must leave off the target specifier entirely.
 
-$msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /property:Configuration=$config /property:Platform=$platform /target:MMCore${target}\;MMCoreJ_wrap${target}\;mmstudio${target} //fileLogger1 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
+$msbuild MMCoreJ_wrap/MMCoreJ_wrap${slnver}.sln /property:Configuration=$config /property:Platform=$platform /target:MMCore${target}\;MMCoreJ_wrap${target}\;mmstudio${target} //fileLogger1 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 
 banner "${target:+RE}BUILDING DEVICE ADAPTERS IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
 
-$msbuild MMCoreJ_wrap/MMCoreJ_wrap_v10.sln /property:Configuration=$config /property:Platform=$platform /target:DemoCamera${target}\;PicardStage${target}\;SerialManager${target}\;CoherentCube${target} //fileLogger2 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
+$msbuild MMCoreJ_wrap/MMCoreJ_wrap${slnver}.sln /property:Configuration=$config /property:Platform=$platform /target:DemoCamera${target}\;PicardStage${target}\;SerialManager${target}\;CoherentCube${target} //fileLogger2 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 
 banner "BUILDING MICRO-MANAGER ACQUISITION ENGINE";
 

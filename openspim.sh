@@ -9,10 +9,10 @@ rq() {
 
 	if (( $#==0 ));
 	then
-		qr="$(reg query $path //ve | tail -n2)";
+		qr="$(reg query "$path" //ve | tail -n2)";
 		key="<NO NAME>";
 	else
-		qr="$(reg query $path //v "$*" | tail -n2)";
+		qr="$(reg query "$path" //v "$*" | tail -n2)";
 	fi;
 
 	test "$(echo \"$qr\" | grep -c "Error")"=="0" || ( echo "invalid key" && return 1 );
@@ -24,7 +24,7 @@ STABLE_FIJI_URL=http://jenkins.imagej.net/job/Stable-Fiji
 FIJI_URL=$STABLE_FIJI_URL/lastSuccessfulBuild/artifact/fiji-win32.tar.gz
 JDK_URL="http://fiji.sc/cgi-bin/gitweb.cgi?p=java/win32.git;a=snapshot;h=HEAD;sf=tgz"
 
-VCEXPRESS="$(rq HKLM\\SOFTWARE\\Microsoft\\VCExpress\\$(rq HKCR\\VCExpress.DTE\\CurVer\\ | sed -r -e 's/VCExpress.DTE.([0-9.]+)/\1/g')\\ InstallDir)VCExpress.exe"
+VCEXPRESS="$(rq "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\VCExpress.exe")"
 
 SRC=/src
 test ! -d /src/fiji/modules/micromanager ||

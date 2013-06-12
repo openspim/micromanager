@@ -36,6 +36,7 @@ using namespace std;
 const char* g_TwisterDeviceName = "Picard Twister";
 const char* g_StageDeviceName = "Picard Z Stage";
 const char* g_XYStageDeviceName = "Picard XY Stage";
+const char* g_XYAdapterDeviceName = "Picard XY Stage Adapter";
 const char* g_Keyword_SerialNumber = "Serial Number";
 const char* g_Keyword_SerialNumberX = "Serial Number (X)";
 const char* g_Keyword_SerialNumberY = "Serial Number (Y)";
@@ -169,6 +170,7 @@ MODULE_API void InitializeModuleData()
    AddAvailableDeviceName(g_TwisterDeviceName, "Twister");
    AddAvailableDeviceName(g_StageDeviceName, "Z stage");
    AddAvailableDeviceName(g_XYStageDeviceName, "XY stage");
+   AddAvailableDeviceName(g_XYAdapterDeviceName, "XY stage adapter");
 }
 
 MODULE_API MM::Device* CreateDevice(const char* deviceName)
@@ -192,6 +194,10 @@ MODULE_API MM::Device* CreateDevice(const char* deviceName)
       // create stage
       return new CSIABXYStage();
    }
+   else if (strcmp(deviceName, g_XYAdapterDeviceName) == 0)
+   {
+	   return new CPicardXYStageAdapter();
+   };
 
    // ...supplied name not recognized
    return 0;
@@ -1057,3 +1063,445 @@ int CSIABXYStage::IsXYStageSequenceable(bool& isSequenceable) const
 	isSequenceable = false;
 	return DEVICE_OK;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// XY Metastage
+// (L.S. early June 2013)
+//
+// The class to follow will hopefully, eventually, supersede CSIABXYStage. It
+// functions as an X/Y stage by instantiating two CSIABStage objects and
+// passing them every request it receives from MM. A few serious things to
+// think about yet:
+//
+// - The whole concept is hackish.
+// - It only works for our stages (dscho suggests instead getting the stage
+//   objects as an init-time parameter)
+// - Error text handling is dodgy, esp. if error numbers exceed 15 bits.
+//   (bit 32 is set if the metastage had an internal error, so Y errors can't
+//   be higher than 0x7FFF, though X stages have the full short to work with.)
+//
+// Basically, this is experimental; use at your own risk. It isn't yet on the
+// OpenSPIM update site, and may never be.
+
+CPicardXYStageAdapter::CPicardXYStageAdapter() : m_szLabel(NULL), m_szDesc(NULL), m_szParentId(NULL), m_hModule(NULL), m_szModName(NULL), m_pStageX(new CSIABStage()), m_pStageY(new CSIABStage()), m_pCallback(NULL)
+{
+};
+
+CPicardXYStageAdapter::~CPicardXYStageAdapter()
+{
+	delete m_pStageX, m_pStageY;
+	delete m_szLabel, m_szDesc, m_szParentId, m_szModName;
+};
+
+unsigned CPicardXYStageAdapter::GetNumberOfProperties() const
+{
+	return m_pStageX->GetNumberOfProperties() + m_pStageY->GetNumberOfProperties();
+};
+
+#define QUICKXY(name) ((name)[0] == 'X' ? m_pStageX : m_pStageY)
+
+int CPicardXYStageAdapter::GetProperty(const char* name, char* value) const
+{
+	return QUICKXY(name)->GetProperty(name + 2, value);
+};
+
+int CPicardXYStageAdapter::SetProperty(const char* name, const char* value)
+{
+	return QUICKXY(name)->SetProperty(name + 2, value);
+};
+
+bool CPicardXYStageAdapter::HasProperty(const char* name) const
+{
+	return QUICKXY(name)->HasProperty(name + 2);
+};
+
+bool CPicardXYStageAdapter::GetPropertyName(unsigned idx, char* name) const
+{
+	bool x = idx < m_pStageX->GetNumberOfProperties();
+
+	if(!x)
+		idx -= m_pStageX->GetNumberOfProperties();
+
+	if(!(x ? m_pStageX : m_pStageY)->GetPropertyName(idx, name))
+		return false;
+
+	// reverse memcpy to shift memory right by 2...
+	for(int i = min(strlen(name), MM::MaxStrLength - 3); i >= 0; --i)
+		name[i + 2] = name[i];
+
+	// ...to make room for the axis tag.
+	if(x)
+	{
+		name[0] = 'X';
+		name[1] = '-';
+		return true;
+	}
+	else
+	{
+		name[0] = 'Y';
+		name[1] = '-';
+		return true;
+	};
+};
+
+int CPicardXYStageAdapter::GetPropertyReadOnly(const char* name, bool& readOnly) const
+{
+	return QUICKXY(name)->GetPropertyReadOnly(name + 2, readOnly);
+};
+
+int CPicardXYStageAdapter::GetPropertyInitStatus(const char* name, bool& preInit) const
+{
+	return QUICKXY(name)->GetPropertyInitStatus(name + 2, preInit);
+};
+
+int CPicardXYStageAdapter::HasPropertyLimits(const char* name, bool& hasLimits) const
+{
+	return QUICKXY(name)->HasPropertyLimits(name + 2, hasLimits);
+};
+
+int CPicardXYStageAdapter::GetPropertyLowerLimit(const char* name, double& lowLimit) const
+{
+	return QUICKXY(name)->GetPropertyLowerLimit(name + 2, lowLimit);
+};
+
+int CPicardXYStageAdapter::GetPropertyUpperLimit(const char* name, double& hiLimit) const
+{
+	return QUICKXY(name)->GetPropertyUpperLimit(name + 2, hiLimit);
+};
+
+int CPicardXYStageAdapter::GetPropertyType(const char* name, MM::PropertyType& pt) const
+{
+	return QUICKXY(name)->GetPropertyType(name + 2, pt);
+};
+
+unsigned CPicardXYStageAdapter::GetNumberOfPropertyValues(const char* propertyName) const
+{
+	return QUICKXY(propertyName)->GetNumberOfPropertyValues(propertyName + 2);
+};
+
+bool CPicardXYStageAdapter::GetPropertyValueAt(const char* propertyName, unsigned index, char* value) const
+{
+	return QUICKXY(propertyName)->GetPropertyValueAt(propertyName + 2, index, value);
+};
+
+int CPicardXYStageAdapter::IsPropertySequenceable(const char* name, bool& isSequenceable) const
+{
+	return QUICKXY(name)->IsPropertySequenceable(name + 2, isSequenceable);
+};
+
+int CPicardXYStageAdapter::GetPropertySequenceMaxLength(const char* propertyName, long& nrEvents) const
+{
+	return QUICKXY(propertyName)->GetPropertySequenceMaxLength(propertyName + 2, nrEvents);
+};
+
+int CPicardXYStageAdapter::StartPropertySequence(const char* propertyName)
+{
+	return QUICKXY(propertyName)->StartPropertySequence(propertyName + 2);
+};
+
+int CPicardXYStageAdapter::StopPropertySequence(const char* propertyName)
+{
+	return QUICKXY(propertyName)->StopPropertySequence(propertyName + 2);
+};
+
+int CPicardXYStageAdapter::ClearPropertySequence(const char* propertyName)
+{
+	return QUICKXY(propertyName)->ClearPropertySequence(propertyName + 2);
+};
+
+int CPicardXYStageAdapter::AddToPropertySequence(const char* propertyName, const char* value)
+{
+	return QUICKXY(propertyName)->AddToPropertySequence(propertyName + 2, value);
+};
+
+int CPicardXYStageAdapter::SendPropertySequence(const char* propertyName)
+{
+	return QUICKXY(propertyName)->SendPropertySequence(propertyName + 2);
+};
+
+#define XYERR_GENERIC 0x80000000;
+
+bool CPicardXYStageAdapter::GetErrorText(int errorCode, char* errMessage) const
+{
+	if(errorCode & 0x80000000)
+	{
+		strcpy(errMessage, "Unknown metastage error occurred."); // might get their own values eventually
+		return true;
+	};
+
+	int errx = errorCode & 0xFFFF;
+	int erry = (errorCode >> 16) & 0x7FFF;
+	char tmp[MM::MaxStrLength];
+
+	string tmp2 = "X stage: ";
+	m_pStageX->GetErrorText(errx, tmp); tmp2.append(tmp);
+	tmp2.append("\nY stage: ");
+	m_pStageY->GetErrorText(erry, tmp); tmp2.append(tmp);
+
+	CDeviceUtils::CopyLimitedString(errMessage, tmp2.c_str());
+
+	return true;
+};
+
+bool CPicardXYStageAdapter::Busy()
+{
+	return m_pStageX->Busy() || m_pStageY->Busy();
+};
+
+double CPicardXYStageAdapter::GetDelayMs() const
+{
+	return max(m_pStageX->GetDelayMs(), m_pStageY->GetDelayMs());
+};
+
+void CPicardXYStageAdapter::SetDelayMs(double delay)
+{
+	m_pStageX->SetDelayMs(delay);
+	m_pStageY->SetDelayMs(delay);
+};
+
+bool CPicardXYStageAdapter::UsesDelay()
+{
+	return m_pStageX->UsesDelay() || m_pStageY->UsesDelay();
+};
+
+HDEVMODULE CPicardXYStageAdapter::GetModuleHandle() const
+{
+	return m_hModule;
+};
+
+void CPicardXYStageAdapter::SetModuleHandle(HDEVMODULE hLibraryHandle)
+{
+	m_hModule = hLibraryHandle;
+};
+
+void CPicardXYStageAdapter::SetLabel(const char* label)
+{
+	delete m_szLabel;
+	m_szLabel = new char[strlen(label) + 1];
+	strcpy(m_szLabel, label);
+};
+
+void CPicardXYStageAdapter::GetLabel(char* name) const
+{
+	CDeviceUtils::CopyLimitedString(name, m_szLabel == NULL ? "" : m_szLabel);
+};
+
+void CPicardXYStageAdapter::SetModuleName(const char* moduleName)
+{
+	delete m_szModName;
+	m_szModName = new char[strlen(moduleName) + 1];
+	strcpy(m_szModName, moduleName);
+};
+
+void CPicardXYStageAdapter::GetModuleName(char* moduleName) const
+{
+	CDeviceUtils::CopyLimitedString(moduleName, m_szModName == NULL ? "" : m_szModName);
+};
+
+void CPicardXYStageAdapter::SetDescription(const char* description)
+{
+	delete m_szDesc;
+	m_szDesc = new char[strlen(description) + 1];
+	strcpy(m_szDesc, description);
+};
+
+void CPicardXYStageAdapter::GetDescription(char* description) const
+{
+	CDeviceUtils::CopyLimitedString(description, m_szDesc == NULL ? "" : m_szDesc);
+};
+
+int CPicardXYStageAdapter::Initialize()
+{
+	return m_pStageX->Initialize() | (m_pStageY->Initialize() << 16);
+};
+
+int CPicardXYStageAdapter::Shutdown()
+{
+	return m_pStageX->Shutdown() | (m_pStageY->Shutdown() << 16);
+};
+
+void CPicardXYStageAdapter::GetName(char* name) const
+{
+	CDeviceUtils::CopyLimitedString(name, "PicardXYStageAdapter");
+};
+
+void CPicardXYStageAdapter::SetCallback(MM::Core* callback)
+{
+	m_pCallback = callback;
+};
+
+int CPicardXYStageAdapter::AcqBefore()
+{
+	return m_pStageX->AcqBefore() | (m_pStageX->AcqBefore() << 16);
+};
+
+int CPicardXYStageAdapter::AcqAfter()
+{
+	return m_pStageX->AcqAfter() | (m_pStageX->AcqAfter() << 16);
+};
+
+int CPicardXYStageAdapter::AcqBeforeFrame()
+{
+	return m_pStageX->AcqBeforeFrame() | (m_pStageX->AcqBeforeFrame() << 16);
+};
+
+int CPicardXYStageAdapter::AcqAfterFrame()
+{
+	return m_pStageX->AcqAfterFrame() | (m_pStageX->AcqAfterFrame() << 16);
+};
+
+int CPicardXYStageAdapter::AcqBeforeStack()
+{
+	return m_pStageX->AcqBeforeStack() | (m_pStageX->AcqBeforeStack() << 16);
+};
+
+int CPicardXYStageAdapter::AcqAfterStack()
+{
+	return m_pStageX->AcqAfterStack() | (m_pStageX->AcqAfterStack() << 16);
+};
+
+MM::DeviceDetectionStatus CPicardXYStageAdapter::DetectDevice(void)
+{
+	return (MM::DeviceDetectionStatus)(min(m_pStageX->DetectDevice(), m_pStageY->DetectDevice()));
+};
+
+void CPicardXYStageAdapter::SetParentID(const char* parentId)
+{
+	delete m_szParentId;
+	m_szParentId = new char[strlen(parentId) + 1];
+	strcpy(m_szParentId, parentId);
+};
+
+void CPicardXYStageAdapter::GetParentID(char* parentID) const
+{
+	CDeviceUtils::CopyLimitedString(parentID, m_szParentId == NULL ? "" : m_szParentId);
+};
+
+int CPicardXYStageAdapter::SetPositionUm(double x, double y)
+{
+	return m_pStageX->SetPositionUm(x) | (m_pStageY->SetPositionUm(y) << 16);
+};
+
+int CPicardXYStageAdapter::SetRelativePositionUm(double dx, double dy)
+{
+	return m_pStageX->SetRelativePositionUm(dx) | (m_pStageY->SetRelativePositionUm(dy) << 16);
+};
+
+int CPicardXYStageAdapter::SetAdapterOriginUm(double x, double y)
+{
+	return m_pStageX->SetAdapterOriginUm(x) | (m_pStageY->SetAdapterOriginUm(y) << 16);
+};
+
+int CPicardXYStageAdapter::GetPositionUm(double& x, double& y)
+{
+	return m_pStageX->GetPositionUm(x) | (m_pStageY->GetPositionUm(y) << 16);
+};
+
+int CPicardXYStageAdapter::GetLimitsUm(double& xMin, double& xMax, double& yMin, double& yMax)
+{
+	return m_pStageX->GetLimits(xMin, xMax) | (m_pStageY->GetLimits(yMin, yMax) << 16);
+};
+
+int CPicardXYStageAdapter::Move(double vx, double vy)
+{
+	return m_pStageX->Move(vx) | (m_pStageY->Move(vy) << 16);
+};
+
+int CPicardXYStageAdapter::SetPositionSteps(long x, long y)
+{
+	return m_pStageX->SetPositionSteps(x) | (m_pStageY->SetPositionSteps(y) << 16);
+};
+
+int CPicardXYStageAdapter::GetPositionSteps(long& x, long& y)
+{
+	return m_pStageX->GetPositionSteps(x) | (m_pStageY->GetPositionSteps(y) << 16);
+};
+
+int CPicardXYStageAdapter::SetRelativePositionSteps(long x, long y)
+{
+	long cx, cy;
+	int r = m_pStageX->GetPositionSteps(cx) | (m_pStageY->GetPositionSteps(cy) << 16);
+
+	if(r != 0)
+		return r;
+
+	return m_pStageX->SetPositionSteps(cx + x) | (m_pStageY->SetPositionSteps(cy + y) << 16);
+};
+
+int CPicardXYStageAdapter::Home()
+{
+	// Not sure...
+	// This *might* be ->SetPositionUm(0) for both.
+	return XYERR_GENERIC;
+};
+
+int CPicardXYStageAdapter::Stop()
+{
+	// This *might* be ->SetPositionUm(GetPositionUm) for both.
+	return XYERR_GENERIC;
+};
+
+int CPicardXYStageAdapter::SetOrigin()
+{
+	return m_pStageX->SetOrigin() | (m_pStageY->SetOrigin() << 16);
+};
+
+int CPicardXYStageAdapter::GetStepLimits(long& xMin, long& xMax, long& yMin, long& yMax)
+{
+	return XYERR_GENERIC;
+};
+
+double CPicardXYStageAdapter::GetStepSizeXUm()
+{
+	return 1.0;
+};
+
+double CPicardXYStageAdapter::GetStepSizeYUm()
+{
+	return 1.0;
+};
+
+int CPicardXYStageAdapter::IsXYStageSequenceable(bool& isSequenceable) const
+{
+	int r = m_pStageX->IsStageSequenceable(isSequenceable);
+
+	if(r == 0 && isSequenceable)
+		r |= (m_pStageY->IsStageSequenceable(isSequenceable) << 16);
+
+	return r;
+};
+
+int CPicardXYStageAdapter::GetXYStageSequenceMaxLength(long& nrEvents) const
+{
+	long tmp;
+	int r = m_pStageX->GetStageSequenceMaxLength(tmp) | (m_pStageY->GetStageSequenceMaxLength(nrEvents) << 16);
+
+	nrEvents = min(nrEvents, tmp);
+
+	return r;
+};
+
+int CPicardXYStageAdapter::StartXYStageSequence()
+{
+	return m_pStageX->StartStageSequence() | (m_pStageY->StartStageSequence() << 16);
+};
+
+int CPicardXYStageAdapter::StopXYStageSequence()
+{
+	return m_pStageX->StopStageSequence() | (m_pStageY->StopStageSequence() << 16);
+};
+
+int CPicardXYStageAdapter::ClearXYStageSequence()
+{
+	return m_pStageX->ClearStageSequence() | (m_pStageY->ClearStageSequence() << 16);
+};
+
+int CPicardXYStageAdapter::AddToXYStageSequence(double positionX, double positionY)
+{
+	return m_pStageX->AddToStageSequence(positionX) | (m_pStageY->AddToStageSequence(positionY) << 16);
+};
+
+int CPicardXYStageAdapter::SendXYStageSequence()
+{
+	return m_pStageX->SendStageSequence() | (m_pStageY->SendStageSequence() << 16);
+};

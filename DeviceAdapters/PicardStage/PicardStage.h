@@ -171,4 +171,107 @@ private:
 	int minY_, maxY_;
 };
 
+class CPicardXYStageAdapter : public MM::XYStage
+{
+public:
+	CPicardXYStageAdapter();
+	~CPicardXYStageAdapter();
+
+	// Property API
+	virtual unsigned GetNumberOfProperties() const;
+	virtual int GetProperty(const char* name, char* value) const;
+	virtual int SetProperty(const char* name, const char* value);
+	virtual bool HasProperty(const char* name) const;
+	virtual bool GetPropertyName(unsigned idx, char* name) const;
+	virtual int GetPropertyReadOnly(const char* name, bool& readOnly) const;
+	virtual int GetPropertyInitStatus(const char* name, bool& preInit) const;
+	virtual int HasPropertyLimits(const char* name, bool& hasLimits) const;
+	virtual int GetPropertyLowerLimit(const char* name, double& lowLimit) const;
+	virtual int GetPropertyUpperLimit(const char* name, double& hiLimit) const;
+	virtual int GetPropertyType(const char* name, MM::PropertyType& pt) const;
+	virtual unsigned GetNumberOfPropertyValues(const char* propertyName) const;
+	virtual bool GetPropertyValueAt(const char* propertyName, unsigned index, char* value) const;
+
+	// Property sequencing
+	virtual int IsPropertySequenceable(const char* name, bool& isSequenceable) const;
+	virtual int GetPropertySequenceMaxLength(const char* propertyName, long& nrEvents) const;
+	virtual int StartPropertySequence(const char* propertyName);
+	virtual int StopPropertySequence(const char* propertyName);
+	virtual int ClearPropertySequence(const char* propertyName);
+	virtual int AddToPropertySequence(const char* propertyName, const char* value);
+	virtual int SendPropertySequence(const char* propertyName);
+
+	virtual bool GetErrorText(int errorCode, char* errMessage) const;
+	virtual bool Busy();
+	virtual double GetDelayMs() const;
+	virtual void SetDelayMs(double delay);
+	virtual bool UsesDelay();
+
+	// Library handle management (we just store it so MM can get it easily)
+	virtual HDEVMODULE GetModuleHandle() const;
+	virtual void SetModuleHandle(HDEVMODULE hLibraryHandle);
+
+	virtual void SetLabel(const char* label);
+	virtual void GetLabel(char* name) const;
+
+	virtual void SetModuleName(const char* moduleName);
+	virtual void GetModuleName(char* moduleName) const;
+
+	virtual void SetDescription(const char* description);
+	virtual void GetDescription(char* description) const;
+
+	virtual int Initialize();
+	virtual int Shutdown();
+
+	virtual void GetName(char* name) const;
+	virtual void SetCallback(MM::Core* callback);
+
+	// Experimental(?) acquisition API
+	virtual int AcqBefore();
+	virtual int AcqAfter();
+	virtual int AcqBeforeFrame();
+	virtual int AcqAfterFrame();
+	virtual int AcqBeforeStack();
+	virtual int AcqAfterStack();
+
+	// Device discovery. Doesn't do anything yet...
+	virtual MM::DeviceDetectionStatus DetectDevice(void);
+
+	// Hub-peripheral relationship
+	virtual void SetParentID(const char* parentId);
+	virtual void GetParentID(char* parentID) const;
+
+	// XYStage API
+	virtual int SetPositionUm(double x, double y);
+	virtual int SetRelativePositionUm(double dx, double dy);
+	virtual int SetAdapterOriginUm(double x, double y);
+	virtual int GetPositionUm(double& x, double& y);
+	virtual int GetLimitsUm(double& xMin, double& xMax, double& yMin, double& yMax);
+	virtual int Move(double vx, double vy);
+
+	virtual int SetPositionSteps(long x, long y);
+	virtual int GetPositionSteps(long& x, long& y);
+	virtual int SetRelativePositionSteps(long x, long y);
+	virtual int Home();
+	virtual int Stop();
+	virtual int SetOrigin();
+	virtual int GetStepLimits(long& xMin, long& xMax, long& yMin, long& yMax);
+	virtual double GetStepSizeXUm();
+	virtual double GetStepSizeYUm();
+
+	virtual int IsXYStageSequenceable(bool& isSequenceable) const;
+	virtual int GetXYStageSequenceMaxLength(long& nrEvents) const;
+	virtual int StartXYStageSequence();
+	virtual int StopXYStageSequence();
+	virtual int ClearXYStageSequence();
+	virtual int AddToXYStageSequence(double positionX, double positionY);
+	virtual int SendXYStageSequence();
+
+private:
+	CSIABStage *m_pStageX, *m_pStageY;
+	char *m_szLabel, *m_szDesc, *m_szModName, *m_szParentId;
+	HDEVMODULE m_hModule;
+	MM::Core* m_pCallback;
+};
+
 #endif //_PICARDSTAGE_H_

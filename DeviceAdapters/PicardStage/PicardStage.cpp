@@ -245,6 +245,9 @@ int CSIABTwister::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
 
 bool CSIABTwister::Busy()
 {
+	if(handle_ == NULL)
+		return false;
+
 	BOOL moving;
 	if (handle_ && !piGetTwisterMovingStatus(&moving, handle_))
 		return moving != 0;
@@ -295,6 +298,9 @@ void CSIABTwister::GetName(char* name) const
 
 int CSIABTwister::SetPositionUm(double pos)
 {
+	if(handle_ == NULL)
+		return DEVICE_ERR;
+
 	int moveret = piRunTwisterToPosition((int)pos, velocity_, handle_);
 
 	double at = 0;
@@ -330,6 +336,9 @@ int CSIABTwister::SetAdapterOriginUm(double d)
 
 int CSIABTwister::GetPositionUm(double& pos)
 {
+	if(handle_ == NULL)
+		return DEVICE_ERR;
+
 	int position;
 	if (piGetTwisterPosition(&position, handle_))
 		return DEVICE_ERR;
@@ -465,6 +474,9 @@ int CSIABStage::OnVelocity(MM::PropertyBase* pProp, MM::ActionType eAct)
 
 bool CSIABStage::Busy()
 {
+	if(handle_ == NULL)
+		return false;
+
 	BOOL moving;
 	if (handle_ && !piGetMotorMovingStatus(&moving, handle_))
 		return moving != 0;
@@ -515,6 +527,9 @@ void CSIABStage::GetName(char* name) const
 
 int CSIABStage::SetPositionUm(double pos)
 {
+	if(handle_ == NULL)
+		return DEVICE_ERR;
+
 	int moveret = piRunMotorToPosition((int)pos, velocity_, handle_);
 
 	double at = 0;
@@ -562,6 +577,9 @@ int CSIABStage::SetAdapterOriginUm(double d)
 
 int CSIABStage::GetPositionUm(double& pos)
 {
+	if(handle_ == NULL)
+		return DEVICE_ERR;
+
 	int position;
 	if (piGetMotorPosition(&position, handle_))
 		return DEVICE_ERR;

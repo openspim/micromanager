@@ -17,6 +17,13 @@ bannerdie() {
 	exit 1;
 }
 
+registry_query() {
+	printf '%s\n%s\n' \
+		'package require registry 1.0' \
+		"puts [registry get \"$1\" \"$2\"]" |
+	tclsh
+}
+
 platform="Win32"
 config="Release"
 target=
@@ -47,8 +54,8 @@ done;
 
 banner "FINDING MY MARBLES D:";
 
-dotnetfwdir=$(reg query HKLM\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7 //v FrameworkDir32 | grep 'FrameworkDir32' | sed -r -e 's/\s*FrameworkDir32\s*REG_SZ\s*([^\s]*)/\1/g');
-dotnetfwver=$(reg query HKLM\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7 //v FrameworkVer32 | grep 'FrameworkVer32' | sed -r -e 's/\s*FrameworkVer32\s*REG_SZ\s*([^\s]*)/\1/g');
+dotnetfwdir="$(registry_query "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\VisualStudio\\\\SxS\\\\VC7" "FrameworkDir32")"
+dotnetfwver="$(registry_query "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\VisualStudio\\\\SxS\\\\VC7" "FrameworkVer32")"
 
 test -z "$slnver" && test "$(echo "$dotnetfwver" | head -c2)" = "v4" && slnver="_v10";
 test "$slnver" = "_v9" && slnver='' dotnetfwver='v3.5';

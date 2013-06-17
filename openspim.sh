@@ -1,22 +1,10 @@
 #!/bin/sh
 
-rq() {
-	path="$1"
-	shift;
-	key="$*";
-
-	qr=
-
-	if (( $#==0 ));
-	then
-		qr="$(reg query "$path" //ve | tail -n2)";
-		key="<NO NAME>";
-	else
-		qr="$(reg query "$path" //v "$*" | tail -n2)";
-	fi;
-
-	test "$(echo \"$qr\" | grep -c "Error")"=="0" || ( echo "invalid key" && return 1 );
-	echo "$qr" | grep -E "^[ ]{4}$key[^\r\n]REG_[A-Z0-9]+[^\r\n].+$" | sed -r -e "s/^[ ]{4}$key[^\r\n]REG_[A-Z0-9]+[^\r\n](.+)$/\1/g" && return 0;
+reqistry_query () {
+	printf '%s\n%s\n' \
+		'package require registry 1.0' \
+		"puts [registry get \"$1\" \"\"]" |
+	tclsh
 }
 
 VCEXPRESS_URL=http://www.microsoft.com/visualstudio/eng/downloads\#d-2010-express
@@ -24,7 +12,7 @@ STABLE_FIJI_URL=http://jenkins.imagej.net/job/Stable-Fiji
 FIJI_URL=$STABLE_FIJI_URL/lastSuccessfulBuild/artifact/fiji-win32.tar.gz
 JDK_URL="http://fiji.sc/cgi-bin/gitweb.cgi?p=java/win32.git;a=snapshot;h=HEAD;sf=tgz"
 
-VCEXPRESS="$(rq "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\VCExpress.exe")"
+VCEXPRESS="$(reqistry_query "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\App Paths\\\\VCExpress.exe")"
 
 SRC=/src
 test ! -d /src/fiji/modules/micromanager ||

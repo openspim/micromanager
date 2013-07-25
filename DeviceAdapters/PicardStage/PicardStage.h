@@ -171,6 +171,7 @@ private:
 	int minY_, maxY_;
 };
 
+#if 0
 class CPicardXYStageAdapter : public MM::XYStage
 {
 public:
@@ -273,5 +274,6 @@ private:
 	HDEVMODULE m_hModule;
 	MM::Core* m_pCallback;
 };
+#endif
 
 #endif //_PICARDSTAGE_H_

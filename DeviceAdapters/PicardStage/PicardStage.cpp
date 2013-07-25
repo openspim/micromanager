@@ -69,7 +69,7 @@ BOOL APIENTRY DllMain( HANDLE /*hModule*/,
 }
 #endif
 
-#define MAX_IDX 500
+#define MAX_IDX 250
 
 class CPiDetector
 {
@@ -162,15 +162,10 @@ static CPiDetector* g_pPiDetector = new CPiDetector();
  */
 MODULE_API void InitializeModuleData()
 {
-	if(g_pPiDetector != NULL)
-		delete g_pPiDetector;
-
-	g_pPiDetector = new CPiDetector();
-
    AddAvailableDeviceName(g_TwisterDeviceName, "Twister");
    AddAvailableDeviceName(g_StageDeviceName, "Z stage");
    AddAvailableDeviceName(g_XYStageDeviceName, "XY stage");
-   AddAvailableDeviceName(g_XYAdapterDeviceName, "XY stage adapter");
+//   AddAvailableDeviceName(g_XYAdapterDeviceName, "XY stage adapter");
 }
 
 MODULE_API MM::Device* CreateDevice(const char* deviceName)
@@ -194,10 +189,10 @@ MODULE_API MM::Device* CreateDevice(const char* deviceName)
       // create stage
       return new CSIABXYStage();
    }
-   else if (strcmp(deviceName, g_XYAdapterDeviceName) == 0)
+/*   else if (strcmp(deviceName, g_XYAdapterDeviceName) == 0)
    {
 	   return new CPicardXYStageAdapter();
-   };
+   };*/
 
    // ...supplied name not recognized
    return 0;
@@ -1082,6 +1077,7 @@ int CSIABXYStage::IsXYStageSequenceable(bool& isSequenceable) const
 	return DEVICE_OK;
 }
 
+#if 0
 ///////////////////////////////////////////////////////////////////////////////
 // XY Metastage
 // (L.S. early June 2013)
@@ -1523,3 +1519,4 @@ int CPicardXYStageAdapter::SendXYStageSequence()
 {
 	return m_pStageX->SendStageSequence() | (m_pStageY->SendStageSequence() << 16);
 };
+#endif

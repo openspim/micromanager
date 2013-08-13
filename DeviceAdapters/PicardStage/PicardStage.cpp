@@ -47,6 +47,9 @@ const char* g_Keyword_MaxY = "Y-Max";
 const char* g_Keyword_Velocity = "Velocity";
 const char* g_Keyword_VelocityX = "X-Velocity";
 const char* g_Keyword_VelocityY = "Y-Velocity";
+const char* g_Keyword_StepSize = "StepSize";
+const char* g_Keyword_StepSizeX = "X-StepSize";
+const char* g_Keyword_StepSizeY = "Y-StepSize";
 
 #define MAX_WAIT 0.3 // Maximum time to wait for the motors to begin motion, in seconds.
 
@@ -426,6 +429,8 @@ CSIABStage::CSIABStage()
 	}
 	SetAllowedValues(g_Keyword_Velocity, allowed_velocities);
 
+	CreateProperty(g_Keyword_StepSize, "1.5", MM::Float, false);
+
 	SetErrorText(1, "Could not initialize motor (Z stage)");
 }
 
@@ -520,12 +525,22 @@ void CSIABStage::GetName(char* name) const
 	CDeviceUtils::CopyLimitedString(name, g_StageDeviceName);
 }
 
+double CSIABStage::GetStepSizeUm()
+{
+	double out = 0;
+
+	if(GetProperty(g_Keyword_StepSize, out) != DEVICE_OK)
+		return 0;
+
+	return out;
+}
+
 int CSIABStage::SetPositionUm(double pos)
 {
 	if(handle_ == NULL)
 		return DEVICE_ERR;
 
-	int moveret = piRunMotorToPosition((int)pos, velocity_, handle_);
+	int moveret = piRunMotorToPosition((int)(pos / GetStepSizeUm()), velocity_, handle_);
 
 	double at = 0;
 	if(GetPositionUm(at) != DEVICE_OK)
@@ -578,7 +593,7 @@ int CSIABStage::GetPositionUm(double& pos)
 	int position;
 	if (piGetMotorPosition(&position, handle_))
 		return DEVICE_ERR;
-	pos = position;
+	pos = position * GetStepSizeUm();
 	return DEVICE_OK;
 }
 
@@ -695,6 +710,9 @@ CSIABXYStage::CSIABXYStage()
 	CreateProperty(g_Keyword_MaxX, "8000", MM::Integer, false, pActMaxX, true);
 	CreateProperty(g_Keyword_MinY, "0", MM::Integer, false, pActMinY, true);
 	CreateProperty(g_Keyword_MaxY, "8000", MM::Integer, false, pActMaxY, true);
+
+	CreateProperty(g_Keyword_StepSizeX, "1.5", MM::Float, false);
+	CreateProperty(g_Keyword_StepSizeY, "1.5", MM::Float, false);
 }
 
 CSIABXYStage::~CSIABXYStage()
@@ -936,8 +954,8 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	if(y < minY_ || y > maxY_)
 		y = min(maxY_, max(y, minY_));
 
-	int toX = flipX ? (maxX_ - (int)x) + minX_ : (int)x;
-	int toY = flipY ? (maxY_ - (int)y) + minY_ : (int)y;
+	int toX = (int)((flipX ? (maxX_ - x) + minX_ : x) / GetStepSizeXUm());
+	int toY = (int)((flipY ? (maxY_ - y) + minY_ : y) / GetStepSizeYUm());
 
 	std::ostringstream str;
 	str << "SetPositionUm(" << x << ", " << y << "): ";
@@ -1003,8 +1021,8 @@ int CSIABXYStage::GetPositionUm(double& x, double& y)
 	x = flipX ? (maxX_ - positionX) + minX_ : positionX;
 	y = flipY ? (maxY_ - positionY) + minY_ : positionY;
 
-	x = (x < minX_ ? minX_ : (x > maxX_ ? maxX_ : x));
-	y = (y < minY_ ? minY_ : (y > maxY_ ? maxY_ : y));
+	x = (x < minX_ ? minX_ : (x > maxX_ ? maxX_ : x)) * GetStepSizeXUm();
+	y = (y < minY_ ? minY_ : (y > maxY_ ? maxY_ : y)) * GetStepSizeYUm();
 
 	return DEVICE_OK;
 }
@@ -1063,12 +1081,18 @@ int CSIABXYStage::GetStepLimits(long& xMin, long& xMax, long& yMin, long& yMax)
 
 double CSIABXYStage::GetStepSizeXUm()
 {
-	return DEVICE_ERR;
+	double out = 0;
+	if(GetProperty(g_Keyword_StepSizeX, out) != DEVICE_OK)
+		return 0;
+	return out;
 }
 
 double CSIABXYStage::GetStepSizeYUm()
 {
-	return DEVICE_ERR;
+	double out = 0;
+	if(GetProperty(g_Keyword_StepSizeY, out) != DEVICE_OK)
+		return 0;
+	return out;
 }
 
 int CSIABXYStage::IsXYStageSequenceable(bool& isSequenceable) const

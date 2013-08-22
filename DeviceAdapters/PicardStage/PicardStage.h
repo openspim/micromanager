@@ -60,6 +60,8 @@ public:
 	int AddToStageSequence(double position);
 	int SendStageSequence() const; 
 	bool IsContinuousFocusDrive() const;
+
+	double GetStepSizeUm();
 private:
 	int OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct);
 
@@ -103,6 +105,8 @@ public:
 	int AddToStageSequence(double position);
 	int SendStageSequence() const; 
 	bool IsContinuousFocusDrive() const;
+
+	double GetStepSizeUm();
 private:
 	int OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct);
 	int OnVelocity(MM::PropertyBase* pProp, MM::ActionType eAct);
@@ -150,8 +154,6 @@ public:
 	int IsXYStageSequenceable(bool& isSequenceable) const;
 
 protected:
-	// This is how it SHOULD have been done. Why, why why why!? WHY
-	// WOULD YOU MAKE THIS PRIVATE!?
 	virtual void GetOrientation(bool& mirrorX, bool& mirrorY);
 
 private:

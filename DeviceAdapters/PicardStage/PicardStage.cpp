@@ -51,7 +51,7 @@ const char* g_Keyword_StepSize = "StepSize";
 const char* g_Keyword_StepSizeX = "X-StepSize";
 const char* g_Keyword_StepSizeY = "Y-StepSize";
 
-#define MAX_WAIT 0.3 // Maximum time to wait for the motors to begin motion, in seconds.
+#define MAX_WAIT 0.05 // Maximum time to wait for the motors to begin motion, in seconds.
 
 // windows DLL entry code
 #ifdef WIN32

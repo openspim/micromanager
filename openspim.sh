@@ -8,9 +8,6 @@ reqistry_query () {
 }
 
 VCEXPRESS_URL=http://www.microsoft.com/visualstudio/eng/downloads\#d-2010-express
-STABLE_FIJI_URL=http://jenkins.imagej.net/job/Stable-Fiji
-FIJI_URL=$STABLE_FIJI_URL/lastSuccessfulBuild/artifact/fiji-win32.tar.gz
-JDK_URL="http://fiji.sc/cgi-bin/gitweb.cgi?p=java/win32.git;a=snapshot;h=HEAD;sf=tgz"
 
 VCEXPRESS="$(reqistry_query "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\App Paths\\\\VCExpress.exe")"
 
@@ -89,14 +86,6 @@ EOF
 	(mkdir -p $SRC &&
 	 cd $SRC &&
 
-	 if ! test -d 3rdpartypublic
-	 then
-		echo "Cloning Micro-Manager's 3rdparty libraries" &&
-		git clone git://github.com/openspim/3rdpartypublic &&
-		(cd 3rdpartypublic/ &&
-		 git config remote.origin.pushURL \
-			contrib@fiji.sc:/srv/git/mmanager-3rdparty)
-	 fi &&
 	 if ! test -d micromanager
 	 then
 		echo "Cloning Micro-Manager" &&
@@ -106,15 +95,6 @@ EOF
 			contrib@fiji.sc:/srv/git/micromanager1.4 &&
 		 git config branch.openspim.rebase interactive)
 	 fi &&
-
-	 if ! test -f $FIJI_JAVA_HOME/include/jni.h
-	 then
-		echo "Downloading and unpacking the JDK" &&
-		curl "$JDK_URL" |
-		(mkdir -p $FIJI_JAVA_HOME &&
-		 cd $FIJI_JAVA_HOME &&
-		 tar --strip-components=2 -xzf -)
-	 fi
 
 	 if ! test -x "$HOME/bin/ant"
 	 then
@@ -135,21 +115,6 @@ exec "\$JAVA_HOME/bin/jvisualvm" "\$@"
 EOF
 	 fi &&
 	 (cd micromanager &&
-	  if ! test -f bin_Win32/ImageJ-win32.exe
-	  then
-		echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&
-		curl $FIJI_URL |
-		(cd bin_Win32/ &&
-		 tar --strip-components=1 -xf /src/fiji/fiji.tar &&
-		 if test ! -f ImageJ-win32.exe
-		 then
-			cp ImageJ.exe ImageJ-win32.exe
-		 fi &&
-		 ./ImageJ-win32.exe --update add-update-site \
-			OpenSPIM http://openspim.org/update/ \
-			spim@openspim.org update/)
-	  fi &&
-
 	  if ! test -f bin_Win32/plugins/MMJ_.jar
 	  then
 		echo "Building Micro-Manager" &&

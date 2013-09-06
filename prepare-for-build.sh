@@ -34,7 +34,11 @@ FIJI_JAVA_HOME="$WD/bin_Win32/java/win32/jdk1.6.0_24"
 	fi &&
 
 	(
+<<<<<<< HEAD
 		cd $WD &&
+=======
+		cd micromanager &&
+>>>>>>> f0fe8a5... Modified build scripts to accommodate Jenkins
 		if ! test -f bin_Win32/ImageJ-win32.exe
 		then
 			echo "Copying Fiji into Micro-Manager's bin_Win32/ directory" &&

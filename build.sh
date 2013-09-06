@@ -52,6 +52,10 @@ do
 	esac;
 done;
 
+banner "PREPARING BUILD ENVIRONMENT";
+
+sh prepare-for-build.sh;
+
 banner "FINDING MY MARBLES D:";
 
 dotnetfwdir="$(registry_query "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\VisualStudio\\\\SxS\\\\VC7" "FrameworkDir32")"

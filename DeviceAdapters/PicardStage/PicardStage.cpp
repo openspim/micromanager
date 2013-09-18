@@ -51,6 +51,7 @@ const char* g_Keyword_StepSize = "StepSize";
 const char* g_Keyword_StepSizeX = "X-StepSize";
 const char* g_Keyword_StepSizeY = "Y-StepSize";
 
+#define CLOCKDIFF(now, then) (((double)(now) - (double)(then))/((double)(CLOCKS_PER_SEC)))
 #define MAX_WAIT 0.05 // Maximum time to wait for the motors to begin motion, in seconds.
 
 // windows DLL entry code
@@ -73,6 +74,19 @@ BOOL APIENTRY DllMain( HANDLE /*hModule*/,
 #endif
 
 #define MAX_IDX 250
+
+inline static char* VarLog(const char* fmt, ...)
+{
+	static char buffer[MM::MaxStrLength];
+
+	memset(buffer, 0x00, MM::MaxStrLength);
+	va_list va;
+	va_start(va, fmt);
+	vsnprintf(buffer, MM::MaxStrLength, fmt, va);
+	va_end(va);
+
+	return buffer;
+}
 
 class CPiDetector
 {
@@ -301,21 +315,22 @@ int CSIABTwister::SetPositionUm(double pos)
 
 	int moveret = piRunTwisterToPosition((int)pos, velocity_, handle_);
 
-	double at = 0;
-	if(GetPositionUm(at))
+	int at = 0;
+	if(piGetTwisterPosition(&at, handle_) != PI_NO_ERROR)
 		return DEVICE_ERR;
 
-	if((int)at != (int)pos) {
-		time_t start = time(NULL);
-		while(!Busy() && (int)at != (int)pos && difftime(time(NULL),start) < MAX_WAIT) {
-			CDeviceUtils::SleepMs(1);
+	if(at != (int)pos) {
+		clock_t start = clock();
+		clock_t last = start;
+		while(!Busy() && at != (int)pos && CLOCKDIFF(last = clock(), start) < MAX_WAIT) {
+			CDeviceUtils::SleepMs(0);
 
-			if(GetPositionUm(at) != DEVICE_OK)
+			if(piGetTwisterPosition(&at, handle_) != PI_NO_ERROR)
 				return DEVICE_ERR;
 		};
 
-		if(difftime(time(NULL),start) >= MAX_WAIT/2)
-			LogMessage("Long wait (twister)...");
+		if(CLOCKDIFF(last, start) >= MAX_WAIT)
+			LogMessage(VarLog("Long wait (twister): %d / %d (%d != %d).", last - start, (int)(MAX_WAIT*CLOCKS_PER_SEC), at, (int)pos), true);
 	};
 
 	return moveret;
@@ -540,25 +555,28 @@ int CSIABStage::SetPositionUm(double pos)
 	if(handle_ == NULL)
 		return DEVICE_ERR;
 
-	int moveret = piRunMotorToPosition((int)(pos / GetStepSizeUm()), velocity_, handle_);
+	int to = (int)(pos / GetStepSizeUm());
 
-	double at = 0;
-	if(GetPositionUm(at) != DEVICE_OK)
+	int moveret = piRunMotorToPosition(to, velocity_, handle_);
+
+	int at = 0;
+	if(piGetMotorPosition(&at, handle_) != PI_NO_ERROR)
 		return DEVICE_ERR;
 
 	// WORKAROUND: piRunMotorToPosition doesn't wait for the motor to get
 	// underway. Wait a bit here.
-	if((int)at != (int)pos) {
-		time_t start = time(NULL);
-		while(!Busy() && (int)at != (int)pos && difftime(time(NULL),start) < MAX_WAIT) {
-			CDeviceUtils::SleepMs(1);
+	if(at != to) {
+		clock_t start = clock();
+		clock_t last = start;
+		while(!Busy() && at != to && CLOCKDIFF(last = clock(), start) < MAX_WAIT) {
+			CDeviceUtils::SleepMs(0);
 
-			if(GetPositionUm(at) != DEVICE_OK)
+			if(piGetMotorPosition(&at, handle_) != PI_NO_ERROR)
 				return DEVICE_ERR;
 		};
 
-		if(difftime(time(NULL),start) >= MAX_WAIT/2)
-			LogMessage("Long wait...");
+		if(CLOCKDIFF(last, start) >= MAX_WAIT)
+			LogMessage(VarLog("Long wait (Z stage): %d / %d (%d != %d).", last - start, (int)(MAX_WAIT*CLOCKS_PER_SEC), at, to), true);
 	};
 
 	return moveret;
@@ -956,7 +974,7 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 
 	int toX = (int)((flipX ? (maxX_ - x) + minX_ : x) / GetStepSizeXUm());
 	int toY = (int)((flipY ? (maxY_ - y) + minY_ : y) / GetStepSizeYUm());
-
+#if 0
 	std::ostringstream str;
 	str << "SetPositionUm(" << x << ", " << y << "): ";
 	str << "sn X/Y={" << serialX_ << ", " << serialY_ << "}, ";
@@ -965,26 +983,27 @@ int CSIABXYStage::SetPositionUm(double x, double y)
 	str << "min/max Y=[" << minY_ << ", " << maxY_ << "], ";
 	str << "to X/Y={" << toX << ", " << toY << "}";
 	LogMessage(str.str().c_str(), true);
-
+#endif
 	int moveX = piRunMotorToPosition(toX, velocityX_, handleX_);
 	int moveY = piRunMotorToPosition(toY, velocityY_, handleY_) << 1;
 
-	double atX, atY;
+	int atX, atY;
 
-	if(int ret = GetPositionUm(atX, atY))
-		return ret;
+	if(piGetMotorPosition(&atX, handleX_) != PI_NO_ERROR || piGetMotorPosition(&atY, handleY_) != PI_NO_ERROR)
+		return DEVICE_ERR;
 
-	if((int)atX != (int)x || (int)atY != (int)y) {
-		time_t start = time(NULL);
-		while(!Busy() && ((int)atX != (int)x || (int)atY != (int)y) && difftime(time(NULL),start) < MAX_WAIT) {
-			CDeviceUtils::SleepMs(1);
+	if(atX != toX || atY != toY) {
+		clock_t start = clock();
+		clock_t last = start;
+		while(!Busy() && (atX != toX || atY != toY) && CLOCKDIFF(last = clock(), start) < MAX_WAIT) {
+			CDeviceUtils::SleepMs(0);
 
-			if(GetPositionUm(atX, atY) != DEVICE_OK)
+			if(piGetMotorPosition(&atX, handleX_) != PI_NO_ERROR || piGetMotorPosition(&atY, handleY_) != PI_NO_ERROR)
 				return DEVICE_ERR;
 		};
 
-		if(difftime(time(NULL),start) >= MAX_WAIT/2)
-			LogMessage("Long wait (X/Y)...");
+		if(CLOCKDIFF(last, start) >= MAX_WAIT)
+			LogMessage(VarLog("Long wait (XY): %d / %d (%d != %d || %d != %d).", last - start, (int)(MAX_WAIT*CLOCKS_PER_SEC), atX, toX, atY, toY), true);
 	};
 
 	return moveX | moveY;

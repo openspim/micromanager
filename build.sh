@@ -81,7 +81,7 @@ banner "${target:+RE}BUILDING MMCORE & MMSTUDIO IN $(echo $config | tr '[:lower:
 
 # For some reason, you can't specify Build as a target -- you must leave off the target specifier entirely.
 
-$msbuild MMCoreJ_wrap/MMCoreJ_wrap${slnver}.sln /property:Configuration=$config /property:Platform=$platform /target:MMCore${target}\;MMCoreJ_wrap${target}\;mmstudio${target} //fileLogger1 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
+$msbuild MMCoreJ_wrap/MMCoreJ_wrap${slnver}.sln /property:Configuration=$config /property:Platform=$platform /target:MMCore${target}\;MMCoreJ_wrap${target}\;mmstudio${target} //fileLogger1 //verbosity:minimal && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD MMCORE/MMSTUDIO! :(";
 
 banner "${target:+RE}BUILDING DEVICE ADAPTERS IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
 

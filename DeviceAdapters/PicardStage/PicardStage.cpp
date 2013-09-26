@@ -527,6 +527,9 @@ bool CSIABStage::UsesDelay()
 
 int CSIABStage::Initialize()
 {
+	if(handle_)
+		Shutdown();
+
 	int error = -1;
 	handle_ = piConnectMotor(&error, serial_);
 	if (handle_)
@@ -750,6 +753,44 @@ CSIABXYStage::~CSIABXYStage()
 {
 }
 
+int CSIABXYStage::InitStage(void** handleptr, int newserial)
+{
+	int* velptr = NULL;
+
+	if(handleptr == &handleX_) {
+		serialX_ = newserial;
+		velptr = &velocityX_;
+	} else if(handleptr == &handleY_) {
+		serialY_ = newserial;
+		velptr = &velocityY_;
+	} else {
+		return DEVICE_ERR;
+	};
+
+	if(*handleptr != NULL)
+		ShutdownStage(handleptr);
+
+	int error = -1;
+	*handleptr = piConnectMotor(&error, newserial); // assignment intentional
+
+	if(*handleptr != NULL) {
+		piGetMotorVelocity(velptr, *handleptr);
+	} else {
+		LogMessage(VarLog("Could not initialize motor %d (error code %d)\n", newserial, error));
+		return DEVICE_ERR;
+	}
+
+	return DEVICE_OK;
+}
+
+void CSIABXYStage::ShutdownStage(void** handleptr)
+{
+	if(*handleptr != NULL)
+		piDisconnectMotor(*handleptr);
+
+	*handleptr = NULL;
+}
+
 int CSIABXYStage::OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct)
 {
 	if (eAct == MM::BeforeGet)
@@ -761,21 +802,9 @@ int CSIABXYStage::OnSerialNumberX(MM::PropertyBase* pProp, MM::ActionType eAct)
 	{
 		long serial;
 		pProp->Get(serial);
-		serialX_ = (int)serial;
 
-		int errorX = -1;
-		handleX_ = piConnectMotor(&errorX, serialX_);
-		if (handleX_)
-		{
-			piGetMotorVelocity(&velocityX_, handleX_);
-		}
-		else
-		{
-			std::ostringstream buffer;
-			buffer << "Could not initialize X motor " << serialX_ << " (error code " << errorX << ")";
-			LogMessage(buffer.str().c_str(), false);
+		if(InitStage(&handleX_, serial) != DEVICE_OK)
 			return XYERR_INIT_X;
-		}
 	}
 	return DEVICE_OK;
 }
@@ -793,19 +822,8 @@ int CSIABXYStage::OnSerialNumberY(MM::PropertyBase* pProp, MM::ActionType eAct)
 		pProp->Get(serial);
 		serialY_ = (int)serial;
 
-		int errorY = -1;
-		handleY_ = piConnectMotor(&errorY, serialY_);
-		if (handleY_)
-		{
-			piGetMotorVelocity(&velocityY_, handleY_);
-		}
-		else
-		{
-			std::ostringstream buffer;
-			buffer << "Could not initialize Y motor " << serialY_ << " (error code " << errorY << ")";
-			LogMessage(buffer.str().c_str(), false);
+		if(InitStage(&handleY_, serial) != DEVICE_OK)
 			return XYERR_INIT_Y;
-		}
 	}
 	return DEVICE_OK;
 }
@@ -922,36 +940,16 @@ bool CSIABXYStage::UsesDelay()
 
 int CSIABXYStage::Initialize()
 {
-	int errorX = -1, errorY = -1;
-	handleX_ = piConnectMotor(&errorX, serialX_);
-	if (handleX_)
-		piGetMotorVelocity(&velocityX_, handleX_);
-	else {
-		std::ostringstream buffer;
-		buffer << "Could not initialize X motor " << serialX_ << " (error code " << errorX << ")";
-		LogMessage(buffer.str().c_str(), false);
-	}
-	handleY_ = piConnectMotor(&errorY, serialY_);
-	if (handleY_)
-		piGetMotorVelocity(&velocityY_, handleY_);
-	else {
-		std::ostringstream buffer;
-		buffer << "Could not initialize Y motor " << serialY_ << " (error code " << errorY << ")";
-		LogMessage(buffer.str().c_str(), false);
-	}
-	return handleX_ ? (handleY_ ? 0 : 2) : 1;
+	InitStage(&handleX_, serialX_);
+	InitStage(&handleY_, serialY_);
+
+	return handleX_ ? (handleY_ ? DEVICE_OK : XYERR_INIT_Y) : XYERR_INIT_X;
 }
 
 int CSIABXYStage::Shutdown()
 {
-	if (handleX_) {
-		piDisconnectMotor(handleX_);
-		handleX_ = NULL;
-	}
-	if (handleY_) {
-		piDisconnectMotor(handleY_);
-		handleY_ = NULL;
-	}
+	ShutdownStage(&handleX_);
+	ShutdownStage(&handleY_);
 	return 0;
 }
 
@@ -962,14 +960,17 @@ void CSIABXYStage::GetName(char* name) const
 
 void CSIABXYStage::GetOrientation(bool& mirrorX, bool& mirrorY)
 {
+#if 0
 	long x = 0, y = 0;
 	assert(GetProperty(MM::g_Keyword_Transpose_MirrorX, x) == DEVICE_OK);
 	assert(GetProperty(MM::g_Keyword_Transpose_MirrorY, y) == DEVICE_OK);
 
-//	mirrorX = (x != 1);
-//	mirrorY = (y != 1);
+	mirrorX = (x != 1);
+	mirrorY = (y != 1);
+#else
 	mirrorX = false;
 	mirrorY = false;
+#endif
 }
 
 int CSIABXYStage::SetPositionUm(double x, double y)

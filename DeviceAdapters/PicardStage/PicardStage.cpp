@@ -183,6 +183,19 @@ MODULE_API void InitializeModuleData()
    AddAvailableDeviceName(g_StageDeviceName, "Z stage");
    AddAvailableDeviceName(g_XYStageDeviceName, "XY stage");
 //   AddAvailableDeviceName(g_XYAdapterDeviceName, "XY stage adapter");
+
+#ifdef _DEBUG
+   static bool bMessaged = false;
+
+   if(!bMessaged) {
+#ifdef WIN32
+		MessageBoxA(NULL, "The PicardStage device adapter has been built in DEBUG MODE. This version should NEVER be uploaded to the update site!\nIf you obtained this file as a result of an update to Fiji, please contact tine mailing list (openspim@openspim.org) immediately. Thank you.\n", "Warning", MB_OK | MB_ICONWARNING);
+#else
+		std::cout << "WARNING: The PicardStage device adapter has been built in DEBUG MODE. This version should NOT be uploaded to the update site!" << endl;
+#endif
+		bMessaged = true;
+   }
+#endif
 }
 
 MODULE_API MM::Device* CreateDevice(const char* deviceName)

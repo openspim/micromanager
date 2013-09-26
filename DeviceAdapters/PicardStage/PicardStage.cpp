@@ -82,7 +82,7 @@ inline static char* VarLog(const char* fmt, ...)
 	memset(buffer, 0x00, MM::MaxStrLength);
 	va_list va;
 	va_start(va, fmt);
-	vsprintf(buffer, fmt, va);
+	vsnprintf(buffer, MM::MaxStrLength, fmt, va);
 	va_end(va);
 
 	return buffer;

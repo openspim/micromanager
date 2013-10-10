@@ -71,7 +71,7 @@ test -x $msbuild || die "Couldn't find msbuild.exe ($msbuild). No .NET framework
 echo "Found msbuild.exe at $msbuild (fw "$dotnetfwver").";
 
 # TODO: Is this recorded anywhere definitive?
-ant="$(pwd)/../3rdpartypublic/apache-ant-1.6.5/bin/ant";
+ant="$(pwd)/../3rdpartypublic/apache-ant-1.9.2/bin/ant";
 
 test -x $ant || die "Couldn't find Apache Ant at $ant. Did you pull 3rdpartypublic?";
 

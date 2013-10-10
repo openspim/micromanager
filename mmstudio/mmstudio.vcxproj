@@ -37,22 +37,22 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <NMakeBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml
+    <NMakeBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml
 echo copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\AbsoluteLayout.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swing-layout-1.0.4.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swingx-0.9.5.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\ij.jar ..\bin_$(Platform)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml clean
-call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml
+    <NMakeReBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml clean
+call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml
 echo copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\AbsoluteLayout.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swing-layout-1.0.4.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swingx-0.9.5.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\ij.jar ..\bin_$(Platform)</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml clean
+    <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml clean
 del ..\bin_$(Platform)\plugins\MMJ_.jar</NMakeCleanCommandLine>
     <NMakeOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
     <NMakePreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -62,22 +62,22 @@ del ..\bin_$(Platform)\plugins\MMJ_.jar</NMakeCleanCommandLine>
     <NMakeForcedUsingAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
-    <NMakeBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml
+    <NMakeBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml
 echo copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\AbsoluteLayout.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swing-layout-1.0.4.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swingx-0.9.5.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\ij.jar ..\bin_$(Platform)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml clean
-call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml
+    <NMakeReBuildCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml clean
+call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml
 echo copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy MMJ_.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\AbsoluteLayout.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swing-layout-1.0.4.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\swingx-0.9.5.jar ..\bin_$(Platform)\plugins
 copy ..\..\3rdpartypublic\classext\ij.jar ..\bin_$(Platform)</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\3rdpartypublic\apache-ant-1.6.5\bin\ant -f build32.xml clean
+    <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">call ..\..\3rdpartypublic\apache-ant-1.9.2\bin\ant -f build32.xml clean
 del ..\bin_$(Platform)\plugins\MMJ_.jar</NMakeCleanCommandLine>
     <NMakeOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <NMakePreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>

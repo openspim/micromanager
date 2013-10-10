@@ -102,7 +102,7 @@ EOF
 #!/bin/sh
 
 export JAVA_HOME="\$(cd "$FIJI_JAVA_HOME" && pwd -W)"
-exec "$SRC/3rdpartypublic/apache-ant-1.6.5/bin/ant" "\$@"
+exec "$SRC/3rdpartypublic/apache-ant-1.9.2/bin/ant" "\$@"
 EOF
 	 fi &&
 	 if ! test -x "$HOME/bin/jvisualvm"

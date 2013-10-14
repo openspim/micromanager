@@ -1,0 +1,11 @@
+<project name="PicardStage">
+	<import file="../../buildscripts/deviceadapter.xml"/>
+
+	<target name="install-Win32">
+		<copy todir="${mm.dll.installdir}" file="${mm.thirdpartypublic}/picard/4D-Stage DLL and Docs/Win32/PiUsb.dll"/>
+	</target>
+
+	<target name="install-x64">
+		<copy todir="${mm.dll.installdir}" file="${mm.thirdpartypublic}/picard/4D-Stage DLL and Docs/x64/PiUsb.dll"/>
+	</target>
+</project>

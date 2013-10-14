@@ -1,0 +1,118 @@
+<project name="OpenSPIM">
+	<!-- OpenSPIM-specific build script for Micro-Manager. -->
+	<!-- Override some properties. Must come before buildprops. -->
+	<property name="mm.installdir" location="bin_${mm.architecture}"/>
+	<property name="mm.dll.installdir" location="${mm.installdir}/mm/${mm.architecture}"/>
+	<property name="mm.java.installdir" location="${mm.installdir}/plugins"/>
+	<property name="mm.java.lib.installdir" location="${mm.installdir}/jars"/>
+
+	<include file="buildscripts/buildprops.xml"/>
+
+	<include file="build.xml"/> <!-- This is the MM main build script! -->
+
+	<filelist id="openspim.plugins.ant" dir="${mm.java.plugin.srcdir}">
+		<file name="Gaussian/build.xml"/>
+		<file name="SPIMAcquisition/build.xml"/>
+	</filelist>
+
+	<filelist id="openspim.mm.ant" dir="${mm.basedir}">
+		<file name="MMCoreJ_wrap/build.xml"/>
+		<file name="mmstudio/build.xml"/>
+		<file name="acqEngine/build.xml"/>
+		<!--<file name="autofocus/build.xml"/>-->
+	</filelist>
+
+	<fileset id="openspim.mm.autofocus.ant" dir="${mm.basedir}/autofocus/buildscripts">
+		<include name="*.xml"/>
+		<exclude name="autofocusbuild.xml"/>
+	</fileset>
+
+	<fileset id="openspim.devices.ant" dir="${mm.basedir}/DeviceAdapters">
+		<include name="DemoCamera/build.xml"/>
+		<include name="SerialManager/build.xml"/>
+		<include name="CoherentCube/build.xml"/>
+		<include name="PicardStage/build.xml"/>
+	</fileset>
+
+	<filelist id="openspim.java.libs" dir="${mm.java.libs}">
+		<file name="AbsoluteLayout.jar"/>
+		<file name="${mm.java.lib.commons-math}"/>
+		<file name="${mm.java.lib.swing-layout}"/>
+		<file name="${mm.java.lib.swingx}"/>
+	</filelist>
+
+	<macrodef name="openspim-subant-filelist">
+		<attribute name="target"/>
+		<attribute name="ref"/>
+		<sequential>
+			<subant target="@{target}" inheritall="true">
+				<filelist refid="@{ref}"/>
+			</subant>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="openspim-subant-fileset">
+		<attribute name="target"/>
+		<attribute name="ref"/>
+		<sequential>
+			<subant target="@{target}" inheritall="true">
+				<fileset refid="@{ref}"/>
+			</subant>
+		</sequential>
+	</macrodef>
+
+	<target name="build-plugins">
+		<openspim-subant-filelist ref="openspim.plugins.ant" target="jar"/>
+	</target>
+
+	<target name="stage-devices">
+		<copy todir="${mm.dll.installdir}">
+			<fileset dir="${mm.cpp.outdir}" includes="mmgr_dal_*.dll"/>
+		</copy>
+		<openspim-subant-fileset ref="openspim.devices.ant" target="install"/>
+	</target>
+
+	<target name="stage-plugins">
+		<openspim-subant-filelist ref="openspim.plugins.ant" target="install"/>
+	</target>
+
+	<target name="stage-mm">
+		<openspim-subant-filelist ref="openspim.mm.ant" target="install"/>
+		<openspim-subant-fileset ref="openspim.mm.autofocus.ant" target="install"/>
+	</target>
+
+	<target name="stage">
+		<antcall target="stage-devices"/>
+		<antcall target="stage-mm"/>
+		<antcall target="stage-plugins"/>
+
+		<!-- MMCoreJ DLL -->
+		<!-- XXX Should be staged by MMCoreJ_wrap/build.xml -->
+		<copy todir="${mm.dll.installdir}">
+			<filelist dir="${mm.cpp.outdir}" files="MMCoreJ_wrap.dll"/>
+		</copy>
+
+		<!-- MMCorePy files -->
+		<!-- For staging purposes, MMCorePy is optional -->
+		<copy todir="${mm.installdir}" failonerror="false">
+			<filelist dir="${mm.cpp.outdir}" files="_MMCorePy.pyd"/>
+			<filelist dir="${mm.swig.pysrcdir}" files="MMCorePy.py"/>
+		</copy>
+
+		<!-- Files to distribute as is -->
+		<copy todir="${mm.installdir}">
+			<fileset dir="${mm.bindistdir}" includes="**"/>
+			<fileset dir="${mm.platform.bindistdir}" includes="**"/>
+			<fileset dir="${mm.common.bindistdir}" includes="**"/>
+		</copy>
+
+		<copy todir="${mm.java.lib.installdir}">
+			<filelist refid="openspim.java.libs"/>
+		</copy>
+
+		<mkdir dir="${mm.scripts.installdir}"/>
+		<copy todir="${mm.scripts.installdir}">
+			<fileset dir="${mm.scripts.srcdir}" includes="*.bsh"/>
+		</copy>
+	</target>
+</project>

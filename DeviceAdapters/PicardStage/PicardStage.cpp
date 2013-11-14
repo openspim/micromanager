@@ -873,19 +873,18 @@ int CSIABXYStage::OnVelocityX(MM::PropertyBase *pProp, MM::ActionType eAct)
 	if(handleX_ == NULL)
 		return (eAct == MM::BeforeGet ? DEVICE_OK : DEVICE_ERR);
 
-	int value = -1;
 	if(eAct == MM::BeforeGet)
 	{
-		if(piGetMotorVelocity(&value, handleX_) != 0)
+		if(piGetMotorVelocity(&velocityX_, handleX_) != 0)
 			return DEVICE_ERR;
 
-		pProp->Set((long)value);
+		pProp->Set((long)velocityX_);
 	}
 	else if(eAct == MM::AfterSet)
 	{
-		pProp->Get((long&)value);
+		pProp->Get((long&)velocityX_);
 
-		return piSetMotorVelocity(value, handleX_);
+		return piSetMotorVelocity(velocityX_, handleX_);
 	};
 
 	return DEVICE_OK;
@@ -896,19 +895,18 @@ int CSIABXYStage::OnVelocityY(MM::PropertyBase *pProp, MM::ActionType eAct)
 	if(handleY_ == NULL)
 		return (eAct == MM::BeforeGet ? DEVICE_OK : DEVICE_ERR);
 
-	int value = -1;
 	if(eAct == MM::BeforeGet)
 	{
-		if(piGetMotorVelocity(&value, handleY_) != 0)
+		if(piGetMotorVelocity(&velocityY_, handleY_) != 0)
 			return DEVICE_ERR;
 
-		pProp->Set((long)value);
+		pProp->Set((long)velocityY_);
 	}
 	else if(eAct == MM::AfterSet)
 	{
-		pProp->Get((long&)value);
+		pProp->Get((long&)velocityY_);
 
-		return piSetMotorVelocity(value, handleY_);
+		return piSetMotorVelocity(velocityY_, handleY_);
 	};
 
 	return DEVICE_OK;

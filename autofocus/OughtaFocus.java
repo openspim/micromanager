@@ -37,9 +37,11 @@ import mmcorej.CMMCore;
 import mmcorej.Configuration;
 import mmcorej.TaggedImage;
 
-import org.apache.commons.math.analysis.UnivariateRealFunction;
-import org.apache.commons.math.optimization.GoalType;
-import org.apache.commons.math.optimization.univariate.BrentOptimizer;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.univariate.BrentOptimizer;
+import org.apache.commons.math3.optim.univariate.SearchInterval;
+import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.json.JSONException;
 import org.micromanager.api.ScriptInterface;
 import org.micromanager.utils.AutofocusBase;
@@ -159,7 +161,7 @@ public class OughtaFocus extends AutofocusBase implements org.micromanager.api.A
    }
 
    private double runAutofocusAlgorithm() throws Exception {
-      UnivariateRealFunction scoreFun = new UnivariateRealFunction() {
+	   UnivariateObjectiveFunction scoreFun = new UnivariateObjectiveFunction(new UnivariateFunction() {
          public double value(double d) {
 	    try {
                return measureFocusScore(d);
@@ -167,7 +169,7 @@ public class OughtaFocus extends AutofocusBase implements org.micromanager.api.A
 	       return 0;
 	    }
          }
-      };
+      });
       BrentOptimizer brentOptimizer = new BrentOptimizer(tolerance,1e-11);
       imageCount_ = 0;
 
@@ -175,7 +177,7 @@ public class OughtaFocus extends AutofocusBase implements org.micromanager.api.A
       double z = core.getPosition(core.getFocusDevice());
       startZUm_ = z;
 //      getCurrentFocusScore();
-      double zResult = brentOptimizer.optimize(400000000, scoreFun, GoalType.MAXIMIZE, z - searchRange / 2, z + searchRange / 2).getValue();
+      double zResult = brentOptimizer.optimize(scoreFun, GoalType.MAXIMIZE, new SearchInterval(z - searchRange / 2, z + searchRange / 2)).getValue();
       ReportingUtils.logMessage("OughtaFocus Iterations: " + brentOptimizer.getEvaluations() +
             ", z=" + TextUtils.FMT2.format(zResult) +
             ", dz=" + TextUtils.FMT2.format(zResult - startZUm_) +

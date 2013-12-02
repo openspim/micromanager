@@ -11,7 +11,6 @@
 	<include file="build.xml"/> <!-- This is the MM main build script! -->
 
 	<filelist id="openspim.plugins.ant" dir="${mm.java.plugin.srcdir}">
-		<file name="Gaussian/build.xml"/>
 		<file name="SPIMAcquisition/build.xml"/>
 	</filelist>
 

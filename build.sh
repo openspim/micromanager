@@ -51,6 +51,9 @@ do
 	esac;
 done;
 
+conftxt="$(echo $config | tr '[:lower:]' '[:upper:]')"
+plattxt="$(echo $platform | tr '[:lower:]' '[:upper:]')"
+
 banner "PREPARING BUILD ENVIRONMENT";
 
 sh prepare-for-build.sh;
@@ -90,23 +93,31 @@ then
 	$ant ${quiet} -Dmm.architecture=${platform} -buildfile "build.xml" clean-all unstage-all || bannerdie "COULDN'T CLEAN OUTPUT DIRECTORY! :(";
 fi;
 
-banner "${target:+RE}BUILDING MMCORE IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
+banner "BUILDING MM ANT EXTENSIONS";
+
+$ant ${quiet} -Dmm.architecture=${platform} -buildfile "openspim.build.xml" mm.build-buildtools || bannerdie "FAILED TO BUILD MM ANT EXTENSIONS! :(";
+
+banner "${target:+RE}BUILDING MMCORE IN ${conftxt} FOR ${plattxt}";
 
 $msbuild micromanager.sln /property:Configuration=$config /property:Platform=$platform /target:MMCore${target} //fileLogger1 ${verb} && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD MMCORE! :(";
 
-banner "${target:+RE}BUILDING MMCOREJ_WRAP (C++) IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
+banner "${target:+RE}BUILDING MMCOREJ_WRAP (C++) IN ${conftxt} FOR ${plattxt}";
 
 $msbuild micromanager.sln /property:Configuration=$config /property:Platform=$platform /target:MMCoreJ_wrap${target} //fileLogger1 ${verb} && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD MMCOREJ_WRAP (C++)! :(";
 
-banner "${target:+RE}BUILDING DEVICE ADAPTERS IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
+banner "${target:+RE}BUILDING DEVICE RUNTIMES IN ${conftxt} FOR ${plattxt}";
+
+$msbuild micromanager.sln /property:Configuration=$config /property:Platform=$platform /target:MMDevice-SharedRuntime\;MMDevice-StaticRuntime //fileLogger1 ${verb} && test "$(grep -c '^Build FAILED\.$' msbuild1.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE RUNTIMES! :(";
+
+banner "${target:+RE}BUILDING DEVICE ADAPTERS IN ${conftxt} FOR ${plattxt}";
 
 $msbuild micromanager.sln /property:Configuration=$config /property:Platform=$platform /target:DemoCamera${target}\;PicardStage${target}\;SerialManager${target}\;CoherentCube${target} //fileLogger2 ${verb} && test "$(grep -c '^Build FAILED\.$' msbuild2.log)" == "0" || bannerdie "FAILED TO BUILD DEVICE ADAPTERS! :(";
 
-banner "${target:+RE}BUILDING MMCOREJ_WRAP (JAVA) IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
+banner "${target:+RE}BUILDING MMCOREJ_WRAP (JAVA) IN ${conftxt} FOR ${plattxt}";
 
 $ant ${quiet} -Dmm.architecture=${platform} -buildfile "MMCoreJ_wrap/build.xml" ${target:+clean }jar || bannerdie "FAILED TO BUILD MMCOREJ_WRAP (JAVA)! :(";
 
-banner "${target:+RE}BUILDING MMSTUDIO IN $(echo $config | tr '[:lower:]' '[:upper:]') FOR $(echo $platform | tr '[:lower:]' '[:upper:]')";
+banner "${target:+RE}BUILDING MMSTUDIO IN ${conftxt} FOR ${plattxt}";
 
 $ant ${quiet} -Dmm.architecture=${platform} -buildfile "mmstudio/build.xml" ${target:+clean }jar || bannerdie "FAILED TO BUILD MMSTUDIO! :(";
 

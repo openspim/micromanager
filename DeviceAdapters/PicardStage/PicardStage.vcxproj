@@ -80,7 +80,7 @@
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -118,7 +118,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -153,7 +153,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -184,7 +184,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4290;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../MMDevice;../../../3rdpartypublic/picard/4D-Stage DLL and Docs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)mmgr_dal_PicardStage.dll</OutputFile>
@@ -200,18 +200,15 @@
       <AdditionalDependencies>"../../../3rdpartypublic/picard/4D-Stage DLL and Docs/$(Platform)/PiUsb.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+    <ItemGroup>
+    <ProjectReference Include="..\..\MMDevice\MMDevice-StaticRuntime.vcxproj">
+      <Project>{af3143a4-5529-4c78-a01a-9f2a8977ed64}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\MMDevice\DeviceUtils.cpp" />
-    <ClCompile Include="..\..\MMDevice\ModuleInterface.cpp" />
-    <ClCompile Include="..\..\MMDevice\Property.cpp" />
     <ClCompile Include="PicardStage.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\MMDevice\DeviceBase.h" />
-    <ClInclude Include="..\..\MMDevice\MMDevice.h" />
-    <ClInclude Include="..\..\MMDevice\ModuleInterface.h" />
-    <ClInclude Include="..\..\..\3rdpartypublic\picard\PiUsb.h" />
-    <ClInclude Include="..\..\MMDevice\Property.h" />
     <ClInclude Include="PicardStage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

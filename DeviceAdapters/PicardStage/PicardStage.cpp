@@ -5,9 +5,9 @@
 //-----------------------------------------------------------------------------
 // DESCRIPTION:   The drivers required for the Picard Industries USB stages
 //                
-// AUTHOR:        Johannes Schindelin, 2011
+// AUTHOR:        Johannes Schindelin, 2014
 //
-// COPYRIGHT:     Johannes Schindelin, 2011
+// COPYRIGHT:     Johannes Schindelin, 2014
 // LICENSE:       This file is distributed under the BSD license.
 //                License text is included with the source distribution.
 //
@@ -61,15 +61,15 @@ BOOL APIENTRY DllMain( HANDLE /*hModule*/,
                       LPVOID /*lpReserved*/
                       )
 {
-   switch (ul_reason_for_call)
-   {
-   case DLL_PROCESS_ATTACH:
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-   case DLL_PROCESS_DETACH:
-      break;
-   }
-   return TRUE;
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
 }
 #endif
 
@@ -179,58 +179,58 @@ static CPiDetector* g_pPiDetector = new CPiDetector();
  */
 MODULE_API void InitializeModuleData()
 {
-   AddAvailableDeviceName(g_TwisterDeviceName, "Twister");
-   AddAvailableDeviceName(g_StageDeviceName, "Z stage");
-   AddAvailableDeviceName(g_XYStageDeviceName, "XY stage");
-//   AddAvailableDeviceName(g_XYAdapterDeviceName, "XY stage adapter");
+	RegisterDevice(g_TwisterDeviceName, MM::StageDevice, "Twister");
+	RegisterDevice(g_StageDeviceName, MM:StageDevice, "Z stage");
+	RegisterDevice(g_XYStageDeviceName, MM::XYStageDevice, "XY stage");
+//	RegisterDevice(g_XYAdapterDeviceName, MM::XYStageDevice, "XY stage adapter");
 
 #ifdef _DEBUG
-   static bool bMessaged = false;
+	static bool bMessaged = false;
 
-   if(!bMessaged) {
+	if(!bMessaged) {
 #ifdef WIN32
 		MessageBoxA(NULL, "The PicardStage device adapter has been built in DEBUG MODE. This version should NEVER be uploaded to the update site!\nIf you obtained this file as a result of an update to Fiji, please contact tine mailing list (openspim@openspim.org) immediately. Thank you.\n", "Warning", MB_OK | MB_ICONWARNING);
 #else
 		std::cout << "WARNING: The PicardStage device adapter has been built in DEBUG MODE. This version should NOT be uploaded to the update site!" << endl;
 #endif
 		bMessaged = true;
-   }
+	}
 #endif
 }
 
 MODULE_API MM::Device* CreateDevice(const char* deviceName)
 {
-   if (deviceName == 0)
-      return 0;
+	if (deviceName == 0)
+		return 0;
 
-   // decide which device class to create based on the deviceName parameter
-   if (strcmp(deviceName, g_TwisterDeviceName) == 0)
-   {
-      // create stage
-      return new CSIABTwister();
-   }
-   else if (strcmp(deviceName, g_StageDeviceName) == 0)
-   {
-      // create stage
-      return new CSIABStage();
-   }
-   else if (strcmp(deviceName, g_XYStageDeviceName) == 0)
-   {
-      // create stage
-      return new CSIABXYStage();
-   }
-/*   else if (strcmp(deviceName, g_XYAdapterDeviceName) == 0)
-   {
-	   return new CPicardXYStageAdapter();
-   };*/
+	// decide which device class to create based on the deviceName parameter
+	if (strcmp(deviceName, g_TwisterDeviceName) == 0)
+	{
+		// create stage
+		return new CSIABTwister();
+	}
+	else if (strcmp(deviceName, g_StageDeviceName) == 0)
+	{
+		// create stage
+	return new CSIABStage();
+	}
+	else if (strcmp(deviceName, g_XYStageDeviceName) == 0)
+	{
+		// create stage
+		return new CSIABXYStage();
+	}
+/*	else if (strcmp(deviceName, g_XYAdapterDeviceName) == 0)
+	{
+		return new CPicardXYStageAdapter();
+	};*/
 
-   // ...supplied name not recognized
-   return 0;
+	// ...supplied name not recognized
+	return 0;
 }
 
 MODULE_API void DeleteDevice(MM::Device* pDevice)
 {
-   delete pDevice;
+	delete pDevice;
 }
 
 // The twister
@@ -252,20 +252,21 @@ CSIABTwister::~CSIABTwister()
 
 int CSIABTwister::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
 {
-   if (eAct == MM::BeforeGet)
-   {
-      // instead of relying on stored state we could actually query the device
-      pProp->Set((long)serial_);
-   }
-   else if (eAct == MM::AfterSet)
-   {
-      long serial;
-      pProp->Get(serial);
-      serial_ = (int)serial;
+	if (eAct == MM::BeforeGet)
+	{
+		// instead of relying on stored state we could actually query the device
+		pProp->Set((long)serial_);
+	}
+	else if (eAct == MM::AfterSet)
+	{
+		long serial;
+		pProp->Get(serial);
+		serial_ = (int)serial;
 
-	  return Initialize();
-   }
-   return DEVICE_OK;
+		return Initialize();
+	}
+
+	return DEVICE_OK;
 }
 
 bool CSIABTwister::Busy()
@@ -468,36 +469,37 @@ CSIABStage::~CSIABStage()
 
 int CSIABStage::OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct)
 {
-   if (eAct == MM::BeforeGet)
-   {
-      // instead of relying on stored state we could actually query the device
-      pProp->Set((long)serial_);
-   }
-   else if (eAct == MM::AfterSet)
-   {
-      long serial;
-      pProp->Get(serial);
-      serial_ = (int)serial;
+	if (eAct == MM::BeforeGet)
+	{
+		// instead of relying on stored state we could actually query the device
+		pProp->Set((long)serial_);
+	}
+	else if (eAct == MM::AfterSet)
+	{
+		long serial;
+		pProp->Get(serial);
+		serial_ = (int)serial;
 
-	  return Initialize();
-   }
-   return DEVICE_OK;
+		return Initialize();
+	}
+
+	return DEVICE_OK;
 }
 
 int CSIABStage::OnVelocity(MM::PropertyBase* pProp, MM::ActionType eAct)
 {
-   if (eAct == MM::BeforeGet)
-   {
-      // instead of relying on stored state we could actually query the device
-      pProp->Set((long)velocity_);
-   }
-   else if (eAct == MM::AfterSet)
-   {
-      long velocity;
-      pProp->Get(velocity);
-      velocity_ = (int)velocity;
-   }
-   return DEVICE_OK;
+	if (eAct == MM::BeforeGet)
+	{
+		// instead of relying on stored state we could actually query the device
+		pProp->Set((long)velocity_);
+	}
+	else if (eAct == MM::AfterSet)
+	{
+		long velocity;
+		pProp->Get(velocity);
+		velocity_ = (int)velocity;
+	}
+	return DEVICE_OK;
 }
 
 bool CSIABStage::Busy()

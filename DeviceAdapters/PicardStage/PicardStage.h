@@ -8,7 +8,7 @@
 //                
 // AUTHOR:        Johannes Schindelin
 //
-// COPYRIGHT:     Johannes Schindelin, 2011
+// COPYRIGHT:     Johannes Schindelin, 2014
 //
 // LICENSE:       This file is distributed under the BSD license.
 //                License text is included with the source distribution.
@@ -27,19 +27,19 @@
 #include "DeviceBase.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// CSIABZStage class
+// CSIABTwister class
 //////////////////////////////////////////////////////////////////////////////
 
 class CSIABTwister: public CStageBase<CSIABTwister>
 {
 public:
-    CSIABTwister();
-    ~CSIABTwister();
+	CSIABTwister();
+	~CSIABTwister();
 
-    bool Busy();
-    double GetDelayMs() const;
-    void SetDelayMs(double delay);
-    bool UsesDelay();
+	bool Busy();
+	double GetDelayMs() const;
+	void SetDelayMs(double delay);
+	bool UsesDelay();
 	int Initialize();
 	int Shutdown();
 	void GetName(char* name) const;
@@ -71,19 +71,19 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// CSIABZStage class
+// CSIABStage class
 //////////////////////////////////////////////////////////////////////////////
 
 class CSIABStage : public CStageBase<CSIABStage>
 {
 public:
-    CSIABStage();
-    ~CSIABStage();
+	CSIABStage();
+	~CSIABStage();
 
-    bool Busy();
-    double GetDelayMs() const;
-    void SetDelayMs(double delay);
-    bool UsesDelay();
+	bool Busy();
+	double GetDelayMs() const;
+	void SetDelayMs(double delay);
+	bool UsesDelay();
 	int Initialize();
 	int Shutdown();
 	void GetName(char* name) const;
@@ -124,13 +124,13 @@ private:
 class CSIABXYStage : public CXYStageBase<CSIABXYStage>
 {
 public:
-    CSIABXYStage();
-    ~CSIABXYStage();
+	CSIABXYStage();
+	~CSIABXYStage();
 
-    bool Busy();
-    double GetDelayMs() const;
-    void SetDelayMs(double delay);
-    bool UsesDelay();
+	bool Busy();
+	double GetDelayMs() const;
+	void SetDelayMs(double delay);
+	bool UsesDelay();
 	int Initialize();
 	int Shutdown();
 	void GetName(char* name) const;

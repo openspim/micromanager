@@ -976,6 +976,19 @@ int CSIABXYStage::OnVelocityY(MM::PropertyBase *pProp, MM::ActionType eAct)
 	return DEVICE_OK;
 }
 
+int CSIABXYStage::Home()
+{
+	if(handleX_)
+		if(piHomeMotor(10, handleX_) != 0)
+			return XYERR_MOVE_X;
+
+	if(handleY_)
+		if(piHomeMotor(10, handleY_) != 0)
+			return XYERR_MOVE_Y;
+
+	return DEVICE_OK;
+}
+
 bool CSIABXYStage::Busy()
 {
 	BOOL movingX = FALSE, movingY = FALSE;
@@ -1150,11 +1163,6 @@ int CSIABXYStage::GetPositionSteps(long& x, long& y)
 }
 
 int CSIABXYStage::SetRelativePositionSteps(long x, long y)
-{
-	return DEVICE_ERR;
-}
-
-int CSIABXYStage::Home()
 {
 	return DEVICE_ERR;
 }

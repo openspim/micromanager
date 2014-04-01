@@ -239,7 +239,7 @@ CSIABTwister::CSIABTwister()
 : serial_(g_pPiDetector->GetTwisterSerial(0)), handle_(NULL)
 {
 	char buf[16];
-	itoa(serial_, buf, 10);
+	_itoa(serial_, buf, 10);
 
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABTwister::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, buf, MM::String, false, pAct, true);
@@ -443,7 +443,7 @@ CSIABStage::CSIABStage()
 : serial_(g_pPiDetector->GetMotorSerial(2)), handle_(NULL)
 {
 	char buf[16];
-	itoa(serial_, buf, 10);
+	_itoa(serial_, buf, 10);
 
 	CPropertyAction* pAct = new CPropertyAction (this, &CSIABStage::OnSerialNumber);
 	CreateProperty(g_Keyword_SerialNumber, buf, MM::Integer, false, pAct, true);
@@ -710,12 +710,12 @@ CSIABXYStage::CSIABXYStage()
   handleX_(NULL), handleY_(NULL), minX_(1), minY_(1), maxX_(8000), maxY_(8000)
 {
 	char buf[16];
-	itoa(serialX_, buf, 10);
+	_itoa(serialX_, buf, 10);
 
 	CPropertyAction* pActX = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberX);
 	CreateProperty(g_Keyword_SerialNumberX, buf, MM::Integer, false, pActX, true);
 
-	itoa(serialY_, buf, 10);
+	_itoa(serialY_, buf, 10);
 	CPropertyAction* pActY = new CPropertyAction (this, &CSIABXYStage::OnSerialNumberY);
 	CreateProperty(g_Keyword_SerialNumberY, buf, MM::Integer, false, pActY, true);
 

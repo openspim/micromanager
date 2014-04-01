@@ -110,6 +110,7 @@ public:
 private:
 	int OnSerialNumber(MM::PropertyBase* pProp, MM::ActionType eAct);
 	int OnVelocity(MM::PropertyBase* pProp, MM::ActionType eAct);
+	int OnGoHomeProp(MM::PropertyBase* pProp, MM::ActionType eAct);
 
 	int serial_;
 	int velocity_;

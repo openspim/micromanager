@@ -460,6 +460,8 @@ CSIABStage::CSIABStage()
 
 	CreateProperty(g_Keyword_StepSize, "1.5", MM::Float, false);
 
+	CreateProperty("GoHome", "0", MM::Integer, false, new CPropertyAction(this, &CSIABStage::OnGoHomeProp), false);
+
 	SetErrorText(1, "Could not initialize motor (Z stage)");
 }
 
@@ -502,14 +504,74 @@ int CSIABStage::OnVelocity(MM::PropertyBase* pProp, MM::ActionType eAct)
 	return DEVICE_OK;
 }
 
+int CSIABStage::OnGoHomeProp(MM::PropertyBase* pProp, MM::ActionType eAct)
+{
+	if(handle_ == NULL)
+		return (eAct == MM::BeforeGet ? DEVICE_OK : DEVICE_ERR);
+
+	long lval = -1;
+	if(!(pProp->Get(lval)))
+		return DEVICE_ERR;
+
+	switch(eAct)
+	{
+	case MM::AfterSet:
+		{
+			if(lval == 1)
+			{
+				return (piHomeMotor(10, handle_) == 0 ? DEVICE_OK : DEVICE_ERR);
+			}
+			else
+			{
+				pProp->Set((long)0);
+				return DEVICE_OK;
+			}
+		};
+	case MM::BeforeGet:
+		{
+			if(lval == 1)
+			{
+				BOOL home = FALSE;
+				if(!piGetMotorHomeStatus(&home, handle_))
+					return DEVICE_ERR;
+
+				pProp->Set((long)(home ? 0 : 1));
+			}
+
+			return DEVICE_OK;
+		};
+	default:
+		return DEVICE_OK; // Don't care.
+	};
+}
+
 bool CSIABStage::Busy()
 {
 	if(handle_ == NULL)
 		return false;
 
+	long homing = 0;
+	if(GetProperty("GoHome", homing) == DEVICE_OK && homing == 1)
+	{
+		BOOL home = FALSE;
+		if(piGetMotorHomeStatus(&home, handle_) != 0)
+		{
+			if(home)
+			{
+				SetProperty("GoHome", "0");
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
 	BOOL moving;
 	if (handle_ && !piGetMotorMovingStatus(&moving, handle_))
 		return moving != 0;
+
 	return false;
 }
 

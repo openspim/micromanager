@@ -180,7 +180,7 @@ static CPiDetector* g_pPiDetector = new CPiDetector();
 MODULE_API void InitializeModuleData()
 {
 	RegisterDevice(g_TwisterDeviceName, MM::StageDevice, "Twister");
-	RegisterDevice(g_StageDeviceName, MM:StageDevice, "Z stage");
+	RegisterDevice(g_StageDeviceName, MM::StageDevice, "Z stage");
 	RegisterDevice(g_XYStageDeviceName, MM::XYStageDevice, "XY stage");
 //	RegisterDevice(g_XYAdapterDeviceName, MM::XYStageDevice, "XY stage adapter");
 

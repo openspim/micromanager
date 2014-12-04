@@ -12,5 +12,6 @@
 		<dependency org="ome" name="formats-api" rev="5.0.6"/>
 		<dependency org="ome" name="formats-common" rev="5.0.6"/>
 		<dependency org="org.apache.commons" name="commons-math3" rev="3.3"/>
+		<dependency org="org.clojure" name="clojure" rev="1.6.0"/>
 	</dependencies>
 </ivy-module>

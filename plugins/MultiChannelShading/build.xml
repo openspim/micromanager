@@ -4,5 +4,6 @@
 
 	<path id="plugin.classpath">
 		<pathelement location="${mm.java.lib.miglayout}"/>
+		<pathelement location="${mm.java.lib.miglayout-swing}"/>
 	</path>
 </project>

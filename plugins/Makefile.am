@@ -36,6 +36,7 @@ plugins.stamp:
 	@rm -f plugins.tmp
 	@touch plugins.tmp
 	$(ANT) -Dmm.javacflags="$(JAVACFLAGS)" $(ANTFLAGS) \
+		-Dmm.java.lib.imagej="$(IJJARPATH)" \
 		-Dplugin.intdir="`pwd`/build" -Dplugin.outdir="`pwd`" jar
 	@mv -f plugins.tmp $@
 

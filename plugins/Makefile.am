@@ -11,7 +11,6 @@ nobase_mmplugin_DATA = \
 	Acquisition_Tools/PatternOverlay.jar \
 	Acquisition_Tools/SlideExplorer.jar \
 	Beta/CRISPv2.jar \
-	Beta/SlideExplorer2.jar \
 	Big.jar \
 	Developer_Tools/SequenceBufferMonitor.jar \
 	Device_Control/ASIdiSPIM.jar \

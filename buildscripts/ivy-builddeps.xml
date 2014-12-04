@@ -4,5 +4,13 @@
 		<dependency org="ant-contrib" name="ant-contrib" rev="1.0b3"/>
 		<dependency org="junit" name="junit" rev="4.11"/>
 		<dependency org="org.msgpack" name="msgpack" rev="0.6.11"/>
+		<dependency org="bsh" name="bsh" rev="2.0b4"/>
+		<dependency org="com.google.guava" name="guava" rev="17.0"/>
+		<dependency org="com.miglayout" name="miglayout-swing" rev="4.2"/>
+		<dependency org="com.fifesoft" name="rsyntaxtextarea" rev="2.5.4"/>
+		<dependency org="com.google.code.gson" name="gson" rev="2.3.1"/>
+		<dependency org="ome" name="formats-api" rev="5.0.6"/>
+		<dependency org="ome" name="formats-common" rev="5.0.6"/>
+		<dependency org="org.apache.commons" name="commons-math3" rev="3.3"/>
 	</dependencies>
 </ivy-module>

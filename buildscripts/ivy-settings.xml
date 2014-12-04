@@ -1,0 +1,8 @@
+<ivysettings>
+	<settings defaultResolver="imagej"/>
+	<resolvers>
+		<ibiblio name="main" m2compatible="true"/>
+		<ibiblio name="imagej" m2compatible="true" root="http://maven.imagej.net/service/local/repo_groups/public/content/" />
+	</resolvers>
+</ivysettings>
+

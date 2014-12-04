@@ -1,5 +1,4 @@
 package org.micromanager.pixelcalibrator;
-import org.apache.commons.math.util.MathUtils;
 
 import java.awt.geom.AffineTransform;
 import java.util.prefs.Preferences;
@@ -126,7 +125,7 @@ public class PixelCalibratorPlugin implements MMPlugin {
          return;
       }
 
-      double pixelSize = MathUtils.round(getPixelSize(result), 4);
+      double pixelSize = Math.round(getPixelSize(result) * 1e4) / 1e4;
 
       CalibrationListDlg calDialog = app_.getCalibrationListDlg();
       calDialog.updateCalibrations();

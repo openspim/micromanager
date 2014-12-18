@@ -1,7 +1,7 @@
 (ns optimization
   (:import [org.apache.commons.math.optimization GoalType]
            [org.apache.commons.math.optimization.univariate BrentOptimizer]
-           [org.apache.commons.math.optimization.direct NelderMead]
+           [org.apache.commons.math.optimization.direct NelderMeadSimplex]
            [org.apache.commons.math.analysis UnivariateRealFunction MultivariateRealFunction]))
 
 (defn brent-min
@@ -23,7 +23,7 @@
   [f stepsizes]
   (->
     (.optimize
-      (NelderMead.)
+      (NelderMeadSimplex.)
       (reify MultivariateRealFunction
         (value [_ x] (apply f x)))
       GoalType/MINIMIZE (double-array stepsizes))

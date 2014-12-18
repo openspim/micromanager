@@ -31,17 +31,14 @@ import ij.process.ImageProcessor;
 import ij.IJ;
 
 import org.apache.commons.math.analysis.*;
-import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
 import org.apache.commons.math.linear.ArrayRealVector;
 import org.apache.commons.math.linear.BlockRealMatrix;
 import org.apache.commons.math.linear.SingularValueDecompositionImpl;
 import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.linear.QRDecompositionImpl;
-import org.apache.commons.math.optimization.direct.NelderMead;
-import org.apache.commons.math.optimization.direct.MultiDirectional;
-import org.apache.commons.math.optimization.fitting.ParametricRealFunction;
-import org.apache.commons.math.optimization.fitting.CurveFitter;
+import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
+import org.apache.commons.math.optimization.direct.MultiDirectionalSimplex;
 import org.apache.commons.math.optimization.general.LevenbergMarquardtOptimizer;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.GoalType;
@@ -81,7 +78,7 @@ public class GaussianTrack_ implements PlugIn {
 	String [] paramNames_ = {"A", "x_c", "y_c", "sigma", "b"};
 
    GaussianResidual gs_;
-   NelderMead nm_;
+   NelderMeadSimplex nm_;
    SimpleScalarValueChecker convergedChecker_;;
 
    static final String XCOLNAME = "X";
@@ -405,7 +402,7 @@ public class GaussianTrack_ implements PlugIn {
 
       // objects used in Gaussian fitting
 		gs_ = new GaussianResidual();
-		nm_ = new NelderMead();
+		nm_ = new NelderMeadSimplex(1);
 		convergedChecker_ = new SimpleScalarValueChecker(1e-5,-1);
 
       // Filters for results of Gaussian fit

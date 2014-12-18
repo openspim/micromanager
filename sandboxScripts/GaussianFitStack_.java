@@ -12,8 +12,7 @@ import ij.IJ;
 import ij.measure.ResultsTable;
 
 import org.apache.commons.math.analysis.*;
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.optimization.direct.NelderMead;
+import org.apache.commons.math.optimization.direct.NelderMeadSimplex;
 import org.apache.commons.math.optimization.direct.MultiDirectional;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.GoalType;
@@ -36,7 +35,7 @@ public class GaussianFitStack_ implements PlugIn {
 	String [] paramNames_ = {"A", "x_c", "y_c", "sigma", "b"};
 
    GaussianResidual gs_;
-   NelderMead nm_;
+   NelderMeadSimplex nm_;
    SimpleScalarValueChecker convergedChecker_;;
 
 	private void print(String myText) {
@@ -243,7 +242,7 @@ public class GaussianFitStack_ implements PlugIn {
 	public void run(String arg) {
 
 		gs_ = new GaussianResidual();
-		nm_ = new NelderMead();
+		nm_ = new NelderMeadSimplex(1);
 		convergedChecker_ = new SimpleScalarValueChecker(1e-5,-1);
 
       // List with spot positions found through the Find Maxima command

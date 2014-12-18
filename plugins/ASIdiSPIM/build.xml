@@ -5,6 +5,7 @@
 	<path id="plugin.classpath">
 		<pathelement location="${mm.java.lib.commons-math3}"/>
 		<pathelement location="${mm.java.lib.miglayout}"/>
+		<pathelement location="${mm.java.lib.miglayout-swing}"/>
 	</path>
 
 	<target name="copy-files" depends="mm.javabuild.copy-files">

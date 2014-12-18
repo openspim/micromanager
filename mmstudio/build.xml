@@ -8,10 +8,14 @@
 	<path id="project.classpath">
 		<!-- Keep alphabetical, please -->
 		<pathelement location="${mm.java.lib.beanshell}"/>
+		<pathelement location="${mm.java.lib.commons-math3}"/>
 		<pathelement location="${mm.java.lib.commons-math}"/>
+		<pathelement location="${mm.java.lib.formats-api}"/>
 		<pathelement location="${mm.java.lib.gson}"/>
 		<pathelement location="${mm.java.lib.guava}"/>
 		<pathelement location="${mm.java.lib.imagej}"/>
+		<pathelement location="${mm.java.lib.loci-common}"/>
+		<pathelement location="${mm.java.lib.miglayout-swing}"/>
 		<pathelement location="${mm.java.lib.miglayout}"/>
 		<pathelement location="${mm.java.lib.mmcorej}"/>
 		<pathelement location="${mm.java.lib.rsyntaxtextarea}"/>

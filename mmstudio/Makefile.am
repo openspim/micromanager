@@ -3,7 +3,8 @@ jar_DATA = MMJ_.jar
 .PHONY: MMJ_.jar
 
 MMJ_.jar:
-	$(ANT) -Dmm.javacflags="$(JAVACFLAGS)" $(ANTFLAGS) jar
+	$(ANT) -Dmm.javacflags="$(JAVACFLAGS)" \
+		-Dmm.java.lib.imagej="$(IJJARPATH)" $(ANTFLAGS) jar
 
 
 check_SCRIPTS = ant_test.sh

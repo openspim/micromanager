@@ -33,6 +33,7 @@
 	</target>
 
 	<target name="resolve" depends="init-ivy">
+		<ivy:settings file="${mm.basedir}/buildscripts/ivy-settings.xml"/>
 		<ivy:retrieve />
 	</target>
 </project>
